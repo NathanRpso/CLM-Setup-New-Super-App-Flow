@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Rapsodo Golf — CLM PRO Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,700;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#000}
+:root{
+  --red:#C42028;--red-dk:#9e1820;--bg:#000;--card:#1c1c1c;--input:#181818;
+  --border:#2a2a2a;--text:#fff;--muted:#787878;--ph:#454545;
+  --green:#22C55E;--amber:#F59E0B;--r:6px;
+  --head:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;
+}
+#app{width:100vw;height:100vh;position:relative;overflow:hidden;background:#000;font-family:var(--body);color:var(--text)}
+
+/* GRASS */
+#grass{position:fixed;bottom:0;left:0;width:100%;height:260px;pointer-events:none;z-index:1;display:block}
+
+/* R MARK */
+#rmark{position:fixed;bottom:18px;left:22px;z-index:200;opacity:.75}
+
+/* TOAST */
+#toast{position:fixed;bottom:64px;left:50%;transform:translateX(-50%) translateY(16px);background:rgba(28,28,28,.97);border:1px solid #3a3a3a;border-radius:8px;padding:10px 20px;font-size:13px;color:var(--text);z-index:500;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* SCREENS */
+.sc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:translateY(12px);transition:opacity .35s ease,transform .35s ease;pointer-events:none;z-index:10}
+.sc.on{opacity:1;transform:translateY(0);pointer-events:all}
+
+/* PHASE 4 TOP PROGRESS */
+#p4bar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;pointer-events:none;background:rgba(0,0,0,.85);backdrop-filter:blur(4px)}
+.p4col{flex:1;padding:10px 16px 8px;border-right:1px solid rgba(255,255,255,.06)}
+.p4col:last-child{border-right:none}
+.p4lbl{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.p4lbl.on{color:var(--text)}
+.p4track{height:3px;background:#222;border-radius:2px;overflow:hidden}
+.p4fill{height:100%;background:var(--red);border-radius:2px;transition:width .6s ease;width:0%}
+.p4done{width:12px;height:12px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0}
+
+/* LOGO */
+.logo{display:flex;align-items:center;gap:6px;user-select:none}
+.logo-ruler{display:flex;flex-direction:column;gap:3px;margin-right:2px}
+.logo-ruler span{width:3px;background:#fff;border-radius:1px}
+.logo-ruler span:nth-child(1){height:20px}
+.logo-ruler span:nth-child(2){height:12px;margin-left:2px}
+.logo-ruler span:nth-child(3){height:8px}
+.logo-ruler span:nth-child(4){height:20px}
+.logo-r{font-family:var(--head);font-weight:800;font-size:26px;color:#fff;line-height:1}
+.logo-g{font-family:var(--head);font-weight:400;font-size:22px;color:#fff;letter-spacing:.3em;margin-left:6px}
+
+/* CONTENT */
+.cnt{position:relative;z-index:10;width:100%;max-width:520px;padding:0 24px}
+.cnt-lg{position:relative;z-index:10;width:100%;max-width:820px;padding:0 24px}
+
+/* TYPOGRAPHY */
+.h1{font-family:var(--head);font-size:3rem;font-weight:800;font-style:italic;text-transform:uppercase;letter-spacing:.02em;line-height:1;text-align:center;color:#fff}
+.h2{font-family:var(--head);font-size:2.2rem;font-weight:700;font-style:italic;text-transform:uppercase;letter-spacing:.02em;line-height:1.1;text-align:center;color:#fff}
+.h3{font-family:var(--head);font-size:1.6rem;font-weight:700;font-style:italic;text-transform:uppercase;letter-spacing:.02em;line-height:1.1;text-align:center;color:#fff}
+.sub{font-size:15px;color:rgba(255,255,255,.6);text-align:center;line-height:1.6;margin-top:8px}
+.phase-tag{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.18em;text-align:center;margin-bottom:6px}
+.phase-tag em{color:var(--red);font-style:normal}
+
+/* BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border:none;border-radius:var(--r);font-family:var(--head);font-size:1.05rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;cursor:pointer;transition:all .2s;width:100%}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:var(--red-dk)}
+.btn-red:disabled{background:#3a3a3a;color:#666;cursor:not-allowed}
+.btn-dk{background:#252525;color:#fff}.btn-dk:hover{background:#303030}
+.btn-row{display:flex;gap:10px;width:100%}
+.btn-row .btn-dk{flex:0 0 44%}.btn-row .btn-red{flex:1}
+.btn-ghost{background:transparent;border:2px solid var(--border);color:var(--muted)}.btn-ghost:hover{border-color:#555;color:#fff}
+.btn-sm{height:40px;font-size:.9rem}
+
+/* INPUTS */
+.ig{margin-bottom:13px}
+.ilbl{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.07em;text-transform:uppercase}
+.iw{position:relative;display:flex;align-items:center}
+.ico{position:absolute;left:14px;color:var(--muted);font-size:15px;pointer-events:none;z-index:1}
+.iico{position:absolute;right:12px;color:var(--muted);background:none;border:none;cursor:pointer;font-size:15px;padding:0}
+.inp{width:100%;height:52px;background:var(--input);border:1px solid var(--border);border-radius:var(--r);color:#fff;font-family:var(--body);font-size:15px;padding:0 16px 0 42px;outline:none;transition:border-color .2s}
+.inp:focus{border-color:#444;background:#1e1e1e}
+.inp::placeholder{color:var(--ph)}
+.inp.ni{padding-left:16px}
+.inp.err{border-color:rgba(255,80,80,.5)}
+.ierr{font-size:11px;color:#ff6b6b;margin-top:3px;padding-left:2px}
+
+/* SELECT */
+.selw{position:relative}
+.selw::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+select.inp{padding-left:16px;appearance:none;cursor:pointer}
+
+/* NUMBER+UNIT */
+.nu{display:flex;gap:8px}
+.nu .inp{flex:1;padding-left:16px}
+.utog{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;flex-shrink:0}
+.ubtn{padding:0 14px;height:52px;background:var(--input);border:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--body)}
+.ubtn.on{background:var(--red);color:#fff}
+
+/* CHECKBOX */
+.cbx{display:flex;align-items:flex-start;gap:12px;padding:10px 0;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);user-select:none}
+.cbx:last-child{border-bottom:none}
+.cbbox{width:22px;height:22px;min-width:22px;border:2px solid #3a3a3a;border-radius:4px;background:transparent;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.cbx.ck .cbbox{background:var(--red);border-color:var(--red)}
+.cbx.ck .cbbox::after{content:'✓';color:#fff;font-size:13px;font-weight:700}
+.cbxt{font-size:14px;color:rgba(255,255,255,.8);line-height:1.5}
+
+/* TABS */
+.tabs{display:flex;gap:28px;justify-content:center;margin-bottom:28px}
+.tab{font-family:var(--head);font-size:1.5rem;font-weight:700;font-style:italic;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);cursor:pointer;padding-bottom:6px;border-bottom:3px solid transparent;transition:all .2s}
+.tab.on{color:#fff;border-bottom-color:var(--red)}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;transition:border-color .2s}
+.card.sel{border-color:var(--red)}
+
+/* DEVICE CARDS */
+.dvcards{display:flex;gap:14px;width:100%}
+.dvcard{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:14px;padding:22px 20px;cursor:pointer;min-height:220px;background:var(--card);border:1px solid var(--border);border-radius:10px;transition:border-color .2s}
+.dvcard:hover{border-color:#444}
+.dvcard.sel{border-color:var(--red)}
+.dvname{font-family:var(--head);font-style:italic;font-weight:700;font-size:1.4rem;text-transform:uppercase;letter-spacing:.12em}
+
+/* STATUS CHIP */
+.chip{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px 18px;font-size:15px;font-weight:600}
+.dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.dot-g{background:var(--green)}.dot-r{background:var(--red)}.dot-a{background:var(--amber)}
+
+/* FW PROGRESS */
+.fwtrack{height:6px;background:#2a2a2a;border-radius:3px;overflow:hidden;width:100%}
+.fwfill{height:100%;background:var(--red);border-radius:3px;transition:width .5s ease;width:0%}
+.fwlbls{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px}
+.fwstat{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;font-size:13px;color:var(--muted)}
+
+/* SPINNER */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:18px;height:18px;border:2px solid #333;border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+
+/* SCAN */
+@keyframes pulse{0%,100%{opacity:.25;transform:scale(1)}50%{opacity:.7;transform:scale(1.08)}}
+.sring{border-radius:50%;border:2px solid var(--red);position:absolute;animation:pulse 1.6s ease-in-out infinite}
+
+/* CAM PREVIEW */
+.cam{width:100%;height:240px;background:#0c0c0c;border:1px solid var(--border);border-radius:8px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.crosshair::before,.crosshair::after{content:'';position:absolute;background:rgba(255,255,255,.4)}
+.crosshair::before{width:1px;height:60px;left:0;top:-30px}
+.crosshair::after{height:1px;width:60px;top:0;left:-30px}
+.cam-label{position:absolute;top:10px;left:10px;font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.15em;text-transform:uppercase;font-family:var(--body)}
+.cam-scan-line{position:absolute;width:100%;height:2px;background:rgba(196,32,40,.3);animation:scanline 3s linear infinite}
+@keyframes scanline{0%{top:0;opacity:.8}100%{top:100%;opacity:.2}}
+
+/* READOUT */
+.rdgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.rdi{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.rdval{font-family:var(--head);font-size:1.4rem;font-weight:700}
+.rdlbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.rdi.good .rdval{color:var(--green)}.rdi.bad .rdval{color:var(--red)}
+
+/* SHOT CARDS */
+.shotcard{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;animation:fadeUp .3s ease forwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.shotgrid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.shotstat{text-align:center}
+.shotval{font-family:var(--head);font-size:1.2rem;font-weight:700}
+.shotlbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.shotpass{width:26px;height:26px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+
+/* OVERVIEW CARDS */
+.phgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;width:100%}
+.phcard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;display:flex;gap:14px;align-items:flex-start}
+.phnum{width:30px;height:30px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-weight:700;font-size:.95rem;flex-shrink:0}
+.phtitle{font-family:var(--head);font-size:.95rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.phdesc{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* COMPAT */
+.compat{border-radius:8px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.compat.g{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3)}
+.compat.a{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3)}
+.compat.r{background:rgba(196,32,40,.1);border:1px solid rgba(196,32,40,.3)}
+.compat-ico{font-size:20px;flex-shrink:0;margin-top:2px}
+
+/* INFO BOX */
+.infobox{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5;color:rgba(255,255,255,.65)}
+.infobox .lbl{color:var(--red);font-weight:700}
+
+/* MEASURE SUMMARY */
+.msumgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.msumitem{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:11px;text-align:center}
+.msumval{font-family:var(--head);font-size:1.2rem;font-weight:700;color:var(--green)}
+.msumlbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+
+/* EXPANDER */
+.expander{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:12px}
+.exp-hd{padding:11px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}
+.exp-hd:hover{background:rgba(255,255,255,.03)}
+.exp-body{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;padding:0 14px}
+.exp-body.open{max-height:300px;padding:0 14px 14px}
+
+/* INSTALL OPTIONS */
+.optrow{display:flex;gap:14px;width:100%}
+.optcard{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px 20px;cursor:pointer;background:var(--card);border:2px solid var(--border);border-radius:10px;transition:all .2s;text-align:center}
+.optcard:hover{border-color:#555;background:#222}
+.optcard .oico{font-size:2.8rem}
+.optcard .otitle{font-family:var(--head);font-size:1.05rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.optcard .odesc{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* CHECK ITEMS (cal) */
+.chkitem{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06);opacity:0;animation:fadeUp .3s ease forwards}
+.chkitem:last-child{border-bottom:none}
+.chksta{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px}
+.chksta.pend{background:#2a2a2a}
+.chksta.run{border:2px solid var(--red);animation:spin .8s linear infinite}
+.chksta.pass{background:var(--green)}
+.chksta.fail{background:var(--red)}
+.chklbl{font-size:14px;flex:1}
+.chkval{font-size:12px;color:var(--muted)}
+
+/* SUMMARY CARD */
+.sumcard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 22px;width:100%}
+.sumrow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.sumrow:last-child{border-bottom:none}
+.sumkey{font-size:13px;color:var(--muted);font-weight:500}
+.sumval{font-size:14px;font-weight:600}
+
+/* SUCCESS MARK */
+.success-mark{width:76px;height:76px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 20px;box-shadow:0 0 40px rgba(34,197,94,.35)}
+
+/* TROUBLE */
+.troub{font-size:13px;color:rgba(255,255,255,.65);line-height:1.6;padding:14px 0}
+.troub-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.troub-item:last-child{border-bottom:none}
+.troub-num{width:20px;height:20px;min-width:20px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* LINK */
+.lnk{color:rgba(255,255,255,.45);text-decoration:underline;cursor:pointer;font-size:13px}.lnk:hover{color:rgba(255,255,255,.75)}
+
+/* SCAN RESULT */
+.sresult{display:flex;gap:12px;align-items:center;padding:13px 15px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color .2s;margin-top:14px}
+.sresult:hover{border-color:var(--red)}
+.sdico{width:42px;height:42px;background:#252525;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sbars{display:flex;align-items:flex-end;gap:2px;height:16px}
+.sbar{width:4px;background:#3a3a3a;border-radius:2px}
+.sbar.on{background:var(--green)}
+.sbar:nth-child(1){height:4px}.sbar:nth-child(2){height:7px}.sbar:nth-child(3){height:11px}.sbar:nth-child(4){height:16px}
+
+/* SCROLLABLE */
+.scroll{overflow-y:auto;max-height:calc(100vh - 200px);padding-right:6px;padding-bottom:12px}
+.scroll::-webkit-scrollbar{width:3px}
+.scroll::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px}
+
+/* CAL PHASES */
+.calphases{display:flex;gap:8px;width:100%;margin-bottom:18px}
+.calph{flex:1;height:4px;background:#222;border-radius:2px;overflow:hidden}
+.calph-fill{height:100%;background:var(--red);width:0;transition:width .4s ease}
+.calph.done .calph-fill{width:100%}
+.calph.act .calph-fill{width:50%;animation:pulse-bar 1.5s ease-in-out infinite}
+@keyframes pulse-bar{0%,100%{opacity:.7}50%{opacity:1}}
+
+/* POWER BTNS */
+.pwrbtns{display:flex;gap:12px;width:100%}
+.pwrbtn{flex:1;height:60px;font-family:var(--head);font-size:1.1rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;border:2px solid var(--border);border-radius:8px;background:var(--card);color:#fff;cursor:pointer;transition:all .2s}
+.pwrbtn.yes{border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:var(--green)}
+.pwrbtn.yes:hover{border-color:var(--green);background:rgba(34,197,94,.2)}
+.pwrbtn.no{border-color:rgba(248,113,113,.3);background:rgba(196,32,40,.08);color:#f87171}
+.pwrbtn.no:hover{border-color:#f87171;background:rgba(196,32,40,.15)}
+
+/* CLM DEVICE ILLUSTRATION (CSS) */
+.clm-device{width:100%;max-width:520px;height:68px;background:linear-gradient(180deg,#1e1e1e 0%,#0f0f0f 100%);border-radius:6px;position:relative;margin:0 auto;display:flex;align-items:center;padding:0 20px;border:1px solid #2a2a2a;overflow:hidden}
+.clm-device::before{content:''}
+.clm-device::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(255,255,255,.08),transparent)}
+.clm-brand{font-family:var(--body);font-size:11px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.2em;text-transform:uppercase}
+.clm-led-wrap{margin-left:auto;display:flex;align-items:center;gap:7px}
+.clm-led-lbl{font-size:10px;color:rgba(255,255,255,.28);letter-spacing:.08em;text-transform:uppercase}
+.led-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.led-dot.g{background:var(--green);box-shadow:0 0 10px var(--green)}
+.led-dot.w{background:#fff;box-shadow:0 0 10px #fff}
+.led-dot.off{background:#222}
+
+/* MODAL OVERLAY */
+#trial-ov{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+#trial-ov.open{opacity:1;pointer-events:all}
+.modal{background:#191919;border:1px solid #2e2e2e;border-radius:14px;padding:30px;width:100%;max-width:460px;position:relative}
+.modal-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;color:var(--green);margin-bottom:14px}
+.modal-feats{list-style:none;margin:14px 0}
+.modal-feats li{display:flex;gap:9px;align-items:flex-start;padding:5px 0;font-size:13px;color:rgba(255,255,255,.78)}
+.modal-feats li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* DIAGRAM */
+.diagram{width:100%;height:110px;background:var(--card);border:1px solid var(--border);border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px}
+
+/* CONFETTI */
+@keyframes cfall{from{transform:translateY(-20px) rotate(0deg);opacity:1}to{transform:translateY(70vh) rotate(540deg);opacity:0}}
+.confetti{position:absolute;width:8px;height:8px;border-radius:2px;animation:cfall 2.5s ease-in forwards;top:-10px;pointer-events:none}
+
+/* STEP DOTS */
+.stepdots{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:22px}
+.sdot{width:8px;height:8px;border-radius:50%;background:#2a2a2a;transition:all .3s}
+.sdot.act{width:24px;border-radius:4px;background:var(--red)}
+.sdot.done{background:#444}
+
+/* NOTICE */
+.notice{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:11px 14px;font-size:13px;line-height:1.5;color:rgba(255,255,255,.7);display:flex;gap:10px;margin-bottom:14px}
+.notice-ico{flex-shrink:0;color:var(--amber)}
+
+/* HUB PHASE CARDS */
+.hub-grid{display:flex;flex-direction:column;gap:10px;width:100%}
+.hub-phcard{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;cursor:pointer;transition:all .2s}
+.hub-phcard:hover{border-color:#444;background:#222}
+.hub-phcard.done{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.04)}
+.hub-phnum{width:38px;height:38px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-weight:700;font-size:1.05rem;flex-shrink:0;transition:background .3s;color:#fff}
+.hub-phcard.done .hub-phnum{background:var(--green)}
+.hub-phbody{flex:1}
+.hub-phtitle{font-family:var(--head);font-size:1rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.hub-phdesc{font-size:12px;color:var(--muted);line-height:1.4}
+.hub-phcta{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;transition:color .2s}
+.hub-phcard.done .hub-phcta{color:var(--green)}
+.hub-phcard.locked{opacity:.42;cursor:not-allowed}
+.hub-phcard.locked:hover{border-color:var(--border);background:var(--card)}
+.hub-phcard.locked .hub-phcta{opacity:.5}
+/* PLAY SCREEN */
+#sc-play{background:#f0f0f0}
+/* SPACING HELPERS */
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mt24{margin-top:24px}
+.mb2{margin-bottom:2px}.mb4{margin-bottom:4px}.mb6{margin-bottom:6px}.mb8{margin-bottom:8px}.mb10{margin-bottom:10px}.mb12{margin-bottom:12px}.mb14{margin-bottom:14px}.mb16{margin-bottom:16px}.mb20{margin-bottom:20px}.mb24{margin-bottom:24px}.mb28{margin-bottom:28px}
+.tc{text-align:center}
+/* AZ SLIDER */
+.az-wrap{position:relative;padding:4px 0}
+.az-track{width:100%;height:4px;background:#2a2a2a;border-radius:2px;position:relative;overflow:visible}
+.az-zone{position:absolute;height:100%;background:rgba(34,197,94,.25);border:1px solid rgba(34,197,94,.4);border-radius:2px;top:0}
+input[type=range]{width:100%;height:4px;appearance:none;background:#2a2a2a;border-radius:2px;outline:none;cursor:pointer;position:relative;z-index:2}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:#2a2a2a;border-radius:2px}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:20px;height:20px;border-radius:50%;background:var(--red);cursor:pointer;margin-top:-8px;box-shadow:0 0 0 3px rgba(196,32,40,.28)}
+
+/* DIST SLIDER */
+.dist-slider-wrap{width:100%;padding:8px 0}
+.dist-val{font-family:var(--head);font-size:3rem;font-weight:700;font-style:italic;text-align:center;color:#fff;margin:14px 0}
+.dist-range{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+
+/* CONNECTION GLOW */
+@keyframes connection-glow{0%,100%{box-shadow:0 0 8px rgba(34,197,94,.4)}50%{box-shadow:0 0 30px rgba(34,197,94,.7),0 0 60px rgba(34,197,94,.25)}}
+/* STRIKETHROUGH ON CHECKED ITEMS - readiness + installation checklists only */
+#sc-p2-check .cbx.ck .cbxt-lbl,
+#sc-p3-check .cbx.ck .cbxt-lbl{text-decoration:line-through;color:rgba(255,255,255,.4);transition:all .2s}
+/* SUB BULLETS - no strikethrough ever */
+.sub-bullets{display:block;margin-top:5px;padding-left:2px}
+.sub-bullet{display:block;font-size:12px;color:var(--muted);line-height:1.6}
+.sub-bullet::before{content:'·';margin-right:6px;color:#555}
+/* PHASE 2 COMPAT IMPROVEMENTS */
+.compat-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.meas-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;transition:border-color .3s}
+.meas-stat-val{font-family:var(--head);font-size:1.4rem;font-weight:700;line-height:1}
+.meas-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+/* ROOM DIAGRAM */
+#room-diagram-wrap svg{display:block}
+/* PREMIUM MEASUREMENT FIELDS */
+.mfield{display:flex;align-items:stretch;height:52px;border-radius:var(--r);overflow:hidden}
+.mfield-body{flex:1;display:flex;align-items:center;background:var(--input);border:1px solid var(--border);border-right:none;padding:0 14px;gap:5px;min-width:0;transition:border-color .2s,background .2s}
+.mfield-body:focus-within{border-color:#444;background:#1e1e1e}
+.mfield-op{font-family:var(--head);font-size:.95rem;font-weight:700;font-style:italic;color:var(--red);width:12px;flex-shrink:0;text-align:center;opacity:0;transition:opacity .15s}
+.mfield-op.vis{opacity:1}
+.mfield-inp{background:none;border:none;outline:none;color:#fff;font-family:var(--body);font-size:15px;flex:1;min-width:0;padding:0}
+.mfield-inp::placeholder{color:var(--ph)}
+.mstep{width:42px;background:#1a1a1a;border-top:1px solid var(--border);border-bottom:1px solid var(--border);border-left:none;border-right:none;color:rgba(255,255,255,.4);font-size:1.3rem;font-weight:300;cursor:pointer;transition:all .15s;font-family:var(--body);flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;user-select:none}
+.mstep:hover{background:#282828;color:#fff}
+.mstep:active{background:var(--red);color:#fff}
+.mstep+.mstep{border-left:1px solid rgba(255,255,255,.06)}
+.mfield-unit{padding:0 13px;background:#161616;border:1px solid var(--border);border-left:1px solid rgba(255,255,255,.06);display:flex;align-items:center;font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;letter-spacing:.08em;text-transform:uppercase;min-width:36px;justify-content:center}
+.mfield-unit[onclick]{color:rgba(255,255,255,.55);text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app">
+  <svg id="grass" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg"></svg>
+
+  <!-- Phase 4 Top Progress Bar -->
+  <div id="p4bar" style="display:none;flex-direction:row">
+    <div class="p4col"><div class="p4lbl" id="p4l1">Device Connection</div><div class="p4track"><div class="p4fill" id="p4f1"></div></div></div>
+    <div class="p4col"><div class="p4lbl" id="p4l2">Firmware Update</div><div class="p4track"><div class="p4fill" id="p4f2"></div></div></div>
+    <div class="p4col"><div class="p4lbl" id="p4l3">Calibration</div><div class="p4track"><div class="p4fill" id="p4f3"></div></div></div>
+  </div>
+
+  <!-- All screens rendered here -->
+  <div id="screens"></div>
+
+  <!-- R Mark -->
+  <div id="rmark">
+    <svg width="38" height="48" viewBox="0 0 38 48" fill="none">
+      <rect x="0" y="0" width="5" height="48" fill="white" rx="1"/>
+      <rect x="5" y="0" width="22" height="7" fill="white" rx="1"/>
+      <rect x="5" y="19" width="22" height="7" fill="white" rx="1"/>
+      <rect x="21" y="7" width="6" height="12" fill="white"/>
+      <line x1="21" y1="26" x2="32" y2="48" stroke="white" stroke-width="6" stroke-linecap="round"/>
+      <text x="28" y="46" font-size="8" fill="white" font-family="sans-serif" opacity=".7">®</text>
+    </svg>
+  </div>
+
+  <!-- Trial Modal Overlay -->
+  <div id="trial-ov">
+    <div class="modal">
+      <div class="modal-badge">🎉 FREE TRIAL ACTIVE</div>
+      <div class="h3" style="text-align:left;font-size:1.6rem;margin-bottom:6px">Your 30-Day Free Trial<br>Has Started!</div>
+      <div style="font-size:13px;color:var(--muted)">Trial ends: <strong style="color:#fff" id="trial-end"></strong></div>
+      <ul class="modal-feats">
+        <li>Full swing analysis with launch angle, spin & carry</li>
+        <li>Shot history & session tracking</li>
+        <li>Virtual golf course play &amp; practice modes</li>
+        <li>Cloud sync across devices</li>
+        <li>Priority support access</li>
+      </ul>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid var(--border)">
+        No payment required now. Add a payment method any time before your trial ends to continue uninterrupted.
+      </div>
+      <button class="btn btn-red" onclick="closeTrialModal()">START MY TRIAL →</button>
+      <div style="text-align:center;margin-top:10px"><span class="lnk" onclick="closeTrialModal()">Add payment method later</span></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+// ─── STATE ─────────────────────────────────────────────────────────────────
+const S = {
+  screen: 'splash',
+  user: { name: '', email: '', isNew: false },
+  room: { ch: '', rd: '', rw: '', sd: '', cm: '' },
+  install: { height: '', mounted: false },
+  device: { name: "CLM PRO", id: 'CLM-1254780399-123', fw: '2.0.5', fwNew: '2.1.3' },
+  cal: { az: 0, dist: 9, shots: [], checks: [false,false,false,false] },
+  phases: { room: false, install: false, device: false, cal: false },
+  setupSkipped: false,
+  ivUnitFt: true,
+  unitFt: true,
+  compatState: 'g', // g, a, r
+  fwProg: 0,
+};
+
+// ─── GRASS GENERATION ──────────────────────────────────────────────────────
+function generateGrass() {
+  let r = 54321, paths = '';
+  const rand = () => { r = (r * 1664525 + 1013904223) & 0xffffffff; return (r >>> 0) / 0xffffffff; };
+  const W = 1440, H = 260;
+  for (let x = 0; x < W; x += 3) {
+    const base = 80 + Math.sin(x * 0.04) * 25 + Math.sin(x * 0.11) * 15;
+    const h = base + rand() * 80;
+    const lean = (rand() - 0.5) * 0.45;
+    const lx = lean * h;
+    const b = 14 + rand() * 22;
+    const hi = rand() > 0.93;
+    const col = hi ? `rgba(160,180,140,.12)` : `rgb(${Math.round(b)},${Math.round(b+3)},${Math.round(b-1)})`;
+    const sw = (.8 + rand() * 2.2).toFixed(1);
+    paths += `<path d="M${x},${H} Q${x+lx*.5},${H-h*.6} ${x+lx},${H-h}" stroke="${col}" stroke-width="${sw}" fill="none"/>`;
+  }
+  paths += `<defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".97"/><stop offset=".45" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>`;
+  paths += `<rect width="${W}" height="${H}" fill="url(#gg)"/>`;
+  document.getElementById('grass').innerHTML = paths;
+}
+
+// ─── LOGO HTML ─────────────────────────────────────────────────────────────
+const LOGO = `<div class="logo">
+  <div style="display:flex;flex-direction:column;gap:3px;margin-right:2px;justify-content:center">
+    <div style="display:flex;gap:2px;align-items:flex-end">
+      <div style="width:3px;height:22px;background:#fff;border-radius:1px"></div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div style="width:8px;height:2px;background:#fff;border-radius:1px"></div>
+        <div style="width:6px;height:2px;background:#fff;border-radius:1px;margin-left:2px"></div>
+        <div style="width:8px;height:2px;background:#fff;border-radius:1px"></div>
+        <div style="width:6px;height:2px;background:#fff;border-radius:1px;margin-left:2px"></div>
+      </div>
+    </div>
+  </div>
+  <span style="font-family:var(--head);font-weight:700;font-size:26px;color:#fff;line-height:1">Rapsodo</span>
+  <span style="font-family:var(--head);font-weight:400;font-size:22px;color:#fff;letter-spacing:.3em;margin-left:4px">GOLF</span>
+</div>`;
+
+const LOGO_LG = `<div class="logo" style="transform:scale(1.3);transform-origin:center">
+  <div style="display:flex;flex-direction:column;gap:3px;margin-right:2px;justify-content:center">
+    <div style="display:flex;gap:2px;align-items:flex-end">
+      <div style="width:3px;height:22px;background:#fff;border-radius:1px"></div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div style="width:8px;height:2px;background:#fff;border-radius:1px"></div>
+        <div style="width:6px;height:2px;background:#fff;border-radius:1px;margin-left:2px"></div>
+        <div style="width:8px;height:2px;background:#fff;border-radius:1px"></div>
+        <div style="width:6px;height:2px;background:#fff;border-radius:1px;margin-left:2px"></div>
+      </div>
+    </div>
+  </div>
+  <span style="font-family:var(--head);font-weight:700;font-size:26px;color:#fff;line-height:1">Rapsodo</span>
+  <span style="font-family:var(--head);font-weight:400;font-size:22px;color:#fff;letter-spacing:.3em;margin-left:4px">GOLF</span>
+</div>`;
+
+// ─── NAVIGATION ────────────────────────────────────────────────────────────
+function go(id, opts={}) {
+  if (S.screen === 'play') {
+    document.getElementById('grass').style.display  = 'block';
+    document.getElementById('rmark').style.display  = 'block';
+  }
+  const cur = document.querySelector('.sc.on');
+  const nxt = document.getElementById('sc-'+id);
+  if (!nxt) return;
+  if (cur) cur.classList.remove('on');
+  nxt.classList.add('on');
+  S.screen = id;
+  updateP4Bar(id);
+  if (INIT[id]) INIT[id]();
+}
+
+function updateP4Bar(id) {
+  document.getElementById('p4bar').style.display = 'none';
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ─── SCREEN DEFINITIONS ────────────────────────────────────────────────────
+const SCREENS = {
+
+splash: ()=>`
+<div class="sc on" id="sc-splash" onclick="go('auth')" style="cursor:pointer">
+  <div style="position:absolute;top:18%;right:22%;width:90px;height:90px;border-radius:50%;
+    background:radial-gradient(circle at 35% 32%,#f2f2f2,#b0b0b0);
+    box-shadow:inset -6px -6px 18px rgba(0,0,0,.35),0 4px 24px rgba(0,0,0,.6);z-index:10">
+    <div style="position:absolute;inset:0;border-radius:50%;background:
+      radial-gradient(circle at 62% 38%,transparent 28%,rgba(0,0,0,.07) 29%,rgba(0,0,0,.07) 33%,transparent 34%),
+      radial-gradient(circle at 38% 62%,transparent 28%,rgba(0,0,0,.07) 29%,rgba(0,0,0,.07) 33%,transparent 34%),
+      radial-gradient(circle at 72% 68%,transparent 23%,rgba(0,0,0,.05) 24%,rgba(0,0,0,.05) 28%,transparent 29%)">
+    </div>
+  </div>
+  <div style="position:relative;z-index:10;animation:fadeUp .8s ease .3s both">${LOGO_LG}</div>
+  <div style="position:absolute;bottom:32%;color:rgba(255,255,255,.22);font-size:12px;letter-spacing:.2em;animation:fadeUp .6s ease 1.2s both">CLICK TO CONTINUE</div>
+</div>`,
+
+hub: ()=>`
+<div class="sc" id="sc-hub" style="overflow-y:auto">
+  <div class="cnt" style="padding:28px 0 40px;max-width:600px">
+    <div style="display:flex;justify-content:center;margin-bottom:20px">${LOGO}</div>
+    <div class="phase-tag mb2">CLM PRO SETUP</div>
+    <div class="h2 mb6">DEVICE SETUP HUB</div>
+    <div class="sub mb20" style="font-size:14px">Start with Room Confirmation, then complete Installation<br>and Device Connection in any order before calibrating.</div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <div style="flex:1;display:flex;align-items:center;overflow:hidden;border-radius:4px;position:relative;max-width:240px">
+        <div style="position:absolute;right:0;top:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,rgba(255,255,255,.04));z-index:2;pointer-events:none"></div>
+        <div class="clm-device" style="width:520px;max-width:none;flex-shrink:0;margin:0;height:46px;border-radius:4px">
+          <span class="clm-brand" style="font-size:10px" id="hub-dev-brand">Rapsodo | CLM PRO</span>
+          <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot off" id="hub-dev-led"></div></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="hub-dev-name">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px" id="hub-dev-id">Connect device to sync serial number</div>
+      </div>
+    </div>
+    <div class="hub-grid mb16" id="hub-cards">
+      <div class="hub-phcard" id="hph-room" onclick="enterPhase('room')">
+        <div class="hub-phnum" id="hphn-room">1</div>
+        <div class="hub-phbody">
+          <div class="hub-phtitle">Room Confirmation</div>
+          <div class="hub-phdesc">Verify your space meets the minimum requirements for installation.</div>
+        </div>
+        <div class="hub-phcta" id="hphc-room"><span id="hphs-room">Start</span> →</div>
+      </div>
+      <div class="hub-phcard" id="hph-install" onclick="enterPhase('install')">
+        <div class="hub-phnum" id="hphn-install">2</div>
+        <div class="hub-phbody">
+          <div class="hub-phtitle">Installation + Verification</div>
+          <div class="hub-phdesc">Confirm your CLM PRO is physically mounted and secured.</div>
+        </div>
+        <div class="hub-phcta" id="hphc-install"><span id="hphs-install">Start</span> →</div>
+      </div>
+      <div class="hub-phcard" id="hph-device" onclick="enterPhase('device')">
+        <div class="hub-phnum" id="hphn-device">3</div>
+        <div class="hub-phbody">
+          <div class="hub-phtitle">Device Connection &amp; Firmware</div>
+          <div class="hub-phdesc">Connect over Ethernet, bind to account, and update firmware.</div>
+        </div>
+        <div class="hub-phcta" id="hphc-device"><span id="hphs-device">Start</span> →</div>
+      </div>
+      <div class="hub-phcard" id="hph-cal" onclick="enterPhase('cal')">
+        <div class="hub-phnum" id="hphn-cal">4</div>
+        <div class="hub-phbody">
+          <div class="hub-phtitle">Calibration</div>
+          <div class="hub-phdesc">Align, set screen distance, verify environment, and test shots.</div>
+        </div>
+        <div class="hub-phcta" id="hphc-cal"><span id="hphs-cal">Start</span> →</div>
+      </div>
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+        <span style="font-size:12px;color:var(--muted)">Overall Progress</span>
+        <span style="font-size:12px;font-weight:600;color:var(--muted)"><span id="hub-done-count">0</span> / 4 complete</span>
+      </div>
+      <div style="height:4px;background:#222;border-radius:2px;overflow:hidden">
+        <div id="hub-prog-fill" style="height:100%;background:var(--red);border-radius:2px;transition:width .4s ease;width:0%"></div>
+      </div>
+    </div>
+    <div id="hub-all-done" style="display:none;text-align:center;padding:16px 0 4px">
+      <div class="success-mark" style="width:60px;height:60px;font-size:26px;margin:0 auto 14px">✓</div>
+      <div class="h3 mb6" style="font-size:1.4rem">ALL PHASES COMPLETE!</div>
+      <div class="sub mb16" style="font-size:13px">Your CLM PRO is fully set up and ready to play.</div>
+      <button class="btn btn-red mb10" onclick="go('done')">VIEW SETUP SUMMARY →</button>
+    </div>
+    <div id="hub-skip-link" class="tc mt12"><span class="lnk" onclick="go('play')">Leave setup for now →</span></div>
+  </div>
+</div>`,
+
+auth: ()=>`
+<div class="sc" id="sc-auth">
+  <div style="position:absolute;top:22px;left:50%;transform:translateX(-50%);z-index:20">${LOGO}</div>
+  <div class="cnt">
+    <div class="tabs">
+      <div class="tab on" id="tab-login" onclick="switchTab('login')">LOGIN</div>
+      <div class="tab" id="tab-signup" onclick="switchTab('signup')">SIGN UP</div>
+    </div>
+    <div id="form-login">
+      <div class="ig"><div class="ilbl">Email</div>
+        <div class="iw"><span class="ico">✉</span><input class="inp" id="li-email" type="email" placeholder="john.doe@rapsodo.com" value="nathan@rapsodo.com"></div></div>
+      <div class="ig"><div class="ilbl">Password</div>
+        <div class="iw"><span class="ico">🔑</span><input class="inp" id="li-pass" type="password" placeholder="••••••••••" value="password123">
+        <button class="iico" onclick="togglePw('li-pass',this)">👁</button></div></div>
+      <div class="cbx ck mt8 mb16" onclick="this.classList.toggle('ck')">
+        <div class="cbbox"></div><div class="cbxt">Remember this account</div></div>
+      <button class="btn btn-red mb8" onclick="doLogin()">LOGIN</button>
+      <div class="tc mt8"><span class="lnk">Forgot Password?</span></div>
+    </div>
+    <div id="form-signup" style="display:none">
+      <div class="ig"><div class="ilbl">Full Name</div>
+        <div class="iw"><span class="ico">👤</span><input class="inp" id="su-name" type="text" placeholder="John Doe" oninput="checkSignup()"></div></div>
+      <div class="ig"><div class="ilbl">Email</div>
+        <div class="iw"><span class="ico">✉</span><input class="inp" id="su-email" type="email" placeholder="Enter your email" oninput="checkSignup()"></div></div>
+      <div class="ig"><div class="ilbl">Password</div>
+        <div class="iw"><span class="ico">🔑</span><input class="inp" id="su-pass" type="password" placeholder="Enter your password" oninput="checkSignup()">
+        <button class="iico" onclick="togglePw('su-pass',this)">👁</button></div></div>
+      <div class="ig"><div class="ilbl">Confirm Password</div>
+        <div class="iw"><span class="ico">🔑</span><input class="inp" id="su-conf" type="password" placeholder="Confirm your password" oninput="checkSignup()">
+        <button class="iico" onclick="togglePw('su-conf',this)">👁</button></div></div>
+      <div class="cbx mt8 mb16" onclick="this.classList.toggle('ck')">
+        <div class="cbbox"></div><div class="cbxt">Receive product updates and tips</div></div>
+      <button class="btn btn-red" id="su-btn" disabled onclick="doSignup()">SIGN UP</button>
+      <div id="su-err" class="ierr tc mt8" style="display:none"></div>
+    </div>
+  </div>
+</div>`,
+
+'acct-done': ()=>`
+<div class="sc" id="sc-acct-done">
+  <div class="cnt" style="text-align:center">
+    <div class="success-mark">✓</div>
+    <div class="h2 mb8">ACCOUNT CREATED<br>SUCCESSFULLY!</div>
+    <div class="sub mb20">Welcome to Rapsodo. Your account is ready.</div>
+    <button class="btn btn-red" onclick="showTrialModal()">START YOUR FREE TRIAL →</button>
+  </div>
+</div>`,
+
+'p2-meas': ()=>`
+<div class="sc" id="sc-p2-meas" style="overflow-y:auto;padding:24px 0 40px">
+  <div style="width:100%;max-width:980px;padding:0 24px;position:relative;z-index:10">
+    <div class="phase-tag mb2"><em>PHASE 1</em> · ROOM CONFIRMATION</div>
+    <div class="stepdots mb8"><div class="sdot act"></div><div class="sdot"></div><div class="sdot"></div></div>
+    <div class="h3 mb16">ROOM MEASUREMENTS</div>
+
+    <!-- Saved measurements banner -->
+    <div id="saved-banner" style="background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(59,130,246,.04));border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:14px">
+      <div style="width:36px;height:36px;border-radius:8px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:#93c5fd;margin-bottom:2px">Room validation saved to this email</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5)">We found measurements from your earlier compatibility check. Load them to save time.</div>
+      </div>
+      <button onclick="prefill()" style="background:rgba(59,130,246,.18);border:1px solid rgba(59,130,246,.3);color:#93c5fd;font-size:12px;font-weight:700;padding:7px 14px;border-radius:6px;cursor:pointer;white-space:nowrap;letter-spacing:.05em;font-family:var(--head);text-transform:uppercase">Load Saved</button>
+      <button onclick="this.closest('#saved-banner').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;flex-shrink:0">✕</button>
+    </div>
+
+    <!-- Two-column layout -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start">
+      <!-- Left: Form fields -->
+      <div>
+        <!-- Global unit toggle -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Room Dimensions</div>
+          <div class="utog" id="global-unit-tog">
+            <button class="ubtn on" id="u-imperial" onclick="setUnit('imperial')">Imperial</button>
+            <button class="ubtn" id="u-metric" onclick="setUnit('metric')">Metric</button>
+          </div>
+        </div>
+        <div class="ig"><div class="ilbl">Ceiling Height</div>
+          <div class="mfield">
+            <div class="mfield-body">
+              <span class="mfield-op" id="m-ch-op"></span>
+              <input class="mfield-inp" id="m-ch" type="text" inputmode="decimal" placeholder="9.0" oninput="checkMeas()" onblur="commitField('ch')">
+            </div>
+            <button class="mstep" onclick="stepField('ch',-1)">−</button>
+            <button class="mstep" onclick="stepField('ch',+1)">+</button>
+            <span class="mfield-unit" id="u-lbl-ch">ft</span>
+          </div></div>
+        <div class="ig"><div class="ilbl">Room Depth <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(ball flight direction)</span></div>
+          <div class="mfield">
+            <div class="mfield-body">
+              <span class="mfield-op" id="m-rd-op"></span>
+              <input class="mfield-inp" id="m-rd" type="text" inputmode="decimal" placeholder="14.0" oninput="checkMeas()" onblur="commitField('rd')">
+            </div>
+            <button class="mstep" onclick="stepField('rd',-1)">−</button>
+            <button class="mstep" onclick="stepField('rd',+1)">+</button>
+            <span class="mfield-unit" id="u-lbl-rd">ft</span>
+          </div></div>
+        <div class="ig"><div class="ilbl">Room Width <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(side to side)</span></div>
+          <div class="mfield">
+            <div class="mfield-body">
+              <span class="mfield-op" id="m-rw-op"></span>
+              <input class="mfield-inp" id="m-rw" type="text" inputmode="decimal" placeholder="10.0" oninput="checkMeas()" onblur="commitField('rw')">
+            </div>
+            <button class="mstep" onclick="stepField('rw',-1)">−</button>
+            <button class="mstep" onclick="stepField('rw',+1)">+</button>
+            <span class="mfield-unit" id="u-lbl-rw">ft</span>
+          </div></div>
+        <div class="ig"><div class="ilbl">Distance from Screen <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(hitting position to screen)</span></div>
+          <div class="mfield">
+            <div class="mfield-body">
+              <span class="mfield-op" id="m-sd-op"></span>
+              <input class="mfield-inp" id="m-sd" type="text" inputmode="decimal" placeholder="9.0" oninput="checkMeas()" onblur="commitField('sd')">
+            </div>
+            <button class="mstep" onclick="stepField('sd',-1)">−</button>
+            <button class="mstep" onclick="stepField('sd',+1)">+</button>
+            <span class="mfield-unit" id="u-lbl-sd">ft</span>
+          </div></div>
+        <div class="ig"><div class="ilbl">Ceiling Material</div>
+          <div class="selw"><select class="inp ni" id="m-cm" onchange="checkMeas()">
+            <option value="">Select material…</option>
+            <option value="drywall">Drywall</option>
+            <option value="drop">Drop Ceiling</option>
+            <option value="concrete">Concrete / Masonry</option>
+            <option value="wood">Wood / Beam</option>
+            <option value="other">Other</option>
+          </select></div></div>
+        <button class="btn btn-red" id="meas-btn" disabled onclick="saveMeasAndNext()">NEXT →</button>
+      </div>
+      <!-- Right: 3D Room Diagram -->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 2s ease-in-out infinite"></div>
+          <span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.18em;font-weight:600">Live 3D Preview</span>
+        </div>
+        <div id="room-diagram-wrap" style="background:rgba(10,10,10,.8);border:1px solid var(--border);border-radius:10px;overflow:hidden;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center">
+          <div id="room-svg-container" style="width:100%;height:100%"></div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:18px;height:0;border-top:1.5px dashed rgba(196,32,40,.6)"></div><span style="font-size:10px;color:var(--muted)">Ball flight</span></div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:18px;height:0;border-top:1.5px solid #C42028"></div><span style="font-size:10px;color:var(--muted)">Screen / net</span></div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;background:rgba(196,32,40,.2);border:1px solid rgba(196,32,40,.4);border-radius:2px"></div><span style="font-size:10px;color:var(--muted)">Sensing zone</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`,
+
+'p2-compat': ()=>`
+<div class="sc" id="sc-p2-compat">
+  <div class="cnt" style="max-width:560px">
+    <div class="phase-tag"><em>PHASE 1</em> · ROOM CONFIRMATION</div>
+    <div class="stepdots"><div class="sdot done"></div><div class="sdot act"></div><div class="sdot"></div></div>
+    <div class="h3 mb16">COMPATIBILITY RESULT</div>
+    <div id="compat-body"></div>
+    <!-- Prototype state toggle (subtle) -->
+    <div style="display:flex;gap:6px;margin-bottom:14px;justify-content:center;opacity:.4" onmouseenter="this.style.opacity='.9'" onmouseleave="this.style.opacity='.4'">
+      <span style="font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;line-height:28px">Preview:</span>
+      <button onclick="setCompat('g')" style="height:26px;padding:0 10px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:var(--green);border-radius:4px;cursor:pointer">Compatible</button>
+      <button onclick="setCompat('a')" style="height:26px;padding:0 10px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:var(--amber);border-radius:4px;cursor:pointer">Conditional</button>
+      <button onclick="setCompat('r')" style="height:26px;padding:0 10px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(196,32,40,.1);border:1px solid rgba(196,32,40,.3);color:#f87171;border-radius:4px;cursor:pointer">Incompatible</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-dk" onclick="go('p2-meas')">← BACK</button>
+      <button class="btn btn-red" id="compat-next" onclick="go('p2-check')">NEXT →</button>
+    </div>
+  </div>
+</div>`,
+
+'p2-check': ()=>`
+<div class="sc" id="sc-p2-check">
+  <div class="cnt">
+    <div class="phase-tag"><em>PHASE 1</em> · ROOM CONFIRMATION</div>
+    <div class="stepdots"><div class="sdot done"></div><div class="sdot done"></div><div class="sdot act"></div></div>
+    <div class="h3 mb16">INSTALLATION READINESS CHECKLIST</div>
+    <div class="card mb16">
+      <div class="cbx" onclick="toggleCbx(this,'rc1')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">I have the tools I need for installation</span>
+        <span class="sub-bullets">
+          <span class="sub-bullet">Drill with bits appropriate for your ceiling type</span>
+          <span class="sub-bullet">Stud finder</span>
+          <span class="sub-bullet">Level (spirit or laser)</span>
+          <span class="sub-bullet">Ladder tall enough to reach the mount point</span>
+        </span>
+      </div></div>
+      <div class="cbx" onclick="toggleCbx(this,'rc2')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">I have identified my mounting location on the ceiling</span></div></div>
+      <div class="cbx" onclick="toggleCbx(this,'rc3')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">A power outlet is within reach of the mount point</span></div></div>
+      <div class="cbx" onclick="toggleCbx(this,'rc4')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">My ethernet cable can reach the mount point - or I plan to use a Wi-Fi connection</span></div></div>
+      <div class="cbx" onclick="toggleCbx(this,'rc5')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">My impact screen or net enclosure is in place</span></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-dk" onclick="go('p2-compat')">← BACK</button>
+      <button class="btn btn-red" id="rc-btn" disabled onclick="completePhase('room')">NEXT →</button>
+    </div>
+  </div>
+</div>`,
+
+'p3-status': ()=>`
+<div class="sc" id="sc-p3-status">
+  <div class="cnt">
+    <div class="phase-tag"><em>PHASE 2</em> · INSTALLATION + VERIFICATION</div>
+    <div class="stepdots"><div class="sdot act"></div><div class="sdot"></div><div class="sdot"></div></div>
+    <div class="h3 mb8">INSTALLATION STATUS</div>
+    <div class="sub mb20">Have you already mounted your CLM PRO unit?</div>
+    <div class="optrow">
+      <div class="optcard" onclick="go('p3-check');S.install.mounted=true">
+        <div class="oico" style="font-size:0">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="28" cy="28" r="26" stroke="rgba(34,197,94,.35)" stroke-width="1.5" fill="rgba(34,197,94,.07)"/>
+            <path d="M18 28.5L24.5 35L38 21" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="otitle">Yes, it's mounted</div>
+        <div class="odesc">Unit is secured to the ceiling and ready for verification</div>
+      </div>
+      <div class="optcard" onclick="showNotMounted()">
+        <div class="oico" style="font-size:0">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="28" cy="28" r="26" stroke="rgba(255,255,255,.15)" stroke-width="1.5" fill="rgba(255,255,255,.04)"/>
+            <path d="M37.5 18.5c-1.5-1.5-3.8-1.8-5.6-.8l3.1 3.1-3.5 3.5-3.1-3.1c-1 1.8-.7 4.1.8 5.6 1.4 1.4 3.4 1.8 5.2 1.1l5.8 5.8c.8.8 2 .8 2.8 0 .8-.8.8-2 0-2.8l-5.8-5.8c.7-1.8.3-3.8-1.1-5.2-.1-.1-.3-.3-.6-.4z" stroke="rgba(255,255,255,.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M18.5 37.5l5-5" stroke="rgba(255,255,255,.5)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M22.5 33.5l-4 4" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="otitle">Not yet</div>
+        <div class="odesc">I need to complete the physical installation first</div>
+      </div>
+    </div>
+    <div id="notmounted-msg" style="display:none" class="mt16">
+      <div class="infobox mb14">
+        <span class="lbl">Before continuing:</span> Complete the physical installation using the CLM PRO Installation Guide.
+        The next step requires your unit to be fully mounted and secured.
+      </div>
+      <!-- Video placeholder -->
+      <div style="width:100%;aspect-ratio:16/9;background:#111;border:1px solid var(--border);border-radius:8px;overflow:hidden;position:relative;margin-bottom:14px;display:flex;align-items:center;justify-content:center">
+        <div style="position:absolute;inset:0;background:linear-gradient(160deg,#1a1a1a,#0a0a0a)"></div>
+        <div style="position:relative;z-index:2;text-align:center">
+          <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;cursor:pointer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>
+          <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.15em">CLM PRO Installation Guide</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:4px">Full walkthrough · 8 min</div>
+        </div>
+        <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.6);border-radius:4px;padding:3px 8px;font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.05em">YouTube</div>
+      </div>
+      <button class="btn btn-ghost mb12" onclick="window.open('#','_blank')">VIEW FULL INSTALLATION GUIDE →</button>
+      <button class="btn btn-dk" onclick="document.getElementById('notmounted-msg').style.display='none';document.querySelector('#sc-p3-status .optrow').style.display='flex';document.querySelector('#sc-p3-status .tc').style.display='block'">← Back</button>
+    </div>
+    <div class="tc mt16"><button class="btn btn-dk btn-sm" style="width:auto;padding:0 20px" onclick="go('hub')">← Back to Hub</button></div>
+  </div>
+</div>`,
+
+'p3-check': ()=>`
+<div class="sc" id="sc-p3-check">
+  <div class="cnt">
+    <div class="phase-tag"><em>PHASE 2</em> · INSTALLATION + VERIFICATION</div>
+    <div class="stepdots"><div class="sdot done"></div><div class="sdot act"></div><div class="sdot"></div></div>
+    <div class="h3 mb16">INSTALLATION + VERIFICATION</div>
+    <div class="card">
+      <div class="cbx" onclick="toggleCbx(this,'iv1');checkIV()"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">Unit is mounted securely - there is no wobble or flex when I apply gentle pressure</span></div></div>
+      <div class="cbx" onclick="toggleCbx(this,'iv2');checkIV()"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">Unit is approximately level (precise calibration done later)</span></div></div>
+      <div class="cbx" onclick="toggleCbx(this,'iv3');checkIV()"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">Cables are managed and not in the swing path</span></div></div>
+      <div class="cbx" onclick="toggleCbx(this,'iv4');checkIV()"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">Unit powers on - LED is lit</span></div></div>
+      <div class="cbx" id="iv5-cbx" style="flex-direction:column;align-items:stretch;cursor:default">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div class="cbbox" style="margin-top:2px;cursor:default"></div>
+          <div class="cbxt"><span class="cbxt-lbl">Confirm the installed height from floor to bottom of unit</span></div>
+        </div>
+        <div class="ig mt8" style="padding-left:34px">
+          <div class="mfield">
+            <div class="mfield-body">
+              <span class="mfield-op" id="iv-h-op"></span>
+              <input class="mfield-inp" id="iv-height" type="text" inputmode="decimal" placeholder="8.5" oninput="autoCheckHeight(this)" onblur="commitIVHeight()">
+            </div>
+            <button class="mstep" onclick="stepIVHeight(-1)">−</button>
+            <button class="mstep" onclick="stepIVHeight(+1)">+</button>
+            <span class="mfield-unit" id="iv-unit-lbl" onclick="toggleIVUnit()" style="cursor:pointer;user-select:none" title="Click to toggle units">ft</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tc mt8 mb12"><span class="lnk" onclick="openInstallGuide()">View installation instructions →</span></div>
+    <div class="btn-row">
+      <button class="btn btn-dk" onclick="go('p3-status')">← BACK</button>
+      <button class="btn btn-red" id="iv-btn" disabled onclick="go('p3-power')">NEXT →</button>
+    </div>
+  </div>
+</div>`,
+
+'p3-power': ()=>`
+<div class="sc" id="sc-p3-power">
+  <div class="cnt" style="max-width:560px">
+    <div class="phase-tag"><em>PHASE 2</em> · INSTALLATION + VERIFICATION</div>
+    <div class="stepdots mb16"><div class="sdot done"></div><div class="sdot done"></div><div class="sdot act"></div></div>
+    <div class="h3 mb6">POWER ON CONFIRMATION</div>
+    <div class="sub mb20" style="font-size:14px">Is your CLM PRO powered on and showing a <strong style="color:#fff;font-weight:600">white LED</strong>?</div>
+    <!-- Device illustration -->
+    <div class="clm-device mb20">
+      <span class="clm-brand">Rapsodo | CLM PRO</span>
+      <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot w"></div></div>
+    </div>
+    <div id="power-question">
+      <div class="pwrbtns mb12">
+        <button class="pwrbtn yes" onclick="completePhase('install')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>
+          YES, IT'S ON
+        </button>
+        <button class="pwrbtn no" onclick="document.getElementById('trouble').style.display='block';document.getElementById('power-question').style.display='none'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          NO / NOT SURE
+        </button>
+      </div>
+    </div>
+    <div id="trouble" style="display:none">
+      <div class="card mb12">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px;color:var(--muted)">Troubleshooting Steps</div>
+        <div class="troub-item"><div class="troub-num">1</div><div>Check the power cable at both the unit and the power adapter — ensure fully seated</div></div>
+        <div class="troub-item"><div class="troub-num">2</div><div>Try a different power outlet</div></div>
+        <div class="troub-item"><div class="troub-num">3</div><div>If the LED is <span style="color:var(--red);font-weight:600">red</span> — note the error code displayed and contact support</div></div>
+      </div>
+      <div class="tc mb12"><span class="lnk">Still having trouble? Contact Support →</span></div>
+      <button class="btn btn-dk btn-sm" onclick="document.getElementById('trouble').style.display='none';document.getElementById('power-question').style.display='block'">← Back</button>
+    </div>
+    <div class="tc mt12"><button class="btn btn-dk btn-sm" style="width:auto;padding:0 20px" onclick="go('p3-check')">← Back to checklist</button></div>
+  </div>
+</div>`,
+
+p4sel: ()=>`
+<div class="sc" id="sc-p4sel">
+  <div class="cnt-lg">
+    <div class="h2 mb6">SELECT YOUR DEVICE</div>
+    <div class="sub mb24" style="font-size:14px">Please select the device you would like to connect.</div>
+    <div class="dvcards mb24" style="gap:20px">
+      <div class="dvcard sel" id="dv-clm" onclick="selectDev('clm')" style="gap:16px">
+        <div style="flex:1;display:flex;align-items:center;justify-content:flex-start;width:100%;overflow:hidden;border-radius:4px;position:relative">
+          <!-- Right-edge fade so the crop reads as intentional -->
+          <div style="position:absolute;right:0;top:0;bottom:0;width:52px;background:linear-gradient(to right,transparent,var(--card));z-index:2;pointer-events:none"></div>
+          <!-- Full-scale CLM bar, left-aligned so label shows and right side crops -->
+          <div class="clm-device" style="width:520px;max-width:none;flex-shrink:0;margin:0;border-radius:6px">
+            <span class="clm-brand">Rapsodo | CLM PRO</span>
+            <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot w"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="dvname mb4">CLM PRO</div>
+          <div style="font-size:12px;color:var(--muted);letter-spacing:.05em">Launch Monitor</div>
+        </div>
+      </div>
+      <div class="dvcard" id="dv-mlm" onclick="selectDev('mlm')" style="gap:20px">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center">
+          <div style="width:56px;height:150px;background:linear-gradient(160deg,#f5f5f5,#d0d0d0);border-radius:12px;position:relative;border:1px solid #c0c0c0;box-shadow:0 8px 24px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;box-shadow:0 2px 8px rgba(196,32,40,.4)">R</div>
+            <div style="width:20px;height:3px;background:#ccc;border-radius:2px"></div>
+            <div style="width:20px;height:3px;background:#ccc;border-radius:2px"></div>
+          </div>
+        </div>
+        <div>
+          <div class="dvname mb4">MLM 2 PRO</div>
+          <div style="font-size:12px;color:var(--muted);letter-spacing:.05em">Launch Monitor</div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row" style="max-width:640px;margin:0 auto">
+      <button class="btn btn-dk" onclick="S.setupSkipped=true;go('play')">SKIP SETUP</button>
+      <button class="btn btn-red" onclick="go('hub')">CONTINUE →</button>
+    </div>
+  </div>
+</div>`,
+
+p4inst: ()=>`
+<div class="sc" id="sc-p4inst">
+  <div class="cnt-lg">
+    <div class="h2 mb6">POWER ON AND CONNECT<br>THE DEVICE</div>
+    <div class="sub mb20" style="font-size:14px">Follow these steps before scanning for your device.</div>
+    <div style="display:flex;justify-content:center;gap:0;margin-bottom:20px;max-width:660px;margin-left:auto;margin-right:auto">
+      <div style="flex:1;text-align:center;padding:0 20px;position:relative">
+        <div style="position:absolute;top:22px;right:0;left:50%;height:2px;background:rgba(255,255,255,.08)"></div>
+        <div style="width:44px;height:44px;border-radius:50%;background:#1e1e1e;border:1px solid #333;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v6M12 22v-6M12 12m-4-4a4 4 0 1 0 8 0"/><path d="M5 12H2M22 12h-3"/></svg>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Step 1</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.4">Plug in the device to a power outlet</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:0 20px;position:relative">
+        <div style="position:absolute;top:22px;right:0;left:50%;height:2px;background:rgba(255,255,255,.08)"></div>
+        <div style="position:absolute;top:22px;right:50%;left:0;height:2px;background:rgba(255,255,255,.08)"></div>
+        <div style="width:44px;height:44px;border-radius:50%;background:#1e1e1e;border:1px solid #333;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Step 2</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.4">Press the power button on the device — wait for white LED</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:0 20px;position:relative">
+        <div style="position:absolute;top:22px;right:50%;left:0;height:2px;background:rgba(255,255,255,.08)"></div>
+        <div style="width:44px;height:44px;border-radius:50%;background:#1e1e1e;border:1px solid #333;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Step 3</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.4">Connect the device to this PC with an Ethernet cable</div>
+      </div>
+    </div>
+    <div class="clm-device mb20">
+      <span class="clm-brand">Rapsodo | CLM PRO</span>
+      <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot w"></div></div>
+    </div>
+    <div class="btn-row" style="max-width:640px;margin:0 auto">
+      <button class="btn btn-dk" onclick="go('hub')">← BACK</button>
+      <button class="btn btn-red" onclick="go('p4scan')">NEXT →</button>
+    </div>
+  </div>
+</div>`,
+
+p4scan: ()=>`
+<div class="sc" id="sc-p4scan">
+  <div class="cnt" style="text-align:center">
+    <div id="scan-state-scanning">
+      <div class="h3 mb8">SCANNING FOR DEVICES</div>
+      <div class="sub mb28">Searching your network for CLM PRO devices…</div>
+      <div style="position:relative;width:200px;height:200px;margin:0 auto 28px;display:flex;align-items:center;justify-content:center">
+        <div class="sring" style="width:60px;height:60px"></div>
+        <div class="sring" style="width:110px;height:110px;animation-delay:.35s;opacity:.55"></div>
+        <div class="sring" style="width:170px;height:170px;animation-delay:.7s;opacity:.3"></div>
+        <div style="width:48px;height:48px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:2;position:relative">📡</div>
+      </div>
+      <div class="fwstat"><div class="spin"></div> Scanning local network…</div>
+    </div>
+    <div id="scan-state-found" style="display:none">
+      <div class="h3 mb8">DEVICE FOUND</div>
+      <div class="sub mb8">Select your device to connect.</div>
+      <div class="sresult" onclick="go('p4conn')">
+        <div class="sdico">📡</div>
+        <div style="flex:1;text-align:left">
+          <div style="font-size:15px;font-weight:600">${S.device.id}</div>
+          <div style="font-size:12px;color:var(--muted)">CLM PRO · Firmware v${S.device.fw}</div>
+        </div>
+        <div class="sbars"><div class="sbar on"></div><div class="sbar on"></div><div class="sbar on"></div><div class="sbar"></div></div>
+      </div>
+      <div class="tc mt12"><span class="lnk" onclick="showScanTrouble()">Don't see your device? Troubleshoot →</span></div>
+    </div>
+    <div id="scan-trouble" style="display:none" class="mt16">
+      <div class="card" style="text-align:left">
+        <div class="troub-item"><div class="troub-num">1</div><div>Confirm the device is powered on (white LED)</div></div>
+        <div class="troub-item"><div class="troub-num">2</div><div>Make sure the device and this PC are on the same network</div></div>
+        <div class="troub-item"><div class="troub-num">3</div><div>Try connecting with an Ethernet cable instead of Wi-Fi</div></div>
+        <div class="troub-item"><div class="troub-num">4</div><div><span class="lnk">Enter IP address manually (advanced)</span></div></div>
+      </div>
+      <button class="btn btn-dk mt12" onclick="restartScan()">RESCAN</button>
+    </div>
+  </div>
+</div>`,
+
+p4conn: ()=>`
+<div class="sc" id="sc-p4conn">
+  <div class="cnt" style="max-width:560px">
+    <div class="h2 mb6">CONNECTION SUCCESSFUL</div>
+    <div class="sub mb20" style="font-size:14px">Your device is now connected and ready to use. Proceed to bind it to your account.</div>
+    <div class="chip mb16" style="justify-content:center;background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2)">
+      <div style="width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${"#22C55E"}" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:600">${S.device.id}</div>
+        <div style="font-size:11px;color:var(--green);margin-top:1px">Connected · Firmware v${S.device.fw}</div>
+      </div>
+    </div>
+    <div class="clm-device mb20" style="animation:connection-glow 2s ease-in-out infinite">
+      <span class="clm-brand">Rapsodo | CLM PRO</span>
+      <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot g"></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-dk" onclick="go('p4scan')">← BACK</button>
+      <button class="btn btn-red" onclick="go('p4bind')">NEXT →</button>
+    </div>
+  </div>
+</div>`,
+
+p4bind: ()=>`
+<div class="sc" id="sc-p4bind">
+  <div class="cnt" style="max-width:480px">
+    <div class="h3 mb6">DEVICE SETUP</div>
+    <div class="sub mb20" style="font-size:13px">Give your device a name and confirm the details before binding it to your account.</div>
+    <div class="chip mb20" style="background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.18)">
+      <div style="width:34px;height:34px;border-radius:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${"#22C55E"}" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:600">${S.device.id}</div>
+        <div style="font-size:11px;color:var(--green);margin-top:1px">Connected · Firmware v${S.device.fw}</div>
+      </div>
+    </div>
+    <div class="ig"><div class="ilbl">Device Name</div>
+      <div class="iw"><span class="ico">🖥</span><input class="inp" id="bind-name" type="text" value="${S.device.name}" oninput="S.device.name=this.value"></div></div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.06)">
+        <span style="color:var(--muted)">Device ID</span><span style="font-family:monospace;font-size:12px">${S.device.id}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px">
+        <span style="color:var(--muted)">Installed Height</span><span id="bind-height">${S.install.height || '8.5'} ft</span>
+      </div>
+    </div>
+    <div class="clm-device mb16">
+      <span class="clm-brand">Rapsodo | CLM PRO</span>
+      <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot g"></div></div>
+    </div>
+    <button class="btn btn-red" onclick="go('p4fw-info')">NEXT →</button>
+  </div>
+</div>`,
+
+'p4fw-info': ()=>`
+<div class="sc" id="sc-p4fw-info" style="overflow-y:auto;padding:24px 0 40px">
+  <div class="cnt" style="max-width:640px">
+    <div class="h2 mb8">LATEST FIRMWARE<br>UPDATE</div>
+    <div class="sub mb20" style="font-size:14px">Updating to the latest version for improved performance and new features.</div>
+    <div class="infobox mb20" style="background:rgba(59,130,246,.07);border-color:rgba(59,130,246,.25);color:rgba(255,255,255,.75)">
+      <span style="color:#60a5fa;font-weight:700">What is New:</span> Improved shot detection &bull; Enhanced Ball Spin Calculations &bull; Better Network Stability &bull; Bug Fixes and Performance Improvements
+    </div>
+    <div class="chip mb6" style="background:rgba(255,255,255,.04);border-color:var(--border)">
+      <div style="width:38px;height:38px;border-radius:50%;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:600">${S.device.id}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">CLM PRO · Connected</div>
+      </div>
+      <div style="background:#1e1e1e;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em">FW: V ${S.device.fw}</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:4px 0 20px">
+      <span style="color:var(--amber);font-weight:600">Update Available → v${S.device.fwNew}</span>
+      <span>${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
+    </div>
+    <div class="btn-row mb12">
+      <button class="btn btn-dk" onclick="go('hub')">NOT NOW</button>
+      <button class="btn btn-red" onclick="go('p4fw')">CONTINUE →</button>
+    </div>
+    <div class="infobox" style="font-size:12px">
+      <span class="lbl">Before You Update:</span> Update takes approximately 2–3 minutes &bull; Device will reboot automatically during the process &bull; Make sure the device stays powered on &bull; Keep the Ethernet connection stable
+    </div>
+  </div>
+</div>`,
+
+p4fw: ()=>`
+<div class="sc" id="sc-p4fw">
+  <div class="cnt" style="max-width:640px">
+    <div class="h2 mb8">INSTALLING FIRMWARE<br>UPDATE</div>
+    <div class="sub mb16" style="font-size:14px">Please do not disconnect power or Ethernet during the update.</div>
+    <div class="infobox mb20">
+      <span class="lbl">Important:</span> Keep the window open and the device powered on until the update is complete.
+    </div>
+    <div class="chip mb28" style="justify-content:center;background:rgba(255,255,255,.04);border-color:var(--border)">
+      <div style="width:38px;height:38px;border-radius:50%;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:600">${S.device.id}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px" id="fw-chip-status">Preparing update…</div>
+      </div>
+    </div>
+    <div class="fwlbls"><span>v${S.device.fw}</span><span>v${S.device.fwNew}</span></div>
+    <div class="fwtrack mb8"><div class="fwfill" id="fw-fill" style="width:0%"></div></div>
+    <div class="fwstat" id="fw-stat"><div class="spin"></div> Updating Firmware, Please wait</div>
+  </div>
+</div>`,
+
+'p4fw-done': ()=>`
+<div class="sc" id="sc-p4fw-done">
+  <div class="cnt" style="max-width:560px;text-align:center">
+    <div class="success-mark mb16">✓</div>
+    <div class="h2 mb8">FIRMWARE UPDATED<br>SUCCESSFULLY</div>
+    <div class="sub mb28" style="font-size:14px">Your device firmware is up to date and ready.</div>
+    <button class="btn btn-red" style="max-width:320px;margin:0 auto" onclick="completePhase('device')">DONE →</button>
+  </div>
+</div>`,
+
+cala: ()=>`
+<div class="sc" id="sc-cala">
+  <div class="cnt">
+    <div class="phase-tag">PHASE 4 · <em>CALIBRATION</em></div>
+    <div class="calphases">
+      <div class="calph act"><div class="calph-fill"></div></div>
+      <div class="calph"><div class="calph-fill"></div></div>
+      <div class="calph"><div class="calph-fill"></div></div>
+      <div class="calph"><div class="calph-fill"></div></div>
+    </div>
+    <div class="h3 mb8">CENTERLINE ALIGNMENT</div>
+    <div class="sub mb12" style="font-size:12px">Position an alignment rod at your hitting position center, then adjust the azimuth until aligned.</div>
+    <div class="cam">
+      <div class="cam-label">LIVE FEED</div>
+      <div class="crosshair" style="width:60px;height:60px"></div>
+      <div class="cam-scan-line"></div>
+      <div id="az-indicator" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:4px;height:80px;background:rgba(255,100,80,.7);border-radius:2px;transform-origin:bottom center;transition:transform .2s"></div>
+      <div style="position:absolute;bottom:10px;right:10px;font-size:10px;color:rgba(255,255,255,.3)">CLM PRO · FEED</div>
+    </div>
+    <div class="az-wrap mt12">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">
+        <span>-15°</span><span>Azimuth</span><span>+15°</span>
+      </div>
+      <div class="az-track" style="position:relative;height:4px;background:#2a2a2a;border-radius:2px">
+        <div class="az-zone" style="left:40%;width:20%"></div>
+      </div>
+      <input type="range" id="az-slider" min="-15" max="15" value="0" step="0.5" oninput="updateAzimuth(this.value)" style="margin-top:-4px;display:block">
+    </div>
+    <div class="rdgrid mt8">
+      <div class="rdi"><div class="rdval" id="rd-pitch">2.1°</div><div class="rdlbl">Pitch</div></div>
+      <div class="rdi"><div class="rdval" id="rd-roll">0.8°</div><div class="rdlbl">Roll</div></div>
+      <div class="rdi bad" id="rd-az-item"><div class="rdval" id="rd-az">8.5°</div><div class="rdlbl">Azimuth</div></div>
+    </div>
+    <button class="btn btn-red mt16" id="az-btn" disabled onclick="go('calb')">CONFIRM ALIGNMENT →</button>
+    <div class="tc mt10"><span class="lnk" onclick="go('hub')">← Back to Hub</span></div>
+  </div>
+</div>`,
+
+calb: ()=>`
+<div class="sc" id="sc-calb">
+  <div class="cnt" style="max-width:560px">
+    <div class="phase-tag">PHASE 4 · <em>CALIBRATION</em></div>
+    <div class="calphases">
+      <div class="calph done"><div class="calph-fill"></div></div>
+      <div class="calph act"><div class="calph-fill"></div></div>
+      <div class="calph"><div class="calph-fill"></div></div>
+      <div class="calph"><div class="calph-fill"></div></div>
+    </div>
+    <div class="h3 mb6">SCREEN DISTANCE</div>
+    <div class="sub mb16" style="font-size:13px">Verify the distance from your hitting position to the impact screen or net.</div>
+    <div id="dist-diagram" style="background:rgba(10,10,10,.8);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px"></div>
+    <div class="dist-val" id="dist-val">9.0 ft</div>
+    <input type="range" id="dist-slider" min="6" max="15" value="9" step="0.5" oninput="updateDist(this.value)">
+    <div class="dist-range"><span>6 ft (min)</span><span>15 ft (max)</span></div>
+    <div class="btn-row mt20">
+      <button class="btn btn-dk" onclick="go('cala')">← BACK</button>
+      <button class="btn btn-red" onclick="S.cal.dist=parseFloat(document.getElementById('dist-slider').value);go('calc')">NEXT →</button>
+    </div>
+  </div>
+</div>`,
+
+calc: ()=>`
+<div class="sc" id="sc-calc">
+  <div class="cnt">
+    <div class="phase-tag">PHASE 4 · <em>CALIBRATION</em></div>
+    <div class="calphases">
+      <div class="calph done"><div class="calph-fill"></div></div>
+      <div class="calph done"><div class="calph-fill"></div></div>
+      <div class="calph act"><div class="calph-fill"></div></div>
+      <div class="calph"><div class="calph-fill"></div></div>
+    </div>
+    <div class="h3 mb8">ENVIRONMENT CHECK</div>
+    <div class="sub mb16" style="font-size:13px">Running automated checks against the live device feed…</div>
+    <div class="card mb16" id="env-checks">
+      <div class="chkitem" style="animation-delay:.1s" id="ec-1"><div class="chksta pend" id="ec1-s">·</div><div class="chklbl">Lighting Adequacy</div><div class="chkval" id="ec1-v"></div></div>
+      <div class="chkitem" style="animation-delay:.2s" id="ec-2"><div class="chksta pend" id="ec2-s">·</div><div class="chklbl">Background Clutter Detection</div><div class="chkval" id="ec2-v"></div></div>
+      <div class="chkitem" style="animation-delay:.3s" id="ec-3"><div class="chksta pend" id="ec3-s">·</div><div class="chklbl">Pitch &amp; Roll Verification</div><div class="chkval" id="ec3-v"></div></div>
+      <div class="chkitem" style="animation-delay:.4s" id="ec-4"><div class="chksta pend" id="ec4-s">·</div><div class="chklbl">Height Confirmation (${S.install.height || '8.5'} ft)</div><div class="chkval" id="ec4-v"></div></div>
+    </div>
+    <button class="btn btn-red" id="ec-btn" disabled onclick="go('cald')">PROCEED →</button>
+  </div>
+</div>`,
+
+cald: ()=>`
+<div class="sc" id="sc-cald">
+  <div class="cnt">
+    <div class="phase-tag">PHASE 4 · <em>CALIBRATION</em></div>
+    <div class="calphases">
+      <div class="calph done"><div class="calph-fill"></div></div>
+      <div class="calph done"><div class="calph-fill"></div></div>
+      <div class="calph done"><div class="calph-fill"></div></div>
+      <div class="calph act"><div class="calph-fill"></div></div>
+    </div>
+    <div class="h3 mb8">TEST SHOTS</div>
+    <div class="sub mb16" style="font-size:13px">Hit 2–3 shots to validate the calibration. Data should register within expected ranges.</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <div style="font-size:13px;color:var(--muted)">Shots recorded:</div>
+      <div style="font-family:var(--head);font-size:1.4rem;font-weight:700"><span id="shot-count">0</span><span style="color:var(--muted);font-size:1rem"> / 3</span></div>
+    </div>
+    <div id="shots-container"></div>
+    <button class="btn btn-red mb8" id="sim-btn" onclick="simulateShot()">🏌 SIMULATE SHOT</button>
+    <button class="btn btn-dk" id="complete-btn" style="display:none" onclick="S.phases.cal=true;go('done')">COMPLETE CALIBRATION ✓</button>
+    <div class="tc mt8"><span class="lnk" id="retry-cal" style="display:none" onclick="go('cala')">Not registering? Retry from Phase A</span></div>
+  </div>
+</div>`,
+
+play: ()=>`
+<div class="sc" id="sc-play" style="background:#f0f0f0">
+  <div style="position:absolute;top:0;left:0;right:0;height:58px;background:#fff;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;padding:0 24px;gap:16px;z-index:20">
+    <div style="display:flex;align-items:center;gap:8px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;padding:5px 12px 5px 5px">
+      <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#C42028,#7a0010);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;font-family:var(--head)">NA</div>
+      <span style="font-size:13px;font-weight:600;color:#111;font-family:var(--body)">Nathan Aderogba</span>
+    </div>
+    <div style="flex:1;display:flex;gap:28px;justify-content:center">
+      <span style="font-family:var(--head);font-size:.95rem;font-weight:700;color:#111;text-transform:uppercase;letter-spacing:.1em;border-bottom:2px solid #111;padding-bottom:2px;cursor:pointer">Play</span>
+      <span style="font-family:var(--head);font-size:.95rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.1em;cursor:pointer">My Bag</span>
+      <span style="font-family:var(--head);font-size:.95rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.1em;cursor:pointer">Activity</span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div style="width:34px;height:34px;border-radius:50%;background:#22C55E;display:flex;align-items:center;justify-content:center">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+      </div>
+      <div style="width:34px;height:34px;border-radius:50%;background:#22C55E;display:flex;align-items:center;justify-content:center">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </div>
+      <div style="width:34px;height:34px;border-radius:50%;background:#f5f5f5;border:1px solid #ddd;display:flex;align-items:center;justify-content:center">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;inset:0;top:58px;display:flex;flex-direction:column;overflow:hidden">
+    <div style="position:relative;background:#0a0a0a;height:240px;display:flex;align-items:center;overflow:hidden;flex-shrink:0">
+      <div style="position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-family:var(--head);font-size:13rem;font-weight:800;font-style:italic;color:rgba(255,255,255,.035);line-height:1;pointer-events:none;user-select:none;letter-spacing:-.02em">CLM</div>
+      <div style="padding:0 48px;position:relative;z-index:2;flex-shrink:0">
+        <div style="font-family:var(--head);font-size:3.2rem;font-weight:800;font-style:italic;text-transform:uppercase;color:#fff;line-height:1.05;letter-spacing:.01em">OWN THE<br>COURSES™</div>
+      </div>
+      <div style="position:absolute;right:0;top:0;bottom:0;width:52%;display:flex;align-items:center;overflow:hidden">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:80px;background:linear-gradient(to right,#0a0a0a,transparent);z-index:2;pointer-events:none"></div>
+        <div style="position:absolute;right:0;top:0;bottom:0;width:60px;background:linear-gradient(to right,transparent,#0a0a0a);z-index:2;pointer-events:none"></div>
+        <div style="width:100%;padding:0 80px;transform:perspective(900px) rotateY(-10deg) translateZ(0)">
+          <div class="clm-device" style="box-shadow:0 20px 60px rgba(0,0,0,.7);height:80px">
+            <span class="clm-brand" style="font-size:12px" id="play-dev-name">${S.device.name}</span>
+            <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot g"></div></div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:3">
+          <div style="width:20px;height:3px;border-radius:2px;background:rgba(255,255,255,.7)"></div>
+          <div style="width:6px;height:3px;border-radius:2px;background:rgba(255,255,255,.25)"></div>
+          <div style="width:6px;height:3px;border-radius:2px;background:rgba(255,255,255,.25)"></div>
+        </div>
+      </div>
+      <div style="position:absolute;right:calc(52% + 6px);top:50%;transform:translateY(-50%);z-index:5">
+        <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.5);font-size:14px">‹</div>
+      </div>
+      <div style="position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:5">
+        <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.5);font-size:14px">›</div>
+      </div>
+    </div>
+    <div style="flex:1;background:#f0f0f0;overflow-y:auto;padding:18px 28px 40px">
+      <div id="play-setup-banner" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <span style="font-size:18px;flex-shrink:0">⚠</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:1px">Device setup incomplete</div>
+          <div style="font-size:12px;color:#78350f">Complete device setup to unlock all play modes.</div>
+        </div>
+        <button onclick="go('hub')" style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--head);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0">SETUP →</button>
+      </div>
+      <div id="play-modes" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px"></div>
+      <div style="display:flex;align-items:center;gap:4px;opacity:.3">
+        <span style="font-family:var(--head);font-weight:700;font-size:18px;color:#111">Rapsodo</span>
+        <span style="font-family:var(--head);font-weight:400;font-size:15px;color:#111;letter-spacing:.3em;margin-left:4px">GOLF</span>
+      </div>
+    </div>
+  <div id="play-eop-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,.65);z-index:100;align-items:center;justify-content:center">
+    <div style="background:#fff;color:#111;border-radius:14px;padding:32px 40px;max-width:380px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.4)">
+      <div style="font-family:var(--head);font-weight:700;font-style:italic;font-size:26px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px">End of Prototype Flow</div>
+      <p style="font-size:13px;color:#555;margin-bottom:24px;line-height:1.6">You've reached the end of the Rapsodo CLM PRO setup prototype. Thank you for exploring the flow.</p>
+      <button onclick="document.getElementById('play-eop-overlay').style.display='none'" style="background:#C42028;color:#fff;border:none;border-radius:6px;padding:10px 28px;font-family:var(--head);font-weight:700;font-style:italic;font-size:14px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">CLOSE</button>
+    </div>
+  </div>
+  </div>
+</div>`,
+
+done: ()=>`
+<div class="sc" id="sc-done" style="overflow-y:auto;padding:24px 0 40px">
+  <div class="cnt" id="done-content">
+    <div class="success-mark">✓</div>
+    <div class="h2 mb8">SETUP COMPLETE!</div>
+    <div class="sub mb20">Your CLM PRO is connected, calibrated, and ready to play.</div>
+    <div class="sumcard mb20">
+      <div class="sumrow"><div class="sumkey">Device</div><div class="sumval" id="sum-device">${S.device.name}</div></div>
+      <div class="sumrow"><div class="sumkey">Device ID</div><div class="sumval" style="font-family:monospace;font-size:12px">${S.device.id}</div></div>
+      <div class="sumrow"><div class="sumkey">Installed Height</div><div class="sumval" id="sum-height">${S.install.height || '8.5'} ft</div></div>
+      <div class="sumrow"><div class="sumkey">Screen Distance</div><div class="sumval" id="sum-dist">${S.cal.dist} ft</div></div>
+      <div class="sumrow"><div class="sumkey">Firmware</div><div class="sumval">v${S.device.fwNew}</div></div>
+      <div class="sumrow"><div class="sumkey">Calibration Date</div><div class="sumval">${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></div>
+    </div>
+    <button class="btn btn-red mb8" onclick="go('play')">START PLAYING →</button>
+    <button class="btn btn-dk" onclick="toast('Opening settings…')">GO TO SETTINGS</button>
+  </div>
+</div>`,
+
+};
+
+// ─── SCREEN INIT CALLBACKS ─────────────────────────────────────────────────
+const INIT = {
+  auth: () => {},
+  'p2-meas': () => {
+    // Render initial diagram with default values
+    updateRoomDiagram();
+  },
+  'p2-compat': () => {
+    renderCompat(S.compatState);
+  },
+  p4bind: () => {
+    const bh = document.getElementById('bind-height');
+    if (bh) bh.textContent = (S.install.height || '8.5') + ' ft';
+    setTimeout(() => {
+      const inp = document.getElementById('bind-name');
+      if (inp) { inp.focus(); inp.select(); }
+    }, 200);
+  },
+  'p4fw-done': () => {},
+  p4scan: () => {
+    setTimeout(() => {
+      document.getElementById('scan-state-scanning').style.display='none';
+      document.getElementById('scan-state-found').style.display='block';
+    }, 3000);
+  },
+  p4fw: () => {
+    S.fwProg = 0;
+    const fill = document.getElementById('fw-fill');
+    const stat = document.getElementById('fw-stat');
+    const timer = setInterval(() => {
+      S.fwProg = Math.min(100, S.fwProg + (100/50));
+      fill.style.width = S.fwProg + '%';
+      updateP4Bar('p4fw');
+      if (S.fwProg >= 100) {
+        clearInterval(timer);
+        stat.innerHTML = '✓ Firmware updated to v' + S.device.fwNew;
+        stat.style.color = 'var(--green)';
+        setTimeout(() => go('p4fw-done'), 1500);
+      }
+    }, 100);
+  },
+  cala: () => {
+    const slider = document.getElementById('az-slider');
+    if (slider) { slider.value = 8.5; updateAzimuth(8.5); }
+  },
+  calb: () => {
+    const el = document.getElementById('dist-diagram');
+    if (el) el.innerHTML = buildDistDiagram(S.cal.dist || 9);
+    const sl = document.getElementById('dist-slider');
+    if (sl) sl.value = S.cal.dist || 9;
+    const dv = document.getElementById('dist-val');
+    if (dv) dv.textContent = (S.cal.dist || 9).toFixed(1) + ' ft';
+  },
+  calc: () => {
+    runEnvChecks();
+  },
+  cald: () => {
+    S.cal.shots = [];
+    document.getElementById('shot-count').textContent = '0';
+    document.getElementById('shots-container').innerHTML = '';
+    document.getElementById('complete-btn').style.display = 'none';
+    document.getElementById('retry-cal').style.display = 'none';
+  },
+  hub: () => {
+    const deps = { room:[], install:['room'], device:['room'], cal:['install','device'] };
+    const keys = ['room','install','device','cal'];
+    let count = 0;
+    keys.forEach((key,i) => {
+      const done   = S.phases[key];
+      const locked = !done && deps[key].some(k => !S.phases[k]);
+      if (done) count++;
+      const card = document.getElementById('hph-'+key);
+      const num  = document.getElementById('hphn-'+key);
+      const cta  = document.getElementById('hphc-'+key);
+      const stat = document.getElementById('hphs-'+key);
+      if (!card) return;
+      card.classList.toggle('done',   done);
+      card.classList.toggle('locked', locked);
+      if (num)  num.textContent  = done ? '✓' : (i+1);
+      if (stat) stat.textContent = done ? 'Done' : locked ? '🔒' : 'Start';
+      if (cta)  cta.style.color  = done ? 'var(--green)' : locked ? 'var(--muted)' : '';
+    });
+    // Device chip — only show real info after phase 3 done
+    const devDone = S.phases.device;
+    const nameEl  = document.getElementById('hub-dev-name');
+    const idEl    = document.getElementById('hub-dev-id');
+    const ledEl   = document.getElementById('hub-dev-led');
+    const brandEl = document.getElementById('hub-dev-brand');
+    if (nameEl)  nameEl.textContent  = devDone ? S.device.name : '—';
+    if (idEl)    idEl.textContent    = devDone ? S.device.id   : 'Connect device to sync serial number';
+    if (ledEl)   ledEl.className     = 'led-dot ' + (devDone ? 'g' : 'off');
+    if (brandEl) brandEl.textContent = devDone ? S.device.name : 'Rapsodo | CLM PRO';
+    const countEl = document.getElementById('hub-done-count');
+    const fill    = document.getElementById('hub-prog-fill');
+    const allDone = document.getElementById('hub-all-done');
+    const skipEl  = document.getElementById('hub-skip-link');
+    if (countEl) countEl.textContent = count;
+    if (fill) { fill.style.width = (count/4*100)+'%'; fill.style.background = count===4 ? 'var(--green)' : 'var(--red)'; }
+    if (allDone) allDone.style.display = count===4 ? 'block' : 'none';
+    if (skipEl)  skipEl.style.display  = count===4 ? 'none'  : 'block';
+  },
+  play: () => {
+    document.getElementById('grass').style.display  = 'none';
+    document.getElementById('rmark').style.display  = 'none';
+    const banner = document.getElementById('play-setup-banner');
+    const modes  = document.getElementById('play-modes');
+    const done   = allPhasesComplete();
+    if (banner) banner.style.display = done ? 'none' : 'flex';
+    if (modes)  modes.innerHTML = buildPlayModes();
+    const devName = document.getElementById('play-dev-name');
+    if (devName) devName.textContent = S.device.name;
+    if (done) {
+      setTimeout(() => {
+        const overlay = document.getElementById('play-eop-overlay');
+        if (overlay) overlay.style.display = 'flex';
+      }, 5000);
+    }
+  },
+  done: () => {
+    const sd = document.getElementById('sum-device');
+    const sh = document.getElementById('sum-height');
+    const sdist = document.getElementById('sum-dist');
+    if (sd) sd.textContent = S.device.name;
+    if (sh) sh.textContent = (S.install.height || '8.5') + ' ft';
+    if (sdist) sdist.textContent = (S.cal.dist || 9) + ' ft';
+    spawnConfetti();
+  },
+};
+
+// ─── ACTIONS ───────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('on', tab==='login');
+  document.getElementById('tab-signup').classList.toggle('on', tab==='signup');
+  document.getElementById('form-login').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('form-signup').style.display = tab==='signup' ? 'block' : 'none';
+}
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type==='password' ? 'text' : 'password';
+  btn.textContent = inp.type==='password' ? '👁' : '🙈';
+}
+
+function checkSignup() {
+  const n = document.getElementById('su-name')?.value;
+  const e = document.getElementById('su-email')?.value;
+  const p = document.getElementById('su-pass')?.value;
+  const c = document.getElementById('su-conf')?.value;
+  const btn = document.getElementById('su-btn');
+  const err = document.getElementById('su-err');
+  if (!btn) return;
+  const ok = n && e && e.includes('@') && p && p.length >= 8 && /\d/.test(p) && p === c;
+  btn.disabled = !ok;
+  if (p && c && p !== c) { err.textContent = 'Passwords do not match'; err.style.display='block'; }
+  else if (p && p.length > 0 && p.length < 8) { err.textContent = 'Password must be at least 8 characters'; err.style.display='block'; }
+  else err.style.display='none';
+}
+
+function doLogin() {
+  S.user.email = document.getElementById('li-email')?.value || '';
+  go('p4sel');
+}
+
+function doSignup() {
+  S.user.name = document.getElementById('su-name')?.value || '';
+  S.user.email = document.getElementById('su-email')?.value || '';
+  S.user.isNew = true;
+  go('acct-done');
+}
+
+function showTrialModal() {
+  const end = new Date(); end.setDate(end.getDate() + 30);
+  const el = document.getElementById('trial-end');
+  if (el) el.textContent = end.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('trial-ov').classList.add('open');
+}
+
+function openLoginWithTrial() {
+  go('auth');
+  setTimeout(showTrialModal, 400);
+}
+
+function closeTrialModal() {
+  document.getElementById('trial-ov').classList.remove('open');
+  go('p4sel');
+}
+
+function prefill() {
+  const baseFt = { ch:9.5, rd:14, rw:12, sd:9 };
+  Object.entries(baseFt).forEach(([key, ftVal]) => {
+    const inp = document.getElementById('m-'+key);
+    if (!inp) return;
+    const disp = S.unitFt ? ftVal : Math.round(ftVal * 0.3048 * 10) / 10;
+    const r = getFieldRange(key);
+    const clamped = Math.round(Math.max(r.min, Math.min(r.max, disp)) * 10) / 10;
+    inp.value = clamped.toFixed(1);
+    updateFieldOp(key, clamped, r.min, r.max);
+  });
+  document.getElementById('m-cm').value = 'drywall';
+  document.getElementById('saved-banner')?.remove();
+  checkMeas();
+  updateRoomDiagram();
+  toast('Measurements loaded from your room validator ✓');
+}
+
+function setUnit(u) {
+  const wasMetric = !S.unitFt;
+  const nowMetric = u === 'metric';
+  if (wasMetric === nowMetric) return;
+  // Update global toggle buttons
+  document.getElementById('u-imperial')?.classList.toggle('on', !nowMetric);
+  document.getElementById('u-metric')?.classList.toggle('on', nowMetric);
+  // Convert values BEFORE flipping S.unitFt so we know the old unit
+  const lbl = nowMetric ? 'm' : 'ft';
+  ['ch','rd','rw','sd'].forEach(k => {
+    const el = document.getElementById('u-lbl-'+k);
+    if (el) el.textContent = lbl;
+    const inp = document.getElementById('m-'+k);
+    if (!inp || inp.value.trim() === '') return;
+    const v = parseFloat(inp.value);
+    if (isNaN(v)) return;
+    const converted = nowMetric
+      ? Math.round(v * 0.3048 * 10) / 10
+      : Math.round(v / 0.3048 * 10) / 10;
+    inp.value = converted.toFixed(1);
+  });
+  // Flip unit AFTER conversion so getFieldRange uses new unit for clamping
+  S.unitFt = !nowMetric;
+  ['ch','rd','rw','sd'].forEach(k => {
+    const inp = document.getElementById('m-'+k);
+    if (!inp || inp.value.trim() === '') return;
+    const r = getFieldRange(k);
+    const v = parseFloat(inp.value);
+    const clamped = Math.round(Math.max(r.min, Math.min(r.max, v)) * 10) / 10;
+    inp.value = clamped.toFixed(1);
+    updateFieldOp(k, clamped, r.min, r.max);
+  });
+  updateRoomDiagram();
+}
+
+// ─── MEASUREMENT FIELD CONFIG ──────────────────────────────────────────────
+const MFIELD = {
+  ch: { min:7,  max:16, step:0.5 },
+  rd: { min:6,  max:30, step:0.5 },
+  rw: { min:6,  max:30, step:0.5 },
+  sd: { min:6,  max:15, step:0.5 },
+};
+
+function getFieldRange(key) {
+  const cfg = MFIELD[key];
+  if (S.unitFt) return { min:cfg.min, max:cfg.max, step:cfg.step };
+  const c = v => Math.round(v * 0.3048 * 10) / 10;
+  return { min:c(cfg.min), max:c(cfg.max), step:Math.round(cfg.step * 0.3048 * 10) / 10 };
+}
+
+function stepField(key, sign) {
+  const inp = document.getElementById('m-'+key);
+  if (!inp) return;
+  const r = getFieldRange(key);
+  const cur = parseFloat(inp.value);
+  const base = isNaN(cur) ? (sign > 0 ? r.min : r.max) : cur;
+  const next = Math.round((base + sign * r.step) * 10) / 10;
+  const clamped = Math.max(r.min, Math.min(r.max, next));
+  inp.value = clamped.toFixed(1);
+  updateFieldOp(key, clamped, r.min, r.max);
+  checkMeas();
+  updateRoomDiagram();
+}
+
+function commitField(key) {
+  const inp = document.getElementById('m-'+key);
+  if (!inp || inp.value.trim() === '') return;
+  const r = getFieldRange(key);
+  const v = parseFloat(inp.value);
+  if (isNaN(v)) { inp.value = ''; return; }
+  const clamped = Math.round(Math.max(r.min, Math.min(r.max, v)) * 10) / 10;
+  inp.value = clamped.toFixed(1);
+  updateFieldOp(key, clamped, r.min, r.max);
+  checkMeas();
+  updateRoomDiagram();
+}
+
+function updateFieldOp(key, val, min, max) {
+  const op = document.getElementById('m-'+key+'-op');
+  if (!op) return;
+  const atMin = val <= min, atMax = val >= max;
+  op.textContent = atMin ? '<' : atMax ? '>' : '';
+  op.classList.toggle('vis', atMin || atMax);
+}
+
+function checkMeas() {
+  const ch = document.getElementById('m-ch')?.value;
+  const rd = document.getElementById('m-rd')?.value;
+  const rw = document.getElementById('m-rw')?.value;
+  const sd = document.getElementById('m-sd')?.value;
+  const cm = document.getElementById('m-cm')?.value;
+  const btn = document.getElementById('meas-btn');
+  if (btn) btn.disabled = !(ch && rd && rw && sd && cm);
+}
+
+function saveMeasAndNext() {
+  // Convert to feet if currently in metric
+  const toFt = v => S.unitFt ? v : Math.round(v / 0.3048 * 10) / 10;
+  const raw = {
+    ch: parseFloat(document.getElementById('m-ch').value),
+    rd: parseFloat(document.getElementById('m-rd').value),
+    rw: parseFloat(document.getElementById('m-rw').value),
+    sd: parseFloat(document.getElementById('m-sd').value),
+    cm: document.getElementById('m-cm').value,
+  };
+  S.room = { ch: toFt(raw.ch), rd: toFt(raw.rd), rw: toFt(raw.rw), sd: toFt(raw.sd), cm: raw.cm };
+  // Determine compatibility (always in ft)
+  const ch = S.room.ch, rd = S.room.rd;
+  if (ch < 8 || rd < 10) S.compatState = 'r';
+  else if (ch < 9 || rd < 12) S.compatState = 'a';
+  else S.compatState = 'g';
+  go('p2-compat');
+}
+
+function setCompat(state) {
+  S.compatState = state;
+  renderCompat(state);
+}
+
+function renderCompat(state) {
+  const body = document.getElementById('compat-body');
+  const nextBtn = document.getElementById('compat-next');
+  if (!body) return;
+  const icons = {
+    g: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    a: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    r: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+  };
+  const icoWrapColors = { g:'rgba(34,197,94,.12)', a:'rgba(245,158,11,.1)', r:'rgba(248,113,113,.1)' };
+  const icoWrapBorders = { g:'rgba(34,197,94,.25)', a:'rgba(245,158,11,.2)', r:'rgba(248,113,113,.2)' };
+  const ch = S.room.ch||'9.5', rd = S.room.rd||'14', rw = S.room.rw||'10', ss = S.room.ss||'120';
+  const configs = {
+    g: {
+      cls:'g', title:'COMPATIBLE',
+      headline:'Your room meets all CLM PRO requirements.',
+      body:'',
+      extra:`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px">
+        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${ch}<span style="font-size:.9rem"> ft</span></div><div class="meas-stat-lbl">Ceiling Height</div></div>
+        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${rd}<span style="font-size:.9rem"> ft</span></div><div class="meas-stat-lbl">Room Depth</div></div>
+        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${ss}<span style="font-size:.75rem">"</span></div><div class="meas-stat-lbl">Screen Size</div></div>
+      </div>`,
+      next: true,
+    },
+    a: {
+      cls:'a', title:'CONDITIONALLY COMPATIBLE',
+      headline:'Your room meets minimum requirements but has some caveats.',
+      body:`<div style="margin-top:10px">
+        <div style="display:flex;gap:8px;padding:8px 0;font-size:13px;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.06)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Ceiling below 9 ft — some high-launch shots may clip near the ceiling</div>
+        <div style="display:flex;gap:8px;padding:8px 0;font-size:13px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Room depth is near minimum — keep your hitting position tightly centered</div>
+      </div>
+      <div class="cbx mt12" id="ack-cbx" onclick="this.classList.toggle('ck');document.getElementById('compat-next').disabled=!this.classList.contains('ck')">
+        <div class="cbbox"></div><div class="cbxt" style="font-size:13px">I understand the limitations and wish to proceed</div>
+      </div>`,
+      next: false,
+    },
+    r: {
+      cls:'r', title:'NOT COMPATIBLE',
+      headline:'Your room does not meet the minimum requirements.',
+      body:`<div style="margin-top:10px">
+        <div style="display:flex;gap:8px;padding:8px 0;font-size:13px;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.06)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Ceiling height is too low — 8 ft minimum required, 9 ft recommended</div>
+        <div style="display:flex;gap:8px;padding:8px 0;font-size:13px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Room depth is insufficient — 10 ft minimum in the ball flight direction</div>
+      </div>
+      <div style="margin-top:12px"><span class="lnk">Contact support to discuss your space →</span></div>`,
+      next: false,
+    },
+  };
+  const c = configs[state];
+  body.innerHTML = `<div class="compat ${c.cls}" style="padding:18px 20px;margin-bottom:16px;gap:16px">
+    <div style="width:44px;height:44px;border-radius:12px;background:${icoWrapColors[state]};border:1px solid ${icoWrapBorders[state]};display:flex;align-items:center;justify-content:center;flex-shrink:0">${icons[state]}</div>
+    <div style="flex:1">
+      <div style="font-family:var(--head);font-weight:700;font-size:1.15rem;font-style:italic;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">${c.title}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.5">${c.headline}</div>
+      ${c.body||''}${c.extra||''}
+    </div>
+  </div>`;
+  if (nextBtn) nextBtn.disabled = !c.next;
+}
+
+function toggleCbx(el, key) {
+  el.classList.toggle('ck');
+  // Check all in parent
+  const parent = el.parentElement;
+  const all = parent.querySelectorAll('.cbx');
+  const allCk = [...all].every(c=>c.classList.contains('ck'));
+  // Find relevant button
+  const btns = { rc1:'rc-btn', iv1:'iv-btn' };
+  // Generic: check readiness and IV buttons
+  const rcBtn = document.getElementById('rc-btn');
+  if (rcBtn) {
+    const items = document.querySelectorAll('#sc-p2-check .cbx');
+    rcBtn.disabled = ![...items].every(i=>i.classList.contains('ck'));
+  }
+  checkIV();
+}
+
+function autoCheckHeight(inp) {
+  const v = parseFloat(inp.value);
+  // Always store canonical value in feet
+  S.install.height = isNaN(v) ? '' : (S.ivUnitFt ? v : Math.round(v / 0.3048 * 10) / 10);
+  const cbx = document.getElementById('iv5-cbx');
+  if (cbx) cbx.classList.toggle('ck', inp.value.trim() !== '');
+  checkIV();
+}
+
+function checkIV() {
+  const btn = document.getElementById('iv-btn');
+  if (!btn) return;
+  const items = document.querySelectorAll('#sc-p3-check .cbx');
+  const h = document.getElementById('iv-height')?.value;
+  btn.disabled = !([...items].every(i=>i.classList.contains('ck')) && h);
+}
+
+function ivHeightRange() {
+  return S.ivUnitFt ? { min:7, max:16, step:0.5, ph:'8.5' } : { min:2.1, max:4.9, step:0.1, ph:'2.6' };
+}
+
+function stepIVHeight(sign) {
+  const inp = document.getElementById('iv-height');
+  if (!inp) return;
+  const r = ivHeightRange();
+  const cur = parseFloat(inp.value);
+  const base = isNaN(cur) ? (sign > 0 ? r.min : r.max) : cur;
+  const next = Math.round((base + sign * r.step) * 10) / 10;
+  inp.value = Math.max(r.min, Math.min(r.max, next)).toFixed(1);
+  autoCheckHeight(inp);
+}
+
+function commitIVHeight() {
+  const inp = document.getElementById('iv-height');
+  if (!inp || !inp.value.trim()) return;
+  const r = ivHeightRange();
+  const v = parseFloat(inp.value);
+  if (isNaN(v)) { inp.value = ''; return; }
+  inp.value = Math.round(Math.max(r.min, Math.min(r.max, v)) * 10) / 10;
+  autoCheckHeight(inp);
+}
+
+function toggleIVUnit() {
+  const inp = document.getElementById('iv-height');
+  const lbl = document.getElementById('iv-unit-lbl');
+  if (!inp) return;
+  const cur = parseFloat(inp.value);
+  if (S.ivUnitFt) {
+    S.ivUnitFt = false;
+    if (!isNaN(cur)) inp.value = (Math.round(cur * 0.3048 * 10) / 10).toFixed(1);
+    inp.placeholder = '2.6';
+    if (lbl) lbl.textContent = 'm';
+  } else {
+    S.ivUnitFt = true;
+    if (!isNaN(cur)) inp.value = (Math.round(cur / 0.3048 * 10) / 10).toFixed(1);
+    inp.placeholder = '8.5';
+    if (lbl) lbl.textContent = 'ft';
+  }
+  autoCheckHeight(inp);
+}
+
+function openInstallGuide() {
+  go('p3-status');
+  setTimeout(() => showNotMounted(), 80);
+}
+
+function showNotMounted() {
+  document.getElementById('notmounted-msg').style.display = 'block';
+  document.querySelector('#sc-p3-status .optrow').style.display = 'none';
+  document.querySelector('#sc-p3-status .tc').style.display = 'none';
+}
+
+function selectDev(id) {
+  document.getElementById('dv-clm').classList.toggle('sel', id==='clm');
+  document.getElementById('dv-mlm').classList.toggle('sel', id==='mlm');
+}
+
+function toggleExp(hd) {
+  const body = hd.nextElementSibling;
+  body.classList.toggle('open');
+  document.getElementById('exp-arr').textContent = body.classList.contains('open') ? '▴' : '▾';
+}
+
+function updateAzimuth(val) {
+  val = parseFloat(val);
+  S.cal.az = val;
+  const indicator = document.getElementById('az-indicator');
+  const azDisp = document.getElementById('rd-az');
+  const azItem = document.getElementById('rd-az-item');
+  const btn = document.getElementById('az-btn');
+  if (indicator) indicator.style.transform = `translate(-50%, -50%) rotate(${val * 3}deg)`;
+  if (azDisp) azDisp.textContent = Math.abs(val).toFixed(1) + '°';
+  const inRange = Math.abs(val) <= 2.5;
+  if (azItem) { azItem.classList.toggle('good', inRange); azItem.classList.toggle('bad', !inRange); }
+  if (btn) btn.disabled = !inRange;
+}
+
+function updateDist(val) {
+  const disp = document.getElementById('dist-val');
+  if (disp) disp.textContent = parseFloat(val).toFixed(1) + ' ft';
+}
+
+function runEnvChecks() {
+  const checks = [
+    { id:1, label:'Lighting Adequacy', pass:true, val:'Good' },
+    { id:2, label:'Background Detection', pass:true, val:'Clear' },
+    { id:3, label:'Pitch & Roll', pass:true, val:'2.1° / 0.8°' },
+    { id:4, label:'Height', pass:true, val:(S.install.height||'8.5')+' ft ✓' },
+  ];
+  checks.forEach((c,i) => {
+    setTimeout(()=>{
+      const s = document.getElementById(`ec${c.id}-s`);
+      const v = document.getElementById(`ec${c.id}-v`);
+      if(!s) return;
+      s.className='chksta run'; s.textContent='';
+      setTimeout(()=>{
+        s.className = `chksta ${c.pass?'pass':'fail'}`;
+        s.textContent = c.pass ? '✓' : '✗';
+        if(v) { v.textContent=c.val; v.style.color=c.pass?'var(--green)':'var(--red)'; }
+        if(i===checks.length-1) {
+          setTimeout(()=>{ const btn=document.getElementById('ec-btn'); if(btn) btn.disabled=false; }, 300);
+        }
+      }, 900);
+    }, i * 1100);
+  });
+}
+
+function simulateShot() {
+  const shots = [
+    { cs:95, bs:138, la:12.4, cd:168 },
+    { cs:98, bs:143, la:11.8, cd:175 },
+    { cs:93, bs:136, la:13.1, cd:163 },
+  ];
+  const idx = S.cal.shots.length;
+  if (idx >= 3) return;
+  const shot = shots[idx];
+  S.cal.shots.push(shot);
+  const cnt = document.getElementById('shot-count');
+  if (cnt) cnt.textContent = S.cal.shots.length;
+  const container = document.getElementById('shots-container');
+  if (container) {
+    container.insertAdjacentHTML('beforeend', `
+      <div class="shotcard">
+        <div style="font-family:var(--head);font-weight:700;font-size:1rem;color:var(--muted);min-width:32px">S${S.cal.shots.length}</div>
+        <div class="shotgrid">
+          <div class="shotstat"><div class="shotval">${shot.cs}</div><div class="shotlbl">Club MPH</div></div>
+          <div class="shotstat"><div class="shotval">${shot.bs}</div><div class="shotlbl">Ball MPH</div></div>
+          <div class="shotstat"><div class="shotval">${shot.la}°</div><div class="shotlbl">Launch</div></div>
+          <div class="shotstat"><div class="shotval">${shot.cd}</div><div class="shotlbl">Carry (yds)</div></div>
+        </div>
+        <div class="shotpass">✓</div>
+      </div>`);
+  }
+  if (S.cal.shots.length >= 2) {
+    const cb = document.getElementById('complete-btn');
+    if (cb) cb.style.display = 'flex';
+  }
+  if (S.cal.shots.length >= 3) {
+    const simBtn = document.getElementById('sim-btn');
+    if (simBtn) simBtn.disabled = true;
+  }
+}
+
+function showScanTrouble() {
+  document.getElementById('scan-trouble').style.display = 'block';
+}
+
+function restartScan() {
+  document.getElementById('scan-trouble').style.display = 'none';
+  document.getElementById('scan-state-found').style.display = 'none';
+  document.getElementById('scan-state-scanning').style.display = 'block';
+  setTimeout(()=>{
+    document.getElementById('scan-state-scanning').style.display='none';
+    document.getElementById('scan-state-found').style.display='block';
+  }, 3000);
+}
+
+// ─── ROOM DIAGRAM (isometric 3D) ──────────────────────────────────────────
+function buildRoomSVG(W, H, D, SD, unitSys) {
+  const isMetric = unitSys === 'metric';
+  // fmt() shows labels in the user's chosen unit; geometry is always in feet
+  const fmt = v => isMetric ? `${(v*0.3048).toFixed(1)} m` : `${v.toFixed(1)} ft`;
+  W = Math.max(W||10, 4); H = Math.max(H||9, 4); D = Math.max(D||14, 4);
+  SD = SD != null ? Math.max(1, Math.min(SD, D - 0.5)) : Math.min(D*0.65, D-1);
+  const SW=480,SH=280, PL=44,PR=32,PT=30,PB=36;
+  const DW=SW-PL-PR, DH=SH-PT-PB;
+  const COS=Math.cos(30*Math.PI/180), SIN=Math.sin(30*Math.PI/180);
+  const scale = Math.min(DW/(Math.max(W,10)+Math.max(D,12)*COS), DH/(Math.max(H,8)+Math.max(D,12)*SIN))*0.84;
+  const rW=W*scale,rH=H*scale,rD=D*scale;
+  const ox=PL+(DW-(rW+rD*COS))/2;
+  const oy=PT+(DH-(rH+rD*SIN))/2+rH;
+  const p=(x,y,z)=>({x:ox+x*scale+z*COS*scale, y:oy-y*scale+z*SIN*scale});
+  const pts=(...cs)=>cs.map(([x,y,z])=>{const q=p(x,y,z);return`${q.x},${q.y}`}).join(' ');
+  // Screen area scales based on room walls and ceiling height (room validator approach)
+  const maxScrW=Math.min(W*0.82,W-0.35), maxScrH=Math.min(H*0.82,H-0.25);
+  let scrW=maxScrW, scrH=scrW/(16/9);
+  if(scrH>maxScrH){scrH=maxScrH;scrW=Math.min(scrH*(16/9),maxScrW);}
+  const sX0=(W-scrW)/2, sX1=sX0+scrW;
+  const clmZ=SD;
+  const cd=0.22, ch=0.14;
+  // CLM box corners
+  const clm={
+    BLt:p(W/2-cd,H,clmZ-cd),BRt:p(W/2+cd,H,clmZ-cd),
+    BLb:p(W/2-cd,H-ch,clmZ-cd),BRb:p(W/2+cd,H-ch,clmZ-cd),
+    FLb:p(W/2-cd,H-ch,clmZ+cd),FRb:p(W/2+cd,H-ch,clmZ+cd),
+    FLt:p(W/2-cd,H,clmZ+cd),FRt:p(W/2+cd,H,clmZ+cd)
+  };
+  const q=(...vs)=>vs.map(v=>`${v.x},${v.y}`).join(' ');
+  // Ball arc
+  const a0=p(W/2,0.3,clmZ), a1=p(W/2,H*0.35,SD*0.5), a2=p(W/2,scrH*0.7,SD*0.1), a3=p(W/2,scrH*0.4,0.06);
+  // Detection zone
+  const dz=1.8;
+  const dz_pts=[[W/2-dz,0,clmZ-dz],[W/2+dz,0,clmZ-dz],[W/2+dz,0,clmZ+dz],[W/2-dz,0,clmZ+dz]];
+  // Dim annotations
+  const pFLF=p(0,0,D),pFRF=p(W,0,D),pBLF=p(0,0,0),pBLC=p(0,H,0);
+  const wmy=(pFLF.y+pFRF.y)/2, wmx=(pFLF.x+pFRF.x)/2;
+  return `<svg viewBox="0 0 ${SW} ${SH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+  <defs>
+    <linearGradient id="rd-sc" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a3a1a" stop-opacity=".85"/><stop offset="100%" stop-color="#081208" stop-opacity=".75"/></linearGradient>
+    <linearGradient id="rd-fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#222"/><stop offset="100%" stop-color="#181818"/></linearGradient>
+  </defs>
+  <!-- Room faces -->
+  <polygon points="${pts([0,H,0],[W,H,0],[W,H,D],[0,H,D])}" fill="rgba(38,38,38,.9)" stroke="#333" stroke-width="1"/>
+  <polygon points="${pts([0,0,0],[W,0,0],[W,H,0],[0,H,0])}" fill="rgba(26,26,26,.95)" stroke="#333" stroke-width="1"/>
+  <polygon points="${pts([0,0,0],[0,H,0],[0,H,D],[0,0,D])}" fill="rgba(30,30,30,.9)" stroke="#333" stroke-width="1"/>
+  <polygon points="${pts([0,0,0],[W,0,0],[W,0,D],[0,0,D])}" fill="url(#rd-fl)" stroke="#2a2a2a" stroke-width="1"/>
+  <!-- Screen -->
+  <polygon points="${pts([sX0,0,0],[sX1,0,0],[sX1,scrH,0],[sX0,scrH,0])}" fill="url(#rd-sc)" stroke="#C42028" stroke-width="1.5"/>
+  <!-- Detection zone -->
+  <polygon points="${dz_pts.map(([x,y,z])=>{const q=p(x,y,z);return`${q.x},${q.y}`}).join(' ')}" fill="rgba(196,32,40,.06)" stroke="rgba(196,32,40,.25)" stroke-width=".75" stroke-dasharray="3,3"/>
+  <!-- Screen distance line -->
+  <line x1="${p(W/2,0,0).x}" y1="${p(W/2,0,0).y}" x2="${p(W/2,0,SD).x}" y2="${p(W/2,0,SD).y}" stroke="rgba(196,32,40,.4)" stroke-width="1" stroke-dasharray="4,4"/>
+  <!-- Hitting position -->
+  <ellipse cx="${p(W/2,0,clmZ).x}" cy="${p(W/2,0,clmZ).y}" rx="${dz*scale*0.32}" ry="${dz*scale*0.12}" fill="rgba(196,32,40,.18)"/>
+  <circle cx="${p(W/2,0,clmZ).x}" cy="${p(W/2,0,clmZ).y}" r="3" fill="#C42028" opacity=".6"/>
+  <!-- CLM device -->
+  <polygon points="${q(clm.BLb,clm.BRb,clm.FRb,clm.FLb)}" fill="#303030" stroke="#404040" stroke-width=".75"/>
+  <polygon points="${q(clm.BLt,clm.BRt,clm.BRb,clm.BLb)}" fill="#3a3a3a" stroke="#404040" stroke-width=".75"/>
+  <polygon points="${q(clm.BRt,clm.FRt,clm.FRb,clm.BRb)}" fill="#353535" stroke="#404040" stroke-width=".75"/>
+  <polygon points="${q(clm.FLt,clm.FRt,clm.FRb,clm.FLb)}" fill="#404040" stroke="#404040" stroke-width=".75"/>
+  <line x1="${clm.FLb.x+(clm.FRb.x-clm.FLb.x)*.15}" y1="${clm.FLb.y+(clm.FRb.y-clm.FLb.y)*.15-2}" x2="${clm.FRb.x-(clm.FRb.x-clm.FLb.x)*.15}" y2="${clm.FRb.y-(clm.FRb.y-clm.FLb.y)*.15-2}" stroke="#C42028" stroke-width="2.5" stroke-linecap="round" opacity=".9"/>
+  <!-- Ball arc -->
+  <path d="M ${a0.x} ${a0.y} C ${a1.x} ${a1.y} ${a2.x} ${a2.y} ${a3.x} ${a3.y}" stroke="rgba(34,197,94,.55)" stroke-width="1.5" stroke-dasharray="5,3" fill="none"/>
+  <circle cx="${a3.x}" cy="${a3.y}" r="3.5" fill="rgba(34,197,94,.7)"/>
+  <!-- Dimension: Width -->
+  <line x1="${pFLF.x}" y1="${pFLF.y+12}" x2="${pFRF.x}" y2="${pFRF.y+12}" stroke="#444" stroke-width=".75"/>
+  <text x="${wmx}" y="${(pFLF.y+pFRF.y)/2+24}" fill="rgba(255,255,255,.4)" font-size="9" text-anchor="middle" font-family="sans-serif" font-weight="600">${fmt(W)} wide</text>
+  <!-- Dimension: Height -->
+  <line x1="${pBLF.x-12}" y1="${pBLF.y}" x2="${pBLC.x-12}" y2="${pBLC.y}" stroke="#444" stroke-width=".75"/>
+  <text x="${pBLF.x-22}" y="${(pBLF.y+pBLC.y)/2+4}" fill="rgba(255,255,255,.4)" font-size="9" text-anchor="middle" font-family="sans-serif" font-weight="600" transform="rotate(-90,${pBLF.x-22},${(pBLF.y+pBLC.y)/2+4})">${fmt(H)}</text>
+  <!-- SD label -->
+  <text x="${(p(W/2,0,0).x+p(W/2,0,SD).x)/2+8}" y="${(p(W/2,0,0).y+p(W/2,0,SD).y)/2}" fill="rgba(196,32,40,.55)" font-size="8.5" font-family="sans-serif" font-weight="700">${fmt(SD)}</text>
+  <!-- Label -->
+  <text x="${SW/2}" y="13" fill="rgba(255,255,255,.2)" font-size="8.5" text-anchor="middle" font-family="sans-serif" letter-spacing="2">LIVE 3D PREVIEW</text>
+</svg>`;
+}
+
+function updateRoomDiagram() {
+  const el = document.getElementById('room-svg-container');
+  if (!el) return;
+  const toFt = v => S.unitFt ? v : Math.round(v / 0.3048 * 10) / 10;
+  const rawW = parseFloat(document.getElementById('m-rw')?.value);
+  const rawH = parseFloat(document.getElementById('m-ch')?.value);
+  const rawD = parseFloat(document.getElementById('m-rd')?.value);
+  const rawSD = parseFloat(document.getElementById('m-sd')?.value);
+  const W = isNaN(rawW) ? null : toFt(rawW);
+  const H = isNaN(rawH) ? null : toFt(rawH);
+  const D = isNaN(rawD) ? null : toFt(rawD);
+  const SD = isNaN(rawSD) ? null : toFt(rawSD);
+  el.innerHTML = buildRoomSVG(W, H, D, SD, S.unitFt ? 'imperial' : 'metric');
+}
+
+// ─── SCREEN DISTANCE DIAGRAM ──────────────────────────────────────────────
+function buildDistDiagram(dist) {
+  dist = Math.max(6, Math.min(15, dist||9));
+  const W=480, H=120;
+  const minD=6, maxD=15;
+  const frac=(dist-minD)/(maxD-minD);
+  // CLM/hitter fixed on left; screen moves right — min visual gap always maintained
+  const clmX=52, minScrX=clmX+90, maxScrX=W-44;
+  const scrX=minScrX + frac*(maxScrX-minScrX);
+  const gndY=88, ceilY=24;
+  const hitX=clmX;
+  // Room walls
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+  <!-- Ceiling -->
+  <rect x="30" y="20" width="${scrX-30}" height="8" fill="#222" stroke="#333" stroke-width="1" rx="2"/>
+  <!-- Floor -->
+  <rect x="30" y="${gndY}" width="${scrX-30}" height="6" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <!-- Screen wall -->
+  <rect x="${scrX}" y="20" width="8" height="${gndY-20}" fill="#1e1e1e" stroke="#C42028" stroke-width="1.5" rx="1"/>
+  <!-- CLM device on ceiling -->
+  <rect x="${clmX-16}" y="${ceilY-2}" width="32" height="12" fill="#333" stroke="#444" stroke-width=".75" rx="3"/>
+  <line x1="${clmX-10}" y1="${ceilY+10}" x2="${clmX+10}" y2="${ceilY+10}" stroke="#C42028" stroke-width="2" stroke-linecap="round"/>
+  <text x="${clmX}" y="${ceilY-6}" fill="rgba(255,255,255,.35)" font-size="8" text-anchor="middle" font-family="sans-serif" font-weight="600">CLM PRO</text>
+  <!-- Screen label -->
+  <text x="${scrX+14}" y="${(gndY+20)/2+4}" fill="rgba(255,255,255,.35)" font-size="8" text-anchor="middle" font-family="sans-serif" font-weight="600" transform="rotate(-90,${scrX+14},${(gndY+20)/2+4})">SCREEN</text>
+  <!-- Hitting position -->
+  <ellipse cx="${hitX}" cy="${gndY}" rx="12" ry="4" fill="rgba(196,32,40,.2)"/>
+  <circle cx="${hitX}" cy="${gndY}" r="3.5" fill="#C42028" opacity=".7"/>
+  <!-- Distance arrow line -->
+  <line x1="${clmX+20}" y1="${gndY-10}" x2="${scrX-4}" y2="${gndY-10}" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-dasharray="4,4"/>
+  <!-- Arrowheads -->
+  <polygon points="${clmX+20},${gndY-10} ${clmX+26},${gndY-13} ${clmX+26},${gndY-7}" fill="rgba(255,255,255,.35)"/>
+  <polygon points="${scrX-4},${gndY-10} ${scrX-10},${gndY-13} ${scrX-10},${gndY-7}" fill="rgba(255,255,255,.35)"/>
+  <!-- Distance label -->
+  <text x="${(clmX+scrX)/2}" y="${gndY-15}" fill="#fff" font-size="13" font-weight="700" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-style="italic">${dist.toFixed(1)} ft</text>
+  <!-- Cone lines from CLM to floor -->
+  <line x1="${clmX}" y1="${ceilY+12}" x2="${hitX-18}" y2="${gndY-4}" stroke="rgba(196,32,40,.2)" stroke-width=".75" stroke-dasharray="4,4"/>
+  <line x1="${clmX}" y1="${ceilY+12}" x2="${hitX+18}" y2="${gndY-4}" stroke="rgba(196,32,40,.2)" stroke-width=".75" stroke-dasharray="4,4"/>
+  <!-- Ball arc -->
+  <path d="M ${hitX} ${gndY-4} Q ${(hitX+scrX)/2} ${ceilY+10} ${scrX} ${gndY-30}" stroke="rgba(34,197,94,.5)" stroke-width="1.5" stroke-dasharray="5,3" fill="none"/>
+</svg>`;
+}
+
+function updateDist(val) {
+  const v = parseFloat(val);
+  const disp = document.getElementById('dist-val');
+  if (disp) disp.textContent = v.toFixed(1) + ' ft';
+  const el = document.getElementById('dist-diagram');
+  if (el) el.innerHTML = buildDistDiagram(v);
+}
+
+function spawnConfetti() {
+  const colors = ['#C42028','#22C55E','#F59E0B','#fff','#3B82F6'];
+  const container = document.getElementById('done-content');
+  if (!container) return;
+  for (let i = 0; i < 20; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.cssText = `left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*1.5}s;animation-duration:${2+Math.random()}s`;
+    container.appendChild(c);
+  }
+}
+
+// ─── PHASE COMPLETION ──────────────────────────────────────────────────────
+function completePhase(key) {
+  S.phases[key] = true;
+  go('hub');
+}
+
+function enterPhase(key) {
+  const deps    = { room:[], install:['room'], device:['room'], cal:['install','device'] };
+  const targets = { room:'p2-meas', install:'p3-status', device:'p4inst', cal:'cala' };
+  const names   = { room:'Room Confirmation', install:'Installation + Verification', device:'Device Connection', cal:'Calibration' };
+  const missing = deps[key].filter(k => !S.phases[k]);
+  if (missing.length) { toast('Complete ' + missing.map(k=>names[k]).join(' & ') + ' first'); return; }
+  go(targets[key]);
+}
+
+function allPhasesComplete() {
+  return S.phases.room && S.phases.install && S.phases.device && S.phases.cal;
+}
+
+function buildPlayModes() {
+  const done = allPhasesComplete();
+  const modes = [
+    { name:'Range', bg:'linear-gradient(160deg,#2d6a4f 0%,#081c0f 100%)' },
+    { name:'Target Range', bg:'linear-gradient(160deg,#1e3a5f 0%,#0a1628 100%)' },
+    { name:'Courses', bg:'linear-gradient(160deg,#40916c 0%,#1b4332 100%)' },
+    { name:'Closest To Pin', bg:'linear-gradient(160deg,#264653 0%,#0a2026 100%)' },
+  ];
+  return modes.map(m=>`
+    <div style="position:relative;border-radius:10px;overflow:hidden;cursor:${done?'pointer':'default'};background:${m.bg};aspect-ratio:3/4">
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.72))"></div>
+      ${done?`<div style="position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:6px;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+      </div>`:''}
+      ${!done?`<div style="position:absolute;inset:0;background:rgba(0,0,0,.52);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+        <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:600;text-transform:uppercase;letter-spacing:.1em;text-align:center;font-family:var(--body);line-height:1.3">Setup<br>Required</div>
+      </div>`:''}
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:11px 13px">
+        <div style="font-family:var(--head);font-size:1.05rem;font-weight:800;font-style:italic;text-transform:uppercase;color:#fff;letter-spacing:.06em">${m.name}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── RENDER ENGINE ─────────────────────────────────────────────────────────
+function renderAllScreens() {
+  const container = document.getElementById('screens');
+  container.innerHTML = Object.entries(SCREENS).map(([id, fn]) => fn()).join('');
+}
+
+// ─── KEYBOARD NAV ──────────────────────────────────────────────────────────
+const FLOW = ['splash','auth','acct-done','p4sel','hub','p2-meas','p2-compat','p2-check','p3-status','p3-check','p3-power','p4inst','p4scan','p4conn','p4bind','p4fw-info','p4fw','p4fw-done','cala','calb','calc','cald','play','done'];
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+    const idx = FLOW.indexOf(S.screen);
+    if (idx >= 0 && idx < FLOW.length - 1) {
+      const nextBtn = document.querySelector('#sc-'+S.screen+' .btn-red:not(:disabled)');
+      if (nextBtn) nextBtn.click();
+    }
+  }
+});
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+generateGrass();
+renderAllScreens();
+document.getElementById('p4bar').style.display = 'none';
+</script>
+</body>
+</html>
