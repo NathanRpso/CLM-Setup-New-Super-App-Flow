@@ -142,7 +142,7 @@ select.inp{padding-left:16px;appearance:none;cursor:pointer}
 .sring{border-radius:50%;border:2px solid var(--red);position:absolute;animation:pulse 1.6s ease-in-out infinite}
 
 /* CAM PREVIEW */
-.cam{width:100%;height:240px;background:#0c0c0c;border:1px solid var(--border);border-radius:8px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.cam{width:100%;height:240px;background:#111612;border:1px solid var(--border);border-radius:8px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
 .crosshair::before,.crosshair::after{content:'';position:absolute;background:rgba(255,255,255,.4)}
 .crosshair::before{width:1px;height:60px;left:0;top:-30px}
@@ -273,6 +273,10 @@ select.inp{padding-left:16px;appearance:none;cursor:pointer}
 .clm-brand{font-family:var(--body);font-size:11px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.2em;text-transform:uppercase}
 .clm-led-wrap{margin-left:auto;display:flex;align-items:center;gap:7px}
 .clm-led-lbl{font-size:10px;color:rgba(255,255,255,.28);letter-spacing:.08em;text-transform:uppercase}
+.mlm-device{width:60px;height:156px;background:linear-gradient(160deg,#f0f0f0,#cccccc);border-radius:12px;border:1px solid #b8b8b8;box-shadow:0 12px 32px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;position:relative;flex-shrink:0}
+
+.mlm-rlogo{width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;font-family:var(--head);box-shadow:0 2px 8px rgba(196,32,40,.45)}
+.mlm-bar{width:22px;height:3px;background:#b0b0b0;border-radius:2px}
 .led-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .led-dot.g{background:var(--green);box-shadow:0 0 10px var(--green)}
 .led-dot.w{background:#fff;box-shadow:0 0 10px #fff}
@@ -335,6 +339,8 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:20px;height:20px;b
 
 /* DIST SLIDER */
 .dist-slider-wrap{width:100%;padding:8px 0}
+#dist-slider::-webkit-slider-thumb{opacity:0}
+#dist-slider::-moz-range-thumb{opacity:0;border:none}
 .dist-val{font-family:var(--head);font-size:3rem;font-weight:700;font-style:italic;text-align:center;color:#fff;margin:14px 0}
 .dist-range{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
 
@@ -368,6 +374,78 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:20px;height:20px;b
 .mstep+.mstep{border-left:1px solid rgba(255,255,255,.06)}
 .mfield-unit{padding:0 13px;background:#161616;border:1px solid var(--border);border-left:1px solid rgba(255,255,255,.06);display:flex;align-items:center;font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;letter-spacing:.08em;text-transform:uppercase;min-width:36px;justify-content:center}
 .mfield-unit[onclick]{color:rgba(255,255,255,.55);text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px}
+
+/* ═══ RESPONSIVE SCALING ════════════════════════════════════════════════ */
+/* Fluid typography */
+.h1{font-size:clamp(1.8rem,3.2vw,5rem)!important}
+.h2{font-size:clamp(1.3rem,2.2vw,3.5rem)!important}
+.h3{font-size:clamp(1.1rem,1.6vw,2.4rem)!important}
+.sub{font-size:clamp(12px,0.9vw,17px)!important}
+
+/* Fluid containers */
+.cnt{max-width:clamp(400px,32vw,680px);padding:0 clamp(16px,2vw,36px)}
+.cnt-lg{max-width:clamp(680px,52vw,1100px);padding:0 clamp(16px,2.5vw,40px)}
+
+/* Fluid interactive elements */
+.btn,.inp,.ubtn{height:clamp(40px,3.5vh,62px);font-size:clamp(11px,0.85vw,14px)}
+.btn-sm{height:clamp(32px,3vh,48px);font-size:clamp(10px,0.75vw,13px)}
+.mfield{height:clamp(42px,3.8vh,60px)}
+.mfield-inp{font-size:clamp(13px,1vw,17px)}
+.mstep{width:clamp(34px,2.5vw,50px)}
+
+/* Fluid components */
+.cam{height:clamp(180px,18vh,360px)}
+.dist-val{font-size:clamp(1.8rem,2.4vw,4rem)!important}
+.dvcard{min-height:clamp(160px,18vh,280px);padding:clamp(16px,1.8vw,28px)}
+.modal{max-width:clamp(360px,26vw,540px)}
+.dvcard-icon{width:clamp(40px,3.5vw,64px);height:clamp(40px,3.5vw,64px)}
+
+/* Fluid spacing for screens */
+#app .screen{padding:clamp(16px,2vh,32px) 0}
+.p4bar-step{font-size:clamp(9px,0.7vw,12px)}
+.p4col{padding:clamp(8px,0.8vh,14px) clamp(10px,1.2vw,20px) clamp(6px,0.6vh,10px)}
+.p4lbl{font-size:clamp(9px,0.65vw,13px)}
+
+/* Small laptop screens (≤1366px wide) */
+@media(max-width:1366px){
+  .cnt{max-width:440px}
+  .cnt-lg{max-width:720px}
+  .cam{height:200px}
+  .dvcard{min-height:160px;padding:16px}
+  .modal{max-width:380px}
+  .dist-val{font-size:2rem!important}
+}
+
+/* Medium screens (1400–1920px) – baseline 1080p already well-served */
+@media(min-width:1400px) and (max-width:1920px){
+  .cnt{max-width:520px}
+  .cnt-lg{max-width:860px}
+}
+
+/* Large 1440p screens */
+@media(min-width:1921px) and (max-width:2559px){
+  .cnt{max-width:600px}
+  .cnt-lg{max-width:980px}
+  .btn,.inp,.ubtn{height:56px}
+  .cam{height:320px}
+  .dvcard{min-height:240px;padding:24px}
+  .dist-val{font-size:3.5rem!important}
+}
+
+/* 4K screens (≥2560px) */
+@media(min-width:2560px){
+  .cnt{max-width:720px}
+  .cnt-lg{max-width:1200px}
+  .btn,.inp,.ubtn{height:72px;font-size:16px}
+  .btn-sm{height:56px;font-size:14px}
+  .mfield{height:72px}
+  .mfield-inp{font-size:20px}
+  .cam{height:440px}
+  .dvcard{min-height:320px;padding:36px}
+  .modal{max-width:640px}
+  .dist-val{font-size:5rem!important}
+  .mstep{width:56px}
+}
 </style>
 </head>
 <body>
@@ -417,6 +495,46 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:20px;height:20px;b
     </div>
   </div>
 
+  <!-- Payment Modal -->
+  <div id="payment-ov" style="position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:400;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s">
+    <div class="modal" style="max-width:420px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <div style="font-family:var(--head);font-size:1.2rem;font-weight:700;font-style:italic;text-transform:uppercase;letter-spacing:.04em">Secure Payment</div>
+        <div style="display:flex;gap:6px">
+          <div style="background:#1c64f2;border-radius:4px;padding:3px 8px;font-size:10px;font-weight:700;color:#fff">VISA</div>
+          <div style="background:#eb001b;border-radius:4px;padding:3px 8px;font-size:10px;font-weight:700;color:#fff">MC</div>
+        </div>
+      </div>
+      <div id="payment-form-state">
+        <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:rgba(255,255,255,.7);margin-bottom:16px;display:flex;gap:8px;align-items:center">
+          <span style="font-size:16px">🔒</span> Secured by Stripe · 256-bit SSL encryption
+        </div>
+        <div class="ig"><div class="ilbl">Card Number</div>
+          <div class="iw"><span class="ico" style="font-size:18px">💳</span><input class="inp" id="pay-card" type="text" value="4242 4242 4242 4242" style="font-family:monospace;letter-spacing:.08em"></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="ig"><div class="ilbl">Expiry</div>
+            <div class="iw"><input class="inp ni" id="pay-exp" type="text" value="12 / 28"></div></div>
+          <div class="ig"><div class="ilbl">CVV</div>
+            <div class="iw"><input class="inp ni" id="pay-cvv" type="text" value="123"></div></div>
+        </div>
+        <div class="ig"><div class="ilbl">Name on Card</div>
+          <div class="iw"><input class="inp ni" id="pay-name" type="text" id="pay-name-inp"></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;margin-bottom:12px;border-top:1px solid var(--border)">
+          <span id="pay-product-label" style="font-size:14px;font-weight:600">Rapsodo Golf Membership</span>
+          <span id="pay-product-price" style="font-family:var(--head);font-size:1.2rem;font-weight:700;color:var(--red)">$19.99<span style="font-size:.75rem;color:var(--muted)">/mo</span></span>
+        </div>
+        <button id="pay-submit-btn" class="btn btn-red" onclick="confirmPayment()">PAY $19.99 →</button>
+        <div class="tc mt10"><span class="lnk" onclick="closePaymentModal()">Cancel</span></div>
+      </div>
+      <div id="payment-success-state" style="display:none;text-align:center;padding:10px 0">
+        <div class="success-mark" style="width:64px;height:64px;font-size:28px;margin:0 auto 16px">✓</div>
+        <div id="pay-success-title" class="h3 mb8" style="font-size:1.4rem">PAYMENT SUCCESSFUL!</div>
+        <div id="pay-success-msg" style="font-size:14px;color:rgba(255,255,255,.65);margin-bottom:20px">Your Rapsodo Golf Membership is now active.</div>
+        <button class="btn btn-red" onclick="closePaymentModal();go('play')">START PLAYING →</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast"></div>
 </div>
 
@@ -424,10 +542,10 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:20px;height:20px;b
 // ─── STATE ─────────────────────────────────────────────────────────────────
 const S = {
   screen: 'splash',
-  user: { name: '', email: '', isNew: false },
+  user: { name: '', email: '', isNew: false, isGuest: false },
   room: { ch: '', rd: '', rw: '', sd: '', cm: '' },
   install: { height: '', mounted: false },
-  device: { name: "CLM PRO", id: 'CLM-1254780399-123', fw: '2.0.5', fwNew: '2.1.3' },
+  device: { name: "CLM PRO", id: 'CLM-1254780399-123', fw: '2.0.5', fwNew: '2.1.3', type: 'clm' },
   cal: { az: 0, dist: 9, shots: [], checks: [false,false,false,false] },
   phases: { room: false, install: false, device: false, cal: false },
   setupSkipped: false,
@@ -542,7 +660,7 @@ hub: ()=>`
     <div style="display:flex;justify-content:center;margin-bottom:20px">${LOGO}</div>
     <div class="phase-tag mb2">CLM PRO SETUP</div>
     <div class="h2 mb6">DEVICE SETUP HUB</div>
-    <div class="sub mb20" style="font-size:14px">Start with Room Confirmation, then complete Installation<br>and Device Connection in any order before calibrating.</div>
+    <div class="sub mb20" style="font-size:14px">Follow the steps below to get your CLM PRO connected and ready to use.</div>
     <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:14px;margin-bottom:20px">
       <div style="flex:1;display:flex;align-items:center;overflow:hidden;border-radius:4px;position:relative;max-width:240px">
         <div style="position:absolute;right:0;top:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,rgba(255,255,255,.04));z-index:2;pointer-events:none"></div>
@@ -553,7 +671,7 @@ hub: ()=>`
       </div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="hub-dev-name">—</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px" id="hub-dev-id">Connect device to sync serial number</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px" id="hub-dev-id">Please complete your device setup</div>
       </div>
     </div>
     <div class="hub-grid mb16" id="hub-cards">
@@ -644,6 +762,10 @@ auth: ()=>`
       <button class="btn btn-red" id="su-btn" disabled onclick="doSignup()">SIGN UP</button>
       <div id="su-err" class="ierr tc mt8" style="display:none"></div>
     </div>
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);text-align:center">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Just exploring? No account needed.</div>
+      <button class="btn btn-ghost btn-sm" onclick="continueAsGuest()">CONTINUE AS GUEST →</button>
+    </div>
   </div>
 </div>`,
 
@@ -653,7 +775,7 @@ auth: ()=>`
     <div class="success-mark">✓</div>
     <div class="h2 mb8">ACCOUNT CREATED<br>SUCCESSFULLY!</div>
     <div class="sub mb20">Welcome to Rapsodo. Your account is ready.</div>
-    <button class="btn btn-red" onclick="showTrialModal()">START YOUR FREE TRIAL →</button>
+    <button class="btn btn-red" onclick="go('p4sel')">SELECT YOUR DEVICE →</button>
   </div>
 </div>`,
 
@@ -661,7 +783,7 @@ auth: ()=>`
 <div class="sc" id="sc-p2-meas" style="overflow-y:auto;padding:24px 0 40px">
   <div style="width:100%;max-width:980px;padding:0 24px;position:relative;z-index:10">
     <div class="phase-tag mb2"><em>PHASE 1</em> · ROOM CONFIRMATION</div>
-    <div class="stepdots mb8"><div class="sdot act"></div><div class="sdot"></div><div class="sdot"></div></div>
+    <div class="stepdots mb8"><div class="sdot act"></div><div class="sdot"></div></div>
     <div class="h3 mb16">ROOM MEASUREMENTS</div>
 
     <!-- Saved measurements banner -->
@@ -738,9 +860,8 @@ auth: ()=>`
             <option value="wood">Wood / Beam</option>
             <option value="other">Other</option>
           </select></div></div>
-        <button class="btn btn-red" id="meas-btn" disabled onclick="saveMeasAndNext()">NEXT →</button>
       </div>
-      <!-- Right: 3D Room Diagram -->
+      <!-- Right: 3D Room Diagram + Compat Result -->
       <div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <div style="width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 2s ease-in-out infinite"></div>
@@ -754,7 +875,11 @@ auth: ()=>`
           <div style="display:flex;align-items:center;gap:5px"><div style="width:18px;height:0;border-top:1.5px solid #C42028"></div><span style="font-size:10px;color:var(--muted)">Screen / net</span></div>
           <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;background:rgba(196,32,40,.2);border:1px solid rgba(196,32,40,.4);border-radius:2px"></div><span style="font-size:10px;color:var(--muted)">Sensing zone</span></div>
         </div>
+        <div id="meas-compat-result" style="margin-top:16px;height:270px;overflow-y:auto"></div>
       </div>
+    </div>
+    <div style="max-width:480px;margin:20px auto 0">
+      <button class="btn btn-red" id="meas-continue-btn" style="display:none" onclick="go('p2-check')">CONTINUE →</button>
     </div>
   </div>
 </div>`,
@@ -784,7 +909,7 @@ auth: ()=>`
 <div class="sc" id="sc-p2-check">
   <div class="cnt">
     <div class="phase-tag"><em>PHASE 1</em> · ROOM CONFIRMATION</div>
-    <div class="stepdots"><div class="sdot done"></div><div class="sdot done"></div><div class="sdot act"></div></div>
+    <div class="stepdots"><div class="sdot done"></div><div class="sdot act"></div></div>
     <div class="h3 mb16">INSTALLATION READINESS CHECKLIST</div>
     <div class="card mb16">
       <div class="cbx" onclick="toggleCbx(this,'rc1')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">I have the tools I need for installation</span>
@@ -801,7 +926,7 @@ auth: ()=>`
       <div class="cbx" onclick="toggleCbx(this,'rc5')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">My impact screen or net enclosure is in place</span></div></div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-dk" onclick="go('p2-compat')">← BACK</button>
+      <button class="btn btn-dk" onclick="go('p2-meas')">← BACK</button>
       <button class="btn btn-red" id="rc-btn" disabled onclick="completePhase('room')">NEXT →</button>
     </div>
   </div>
@@ -922,6 +1047,7 @@ auth: ()=>`
           NO / NOT SURE
         </button>
       </div>
+      <div class="tc mt12"><button class="btn btn-dk btn-sm" style="width:auto;padding:0 20px" onclick="go('p3-check')">← Back to checklist</button></div>
     </div>
     <div id="trouble" style="display:none">
       <div class="card mb12">
@@ -933,7 +1059,6 @@ auth: ()=>`
       <div class="tc mb12"><span class="lnk">Still having trouble? Contact Support →</span></div>
       <button class="btn btn-dk btn-sm" onclick="document.getElementById('trouble').style.display='none';document.getElementById('power-question').style.display='block'">← Back</button>
     </div>
-    <div class="tc mt12"><button class="btn btn-dk btn-sm" style="width:auto;padding:0 20px" onclick="go('p3-check')">← Back to checklist</button></div>
   </div>
 </div>`,
 
@@ -960,10 +1085,10 @@ p4sel: ()=>`
       </div>
       <div class="dvcard" id="dv-mlm" onclick="selectDev('mlm')" style="gap:20px">
         <div style="flex:1;display:flex;align-items:center;justify-content:center">
-          <div style="width:56px;height:150px;background:linear-gradient(160deg,#f5f5f5,#d0d0d0);border-radius:12px;position:relative;border:1px solid #c0c0c0;box-shadow:0 8px 24px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
-            <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;box-shadow:0 2px 8px rgba(196,32,40,.4)">R</div>
-            <div style="width:20px;height:3px;background:#ccc;border-radius:2px"></div>
-            <div style="width:20px;height:3px;background:#ccc;border-radius:2px"></div>
+          <div class="mlm-device">
+            <div class="mlm-rlogo">R</div>
+            <div class="mlm-bar"></div>
+            <div class="mlm-bar"></div>
           </div>
         </div>
         <div>
@@ -974,7 +1099,7 @@ p4sel: ()=>`
     </div>
     <div class="btn-row" style="max-width:640px;margin:0 auto">
       <button class="btn btn-dk" onclick="S.setupSkipped=true;go('play')">SKIP SETUP</button>
-      <button class="btn btn-red" onclick="go('hub')">CONTINUE →</button>
+      <button class="btn btn-red" onclick="enterSetupHub()">CONTINUE →</button>
     </div>
   </div>
 </div>`,
@@ -1065,7 +1190,7 @@ p4conn: ()=>`
 <div class="sc" id="sc-p4conn">
   <div class="cnt" style="max-width:560px">
     <div class="h2 mb6">CONNECTION SUCCESSFUL</div>
-    <div class="sub mb20" style="font-size:14px">Your device is now connected and ready to use. Proceed to bind it to your account.</div>
+    <div class="sub mb20" style="font-size:14px">Your device is now connected and ready to use. Proceed to add more details.</div>
     <div class="chip mb16" style="justify-content:center;background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2)">
       <div style="width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${"#22C55E"}" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
@@ -1090,7 +1215,7 @@ p4bind: ()=>`
 <div class="sc" id="sc-p4bind">
   <div class="cnt" style="max-width:480px">
     <div class="h3 mb6">DEVICE SETUP</div>
-    <div class="sub mb20" style="font-size:13px">Give your device a name and confirm the details before binding it to your account.</div>
+    <div class="sub mb20" style="font-size:13px">Give your device a name and confirm the details.</div>
     <div class="chip mb20" style="background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.18)">
       <div style="width:34px;height:34px;border-radius:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${"#22C55E"}" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
@@ -1186,7 +1311,7 @@ p4fw: ()=>`
 cala: ()=>`
 <div class="sc" id="sc-cala">
   <div class="cnt">
-    <div class="phase-tag">PHASE 4 · <em>CALIBRATION</em></div>
+    <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
       <div class="calph act"><div class="calph-fill"></div></div>
       <div class="calph"><div class="calph-fill"></div></div>
@@ -1194,17 +1319,33 @@ cala: ()=>`
       <div class="calph"><div class="calph-fill"></div></div>
     </div>
     <div class="h3 mb8">CENTERLINE ALIGNMENT</div>
-    <div class="sub mb12" style="font-size:12px">Position an alignment rod at your hitting position center, then adjust the azimuth until aligned.</div>
+    <div class="sub mb12" style="font-size:12px">Position an alignment rod at your hitting position center, then adjust the aim line until aligned.</div>
     <div class="cam">
+      <!-- Birds-eye mat scene -->
+      <img src="./cam-feed.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:.82;filter:saturate(.55) brightness(.75)" draggable="false"/>
+      <svg viewBox="0 0 520 240" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="camVig" cx="50%" cy="50%" r="68%">
+            <stop offset="0%" stop-color="transparent"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.6)"/>
+          </radialGradient>
+        </defs>
+        <!-- Vignette over image -->
+        <rect width="520" height="240" fill="url(#camVig)"/>
+        <!-- Subtle tint to sell the camera-feed look -->
+        <rect width="520" height="240" fill="rgba(10,22,8,.12)"/>
+      </svg>
       <div class="cam-label">LIVE FEED</div>
       <div class="crosshair" style="width:60px;height:60px"></div>
       <div class="cam-scan-line"></div>
-      <div id="az-indicator" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:4px;height:80px;background:rgba(255,100,80,.7);border-radius:2px;transform-origin:bottom center;transition:transform .2s"></div>
+      <div id="az-indicator" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:4px;height:80px;background:rgba(255,100,80,.7);border-radius:2px;transform-origin:bottom center;transition:transform .2s">
+        <div style="position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:7px solid rgba(255,100,80,.7)"></div>
+      </div>
       <div style="position:absolute;bottom:10px;right:10px;font-size:10px;color:rgba(255,255,255,.3)">CLM PRO · FEED</div>
     </div>
     <div class="az-wrap mt12">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">
-        <span>-15°</span><span>Azimuth</span><span>+15°</span>
+        <span>-15°</span><span>Aim Line</span><span>+15°</span>
       </div>
       <div class="az-track" style="position:relative;height:4px;background:#2a2a2a;border-radius:2px">
         <div class="az-zone" style="left:40%;width:20%"></div>
@@ -1214,7 +1355,7 @@ cala: ()=>`
     <div class="rdgrid mt8">
       <div class="rdi"><div class="rdval" id="rd-pitch">2.1°</div><div class="rdlbl">Pitch</div></div>
       <div class="rdi"><div class="rdval" id="rd-roll">0.8°</div><div class="rdlbl">Roll</div></div>
-      <div class="rdi bad" id="rd-az-item"><div class="rdval" id="rd-az">8.5°</div><div class="rdlbl">Azimuth</div></div>
+      <div class="rdi bad" id="rd-az-item"><div class="rdval" id="rd-az">8.5°</div><div class="rdlbl">Aim Line</div></div>
     </div>
     <button class="btn btn-red mt16" id="az-btn" disabled onclick="go('calb')">CONFIRM ALIGNMENT →</button>
     <div class="tc mt10"><span class="lnk" onclick="go('hub')">← Back to Hub</span></div>
@@ -1224,7 +1365,7 @@ cala: ()=>`
 calb: ()=>`
 <div class="sc" id="sc-calb">
   <div class="cnt" style="max-width:560px">
-    <div class="phase-tag">PHASE 4 · <em>CALIBRATION</em></div>
+    <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
       <div class="calph done"><div class="calph-fill"></div></div>
       <div class="calph act"><div class="calph-fill"></div></div>
@@ -1235,7 +1376,16 @@ calb: ()=>`
     <div class="sub mb16" style="font-size:13px">Verify the distance from your hitting position to the impact screen or net.</div>
     <div id="dist-diagram" style="background:rgba(10,10,10,.8);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px"></div>
     <div class="dist-val" id="dist-val">9.0 ft</div>
-    <input type="range" id="dist-slider" min="6" max="15" value="9" step="0.5" oninput="updateDist(this.value)">
+    <div id="dist-slider-wrap" style="position:relative;padding:4px 0">
+      <input type="range" id="dist-slider" min="6" max="15" value="9" step="0.5" oninput="updateDist(this.value)" style="width:100%;display:block">
+      <div id="dist-thumb" style="position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:5px;pointer-events:none;left:50%;z-index:2">
+        <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><polygon points="8,0 8,12 0,6" fill="#C42028"/></svg>
+        <div style="width:4px"></div>
+        <div style="width:16px;height:16px;border-radius:50%;background:#C42028;box-shadow:0 0 8px rgba(196,32,40,.6)"></div>
+        <div style="width:4px"></div>
+        <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><polygon points="0,0 0,12 8,6" fill="#C42028"/></svg>
+      </div>
+    </div>
     <div class="dist-range"><span>6 ft (min)</span><span>15 ft (max)</span></div>
     <div class="btn-row mt20">
       <button class="btn btn-dk" onclick="go('cala')">← BACK</button>
@@ -1247,7 +1397,7 @@ calb: ()=>`
 calc: ()=>`
 <div class="sc" id="sc-calc">
   <div class="cnt">
-    <div class="phase-tag">PHASE 4 · <em>CALIBRATION</em></div>
+    <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
       <div class="calph done"><div class="calph-fill"></div></div>
       <div class="calph done"><div class="calph-fill"></div></div>
@@ -1269,7 +1419,7 @@ calc: ()=>`
 cald: ()=>`
 <div class="sc" id="sc-cald">
   <div class="cnt">
-    <div class="phase-tag">PHASE 4 · <em>CALIBRATION</em></div>
+    <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
       <div class="calph done"><div class="calph-fill"></div></div>
       <div class="calph done"><div class="calph-fill"></div></div>
@@ -1292,9 +1442,9 @@ cald: ()=>`
 play: ()=>`
 <div class="sc" id="sc-play" style="background:#f0f0f0">
   <div style="position:absolute;top:0;left:0;right:0;height:58px;background:#fff;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;padding:0 24px;gap:16px;z-index:20">
-    <div style="display:flex;align-items:center;gap:8px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;padding:5px 12px 5px 5px">
+    <div id="play-user-chip" style="display:flex;align-items:center;gap:8px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;padding:5px 12px 5px 5px">
       <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#C42028,#7a0010);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;font-family:var(--head)">NA</div>
-      <span style="font-size:13px;font-weight:600;color:#111;font-family:var(--body)">Nathan Aderogba</span>
+      <span style="font-size:13px;font-weight:600;color:#111;font-family:var(--body)">Nathan A</span>
     </div>
     <div style="flex:1;display:flex;gap:28px;justify-content:center">
       <span style="font-family:var(--head);font-size:.95rem;font-weight:700;color:#111;text-transform:uppercase;letter-spacing:.1em;border-bottom:2px solid #111;padding-bottom:2px;cursor:pointer">Play</span>
@@ -1302,10 +1452,10 @@ play: ()=>`
       <span style="font-family:var(--head);font-size:.95rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.1em;cursor:pointer">Activity</span>
     </div>
     <div style="display:flex;gap:10px">
-      <div style="width:34px;height:34px;border-radius:50%;background:#22C55E;display:flex;align-items:center;justify-content:center">
+      <div id="play-icon-dl" style="width:34px;height:34px;border-radius:50%;background:#22C55E;display:flex;align-items:center;justify-content:center">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
       </div>
-      <div style="width:34px;height:34px;border-radius:50%;background:#22C55E;display:flex;align-items:center;justify-content:center">
+      <div id="play-icon-link" style="width:34px;height:34px;border-radius:50%;background:#22C55E;display:flex;align-items:center;justify-content:center">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       </div>
       <div style="width:34px;height:34px;border-radius:50%;background:#f5f5f5;border:1px solid #ddd;display:flex;align-items:center;justify-content:center">
@@ -1315,14 +1465,14 @@ play: ()=>`
   </div>
   <div style="position:absolute;inset:0;top:58px;display:flex;flex-direction:column;overflow:hidden">
     <div style="position:relative;background:#0a0a0a;height:240px;display:flex;align-items:center;overflow:hidden;flex-shrink:0">
-      <div style="position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-family:var(--head);font-size:13rem;font-weight:800;font-style:italic;color:rgba(255,255,255,.035);line-height:1;pointer-events:none;user-select:none;letter-spacing:-.02em">CLM</div>
+      <div id="play-dev-watermark" style="position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-family:var(--head);font-size:13rem;font-weight:800;font-style:italic;color:rgba(255,255,255,.035);line-height:1;pointer-events:none;user-select:none;letter-spacing:-.02em">CLM</div>
       <div style="padding:0 48px;position:relative;z-index:2;flex-shrink:0">
         <div style="font-family:var(--head);font-size:3.2rem;font-weight:800;font-style:italic;text-transform:uppercase;color:#fff;line-height:1.05;letter-spacing:.01em">OWN THE<br>COURSES™</div>
       </div>
-      <div style="position:absolute;right:0;top:0;bottom:0;width:52%;display:flex;align-items:center;overflow:hidden">
+      <div id="play-device-col" style="position:absolute;right:0;top:0;bottom:0;width:52%;display:flex;align-items:center;overflow:hidden">
         <div style="position:absolute;left:0;top:0;bottom:0;width:80px;background:linear-gradient(to right,#0a0a0a,transparent);z-index:2;pointer-events:none"></div>
         <div style="position:absolute;right:0;top:0;bottom:0;width:60px;background:linear-gradient(to right,transparent,#0a0a0a);z-index:2;pointer-events:none"></div>
-        <div style="width:100%;padding:0 80px;transform:perspective(900px) rotateY(-10deg) translateZ(0)">
+        <div id="play-device-inner" style="width:100%;padding:0 80px;transform:perspective(900px) rotateY(-10deg) translateZ(0)">
           <div class="clm-device" style="box-shadow:0 20px 60px rgba(0,0,0,.7);height:80px">
             <span class="clm-brand" style="font-size:12px" id="play-dev-name">${S.device.name}</span>
             <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot g"></div></div>
@@ -1342,13 +1492,29 @@ play: ()=>`
       </div>
     </div>
     <div style="flex:1;background:#f0f0f0;overflow-y:auto;padding:18px 28px 40px">
+      <div id="play-membership-banner" style="display:none;background:rgba(196,32,40,.07);border:1px solid rgba(196,32,40,.3);border-radius:10px;padding:12px 16px;align-items:center;gap:12px;margin-bottom:16px">
+        <span style="font-size:18px;flex-shrink:0">🔒</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#f87171;margin-bottom:1px">Membership required to play</div>
+          <div style="font-size:12px;color:#b91c1c">Activate your membership to unlock all game modes.</div>
+        </div>
+        <button onclick="go('activate')" style="background:#C42028;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--head);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0">ACTIVATE →</button>
+      </div>
+      <div id="play-guest-banner" style="display:none;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:12px 16px;align-items:center;gap:12px;margin-bottom:16px">
+        <span style="font-size:18px;flex-shrink:0">👋</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:1px">You're browsing as a guest</div>
+          <div style="font-size:12px;color:#1e3a8a">Create an account to save your sessions and unlock all features.</div>
+        </div>
+        <button onclick="S.user.isGuest=false;go('auth')" style="background:#2563eb;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--head);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0">LOGIN / SIGN UP →</button>
+      </div>
       <div id="play-setup-banner" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px">
         <span style="font-size:18px;flex-shrink:0">⚠</span>
         <div style="flex:1">
           <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:1px">Device setup incomplete</div>
           <div style="font-size:12px;color:#78350f">Complete device setup to unlock all play modes.</div>
         </div>
-        <button onclick="go('hub')" style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--head);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0">SETUP →</button>
+        <button onclick="S.setupSkipped?go('p4sel'):go('hub')" style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--head);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0">SETUP →</button>
       </div>
       <div id="play-modes" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px"></div>
       <div style="display:flex;align-items:center;gap:4px;opacity:.3">
@@ -1359,10 +1525,61 @@ play: ()=>`
   <div id="play-eop-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,.65);z-index:100;align-items:center;justify-content:center">
     <div style="background:#fff;color:#111;border-radius:14px;padding:32px 40px;max-width:380px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.4)">
       <div style="font-family:var(--head);font-weight:700;font-style:italic;font-size:26px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px">End of Prototype Flow</div>
-      <p style="font-size:13px;color:#555;margin-bottom:24px;line-height:1.6">You've reached the end of the Rapsodo CLM PRO setup prototype. Thank you for exploring the flow.</p>
+      <p style="font-size:13px;color:#555;margin-bottom:24px;line-height:1.6">You've reached the end of the new setup prototype. Thank you for exploring the flow. Feel free to refresh and explore another path. Please share any feedback with Nathan.</p>
       <button onclick="document.getElementById('play-eop-overlay').style.display='none'" style="background:#C42028;color:#fff;border:none;border-radius:6px;padding:10px 28px;font-family:var(--head);font-weight:700;font-style:italic;font-size:14px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">CLOSE</button>
     </div>
   </div>
+  </div>
+</div>`,
+
+'hub-mlm': ()=>`
+<div class="sc" id="sc-hub-mlm" style="overflow-y:auto">
+  <div class="cnt" style="padding:28px 0 40px;max-width:600px">
+    <div style="display:flex;justify-content:center;margin-bottom:20px">${LOGO}</div>
+    <div class="phase-tag mb2">MLM2 PRO SETUP</div>
+    <div class="h2 mb6">DEVICE SETUP</div>
+    <div class="sub mb20" style="font-size:14px">Follow the steps below to get your MLM2 PRO connected and ready to use.</div>
+
+    <!-- Step tiles (ghosted) -->
+    <div style="display:flex;flex-direction:column;gap:10px;opacity:.38;pointer-events:none;user-select:none;margin-bottom:16px">
+      <!-- Step 1 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;display:flex;align-items:center;gap:16px">
+        <div style="width:36px;height:36px;border-radius:50%;background:#1a1a1a;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </div>
+        <div>
+          <div style="font-family:var(--head);font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Connect to Device</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Plug the USB-C cable into your MLM2 PRO and your PC. Connect the wired ethernet cable to your router.</div>
+        </div>
+        <div style="margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap">STEP 1</div>
+      </div>
+      <!-- Step 2 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;display:flex;align-items:center;gap:16px">
+        <div style="width:36px;height:36px;border-radius:50%;background:#1a1a1a;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <div style="font-family:var(--head);font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Device Placement</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Position, align, and calibrate your MLM2 PRO correctly with these steps and get your first session started.</div>
+        </div>
+        <div style="margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap">STEP 2</div>
+      </div>
+    </div>
+
+    <!-- TBC notice + simulate -->
+    <div style="border:1px dashed #2a2a2a;border-radius:10px;padding:20px;text-align:center;margin-bottom:20px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.2em;color:rgba(255,255,255,.25);text-transform:uppercase;margin-bottom:14px">TBC — Steps to be confirmed</div>
+      <button class="btn btn-red" onclick="completeMLMSetup()">SIMULATE SETUP COMPLETE →</button>
+    </div>
+
+    <div class="tc"><button class="btn btn-dk btn-sm" style="width:auto;padding:0 24px" onclick="go('p4sel')">← Change Device</button></div>
+  </div>
+</div>`,
+
+activate: ()=>`
+<div class="sc" id="sc-activate" style="overflow-y:auto;padding:24px 0 40px">
+  <div class="cnt" style="max-width:500px;text-align:center">
+    <div id="activate-content"></div>
   </div>
 </div>`,
 
@@ -1380,8 +1597,8 @@ done: ()=>`
       <div class="sumrow"><div class="sumkey">Firmware</div><div class="sumval">v${S.device.fwNew}</div></div>
       <div class="sumrow"><div class="sumkey">Calibration Date</div><div class="sumval">${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></div>
     </div>
-    <button class="btn btn-red mb8" onclick="go('play')">START PLAYING →</button>
-    <button class="btn btn-dk" onclick="toast('Opening settings…')">GO TO SETTINGS</button>
+    <button class="btn btn-red mb8" id="done-cta-btn" onclick="go('activate')">ACTIVATE →</button>
+    <button class="btn btn-dk mb8" id="done-notnow-btn" onclick="S.membershipSkipped=true;go('play')" style="display:none">NOT NOW</button>
   </div>
 </div>`,
 
@@ -1391,8 +1608,11 @@ done: ()=>`
 const INIT = {
   auth: () => {},
   'p2-meas': () => {
-    // Render initial diagram with default values
     updateRoomDiagram();
+    const cb = document.getElementById('meas-continue-btn');
+    if (cb) cb.style.display = 'none';
+    renderCompatPending();
+    checkMeas();
   },
   'p2-compat': () => {
     renderCompat(S.compatState);
@@ -1439,8 +1659,11 @@ const INIT = {
     if (sl) sl.value = S.cal.dist || 9;
     const dv = document.getElementById('dist-val');
     if (dv) dv.textContent = (S.cal.dist || 9).toFixed(1) + ' ft';
+    setTimeout(() => positionDistArrows(S.cal.dist || 9), 50);
   },
   calc: () => {
+    const ec4lbl = document.querySelector('#ec-4 .chklbl');
+    if (ec4lbl) ec4lbl.textContent = `Height Confirmation (${S.install.height || '8.5'} ft)`;
     runEnvChecks();
   },
   cald: () => {
@@ -1476,7 +1699,7 @@ const INIT = {
     const ledEl   = document.getElementById('hub-dev-led');
     const brandEl = document.getElementById('hub-dev-brand');
     if (nameEl)  nameEl.textContent  = devDone ? S.device.name : '—';
-    if (idEl)    idEl.textContent    = devDone ? S.device.id   : 'Connect device to sync serial number';
+    if (idEl)    idEl.textContent    = devDone ? S.device.id   : 'Please complete your device setup';
     if (ledEl)   ledEl.className     = 'led-dot ' + (devDone ? 'g' : 'off');
     if (brandEl) brandEl.textContent = devDone ? S.device.name : 'Rapsodo | CLM PRO';
     const countEl = document.getElementById('hub-done-count');
@@ -1492,13 +1715,46 @@ const INIT = {
     document.getElementById('grass').style.display  = 'none';
     document.getElementById('rmark').style.display  = 'none';
     const banner = document.getElementById('play-setup-banner');
+    const guestBanner = document.getElementById('play-guest-banner');
+    const membershipBanner = document.getElementById('play-membership-banner');
     const modes  = document.getElementById('play-modes');
     const done   = allPhasesComplete();
-    if (banner) banner.style.display = done ? 'none' : 'flex';
+    const needsMembership = S.device.type === 'clm' && done && !S.membershipActivated && S.membershipSkipped;
+    if (membershipBanner) membershipBanner.style.display = needsMembership ? 'flex' : 'none';
+    if (S.user.isGuest) {
+      if (banner) banner.style.display = 'none';
+      if (guestBanner) guestBanner.style.display = 'flex';
+    } else {
+      if (guestBanner) guestBanner.style.display = 'none';
+      if (banner) banner.style.display = done ? 'none' : 'flex';
+    }
+    // User chip — hide for guests
+    const userChip = document.getElementById('play-user-chip');
+    if (userChip) userChip.style.display = S.user.isGuest ? 'none' : 'flex';
+    // Device column — hide when no device captured (guest or setup not started)
+    const devCol = document.getElementById('play-device-col');
+    const setupStarted = S.phases && (S.phases.room || S.phases.install || S.phases.device || S.phases.cal);
+    if (devCol) devCol.style.display = (S.user.isGuest || !setupStarted) ? 'none' : 'flex';
+    // Status icons — red when setup incomplete, green when done
+    const iconColor = done ? '#22C55E' : '#C42028';
+    const dlIcon = document.getElementById('play-icon-dl');
+    const linkIcon = document.getElementById('play-icon-link');
+    if (dlIcon) dlIcon.style.background = iconColor;
+    if (linkIcon) linkIcon.style.background = iconColor;
     if (modes)  modes.innerHTML = buildPlayModes();
-    const devName = document.getElementById('play-dev-name');
-    if (devName) devName.textContent = S.device.name;
-    if (done) {
+    const watermark = document.getElementById('play-dev-watermark');
+    if (watermark) watermark.textContent = S.device.type === 'mlm' ? 'MLM' : 'CLM';
+    const devInner = document.getElementById('play-device-inner');
+    if (devInner) {
+      if (S.device.type === 'mlm') {
+        devInner.style.cssText = 'width:100%;display:flex;justify-content:center;align-items:flex-start;transform:perspective(900px) rotateY(-10deg) translateZ(0)';
+        devInner.innerHTML = '<div style="position:relative;overflow:hidden;height:200px;display:flex;align-items:flex-start;justify-content:center"><div class="mlm-device" style="width:120px;height:310px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.8);gap:18px"><div class="mlm-rlogo" style="width:48px;height:48px;font-size:18px">R</div><div class="mlm-bar" style="width:40px;height:4px"></div><div class="mlm-bar" style="width:40px;height:4px"></div></div><div style="position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(to bottom,transparent,#0a0a0a);pointer-events:none"></div></div>';
+      } else {
+        devInner.style.cssText = 'width:100%;padding:0 80px;transform:perspective(900px) rotateY(-10deg) translateZ(0)';
+        devInner.innerHTML = '<div class="clm-device" style="box-shadow:0 20px 60px rgba(0,0,0,.7);height:80px"><span class="clm-brand" style="font-size:12px">' + (S.device.name || 'CLM PRO') + '</span><div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot g"></div></div></div>';
+      }
+    }
+    if (done && !S.user.isGuest && S.membershipActivated) {
       setTimeout(() => {
         const overlay = document.getElementById('play-eop-overlay');
         if (overlay) overlay.style.display = 'flex';
@@ -1509,10 +1765,74 @@ const INIT = {
     const sd = document.getElementById('sum-device');
     const sh = document.getElementById('sum-height');
     const sdist = document.getElementById('sum-dist');
+    const sub = document.querySelector('#sc-done .sub');
     if (sd) sd.textContent = S.device.name;
-    if (sh) sh.textContent = (S.install.height || '8.5') + ' ft';
-    if (sdist) sdist.textContent = (S.cal.dist || 9) + ' ft';
+    if (sub) sub.textContent = S.device.type === 'mlm'
+      ? 'Your MLM2 PRO is set up and ready to play.'
+      : 'Your CLM PRO is connected, calibrated, and ready to play.';
+    // Hide CLM-specific rows for MLM
+    const heightRow = sh ? sh.closest('.sumrow') : null;
+    const distRow = sdist ? sdist.closest('.sumrow') : null;
+    if (S.device.type === 'mlm') {
+      if (heightRow) heightRow.style.display = 'none';
+      if (distRow) distRow.style.display = 'none';
+    } else {
+      if (sh) sh.textContent = (S.install.height || '8.5') + ' ft';
+      if (sdist) sdist.textContent = (S.cal.dist || 9) + ' ft';
+      if (heightRow) heightRow.style.display = '';
+      if (distRow) distRow.style.display = '';
+    }
+    const cta = document.getElementById('done-cta-btn');
+    const notNow = document.getElementById('done-notnow-btn');
+    if (cta) {
+      if (S.device.type === 'mlm') { cta.textContent = 'ACTIVATE FREE TRIAL →'; }
+      else { cta.textContent = 'ACTIVATE MEMBERSHIP →'; }
+    }
+    if (notNow) notNow.style.display = S.device.type === 'clm' ? 'block' : 'none';
     spawnConfetti();
+  },
+  activate: () => {
+    const el = document.getElementById('activate-content');
+    if (!el) return;
+    if (S.device.type === 'mlm') {
+      el.innerHTML = `
+        <div class="h2 mb8">START YOUR 30-DAY<br>FREE TRIAL</div>
+        <div class="sub mb20" style="font-size:15px">Experience the Rapsodo Golf PC App with a free 30-day Platinum membership.</div>
+        <div class="card mb20" style="text-align:left">
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:14px">Platinum Membership Features</div>
+          ${['All the benefits of a Premium Membership PLUS:','Access to the Rapsodo Golf PC App','Rapsodo Studios Courses with Stunning Graphics','Putting','On Course Practice','Up to 5 additional family player profiles'].map(f=>`
+          <div style="display:flex;gap:10px;padding:5px 0;font-size:13px;color:rgba(255,255,255,.75);align-items:flex-start"><span style="color:var(--red);flex-shrink:0;margin-top:1px">✓</span>${f}</div>`).join('')}
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:20px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:8px;border:1px solid var(--border)">
+          A credit card is required to start your free trial. You won't be charged until your 30-day trial ends.
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <button class="btn btn-dk" onclick="go('play')">LATER</button>
+          <button class="btn btn-red" onclick="showPaymentModal()">ACTIVATE FREE TRIAL</button>
+        </div>`;
+    } else {
+      el.innerHTML = `
+        <div style="width:76px;height:76px;border-radius:50%;background:rgba(196,32,40,.1);border:2px solid rgba(196,32,40,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px">👑</div>
+        <div class="h2 mb8">ACTIVATE YOUR<br>MEMBERSHIP</div>
+        <div class="sub mb20" style="font-size:14px">Unlock the full Rapsodo Golf experience with your CLM PRO membership.</div>
+        <div class="card mb20" style="text-align:left">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,.07)">
+            <span style="font-size:14px;font-weight:600">Rapsodo Golf Membership</span>
+            <span style="font-family:var(--head);font-size:1.2rem;font-weight:700;color:var(--red)">$19.99<span style="font-size:.75rem;color:var(--muted)">/mo</span></span>
+          </div>
+          <div style="display:flex;gap:8px;padding:3px 0;font-size:13px;color:rgba(255,255,255,.7)"><span style="color:var(--green)">✓</span> Full swing analysis + spin data</div>
+          <div style="display:flex;gap:8px;padding:3px 0;font-size:13px;color:rgba(255,255,255,.7)"><span style="color:var(--green)">✓</span> 100+ virtual golf courses</div>
+          <div style="display:flex;gap:8px;padding:3px 0;font-size:13px;color:rgba(255,255,255,.7)"><span style="color:var(--green)">✓</span> Session history &amp; stats dashboard</div>
+          <div style="display:flex;gap:8px;padding:3px 0;font-size:13px;color:rgba(255,255,255,.7)"><span style="color:var(--green)">✓</span> Priority support access</div>
+        </div>
+        <button class="btn btn-red mb8" onclick="showPaymentModal()">ACTIVATE MEMBERSHIP →</button>
+        <div class="tc mt8"><span class="lnk" onclick="S.membershipSkipped=true;go('play')">Skip for now →</span></div>`;
+      // Pre-fill card name with user's name
+      setTimeout(() => {
+        const ni = document.getElementById('pay-name');
+        if (ni && S.user.name) ni.value = S.user.name;
+      }, 100);
+    }
   },
 };
 
@@ -1547,6 +1867,7 @@ function checkSignup() {
 
 function doLogin() {
   S.user.email = document.getElementById('li-email')?.value || '';
+  S.user.isGuest = false;
   go('p4sel');
 }
 
@@ -1625,14 +1946,15 @@ function setUnit(u) {
     updateFieldOp(k, clamped, r.min, r.max);
   });
   updateRoomDiagram();
+  checkMeas();
 }
 
 // ─── MEASUREMENT FIELD CONFIG ──────────────────────────────────────────────
 const MFIELD = {
   ch: { min:7,  max:16, step:0.5 },
-  rd: { min:6,  max:30, step:0.5 },
+  rd: { min:12, max:30, step:0.5 },
   rw: { min:6,  max:30, step:0.5 },
-  sd: { min:6,  max:15, step:0.5 },
+  sd: { min:7,  max:15, step:0.5 },
 };
 
 function getFieldRange(key) {
@@ -1678,13 +2000,27 @@ function updateFieldOp(key, val, min, max) {
 }
 
 function checkMeas() {
-  const ch = document.getElementById('m-ch')?.value;
-  const rd = document.getElementById('m-rd')?.value;
-  const rw = document.getElementById('m-rw')?.value;
-  const sd = document.getElementById('m-sd')?.value;
-  const cm = document.getElementById('m-cm')?.value;
-  const btn = document.getElementById('meas-btn');
-  if (btn) btn.disabled = !(ch && rd && rw && sd && cm);
+  const chEl = document.getElementById('m-ch');
+  const rdEl = document.getElementById('m-rd');
+  const rwEl = document.getElementById('m-rw');
+  const sdEl = document.getElementById('m-sd');
+  const cmEl = document.getElementById('m-cm');
+  // Enforce sd ≤ rd
+  if (rdEl?.value && sdEl?.value) {
+    const rdV = parseFloat(rdEl.value), sdV = parseFloat(sdEl.value);
+    if (sdV > rdV) {
+      sdEl.value = rdV.toFixed(1);
+      const r = getFieldRange('sd');
+      updateFieldOp('sd', rdV, r.min, r.max);
+    }
+  }
+  if (chEl?.value && rdEl?.value && rwEl?.value && sdEl?.value && cmEl?.value) {
+    checkCompatInline();
+  } else {
+    renderCompatPending();
+    const cb = document.getElementById('meas-continue-btn');
+    if (cb) cb.style.display = 'none';
+  }
 }
 
 function saveMeasAndNext() {
@@ -1699,11 +2035,11 @@ function saveMeasAndNext() {
   };
   S.room = { ch: toFt(raw.ch), rd: toFt(raw.rd), rw: toFt(raw.rw), sd: toFt(raw.sd), cm: raw.cm };
   // Determine compatibility (always in ft)
-  const ch = S.room.ch, rd = S.room.rd;
-  if (ch < 8 || rd < 10) S.compatState = 'r';
-  else if (ch < 9 || rd < 12) S.compatState = 'a';
+  const ch = S.room.ch, rd = S.room.rd, sd = S.room.sd;
+  if (ch < 8 || rd < 12 || sd < 7) S.compatState = 'r';
+  else if (ch < 9 || rd < 14) S.compatState = 'a';
   else S.compatState = 'g';
-  go('p2-compat');
+  go('p2-check');
 }
 
 function setCompat(state) {
@@ -1711,27 +2047,30 @@ function setCompat(state) {
   renderCompat(state);
 }
 
-function renderCompat(state) {
-  const body = document.getElementById('compat-body');
-  const nextBtn = document.getElementById('compat-next');
+function renderCompat(state, bodyId='compat-body', nextBtnId='compat-next') {
+  const body = document.getElementById(bodyId);
+  const nextBtn = document.getElementById(nextBtnId);
   if (!body) return;
   const icons = {
     g: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
     a: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
     r: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
   };
-  const icoWrapColors = { g:'rgba(34,197,94,.12)', a:'rgba(245,158,11,.1)', r:'rgba(248,113,113,.1)' };
+  const icoWrapColors  = { g:'rgba(34,197,94,.12)', a:'rgba(245,158,11,.1)', r:'rgba(248,113,113,.1)' };
   const icoWrapBorders = { g:'rgba(34,197,94,.25)', a:'rgba(245,158,11,.2)', r:'rgba(248,113,113,.2)' };
-  const ch = S.room.ch||'9.5', rd = S.room.rd||'14', rw = S.room.rw||'10', ss = S.room.ss||'120';
+  const unitLbl = S.unitFt ? 'ft' : 'm';
+  const disp = v => S.unitFt ? v : Math.round(v * 0.3048 * 10) / 10;
+  const chRaw = S.room.ch||9.5, rdRaw = S.room.rd||14, sdRaw = S.room.sd||9;
+  const ch = disp(chRaw), rd = disp(rdRaw), sd = disp(sdRaw);
   const configs = {
     g: {
       cls:'g', title:'COMPATIBLE',
       headline:'Your room meets all CLM PRO requirements.',
       body:'',
       extra:`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px">
-        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${ch}<span style="font-size:.9rem"> ft</span></div><div class="meas-stat-lbl">Ceiling Height</div></div>
-        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${rd}<span style="font-size:.9rem"> ft</span></div><div class="meas-stat-lbl">Room Depth</div></div>
-        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${ss}<span style="font-size:.75rem">"</span></div><div class="meas-stat-lbl">Screen Size</div></div>
+        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${ch}<span style="font-size:.9rem"> ${unitLbl}</span></div><div class="meas-stat-lbl">Ceiling Height</div></div>
+        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${rd}<span style="font-size:.9rem"> ${unitLbl}</span></div><div class="meas-stat-lbl">Room Depth</div></div>
+        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${sd}<span style="font-size:.9rem"> ${unitLbl}</span></div><div class="meas-stat-lbl">Screen Dist.</div></div>
       </div>`,
       next: true,
     },
@@ -1740,9 +2079,9 @@ function renderCompat(state) {
       headline:'Your room meets minimum requirements but has some caveats.',
       body:`<div style="margin-top:10px">
         <div style="display:flex;gap:8px;padding:8px 0;font-size:13px;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.06)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Ceiling below 9 ft — some high-launch shots may clip near the ceiling</div>
-        <div style="display:flex;gap:8px;padding:8px 0;font-size:13px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Room depth is near minimum — keep your hitting position tightly centered</div>
+        <div style="display:flex;gap:8px;padding:8px 0;font-size:13px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Room depth below 14 ft recommended — keep your hitting position tightly centered</div>
       </div>
-      <div class="cbx mt12" id="ack-cbx" onclick="this.classList.toggle('ck');document.getElementById('compat-next').disabled=!this.classList.contains('ck')">
+      <div class="cbx mt12" onclick="this.classList.toggle('ck');document.getElementById('${nextBtnId}').disabled=!this.classList.contains('ck')">
         <div class="cbbox"></div><div class="cbxt" style="font-size:13px">I understand the limitations and wish to proceed</div>
       </div>`,
       next: false,
@@ -1750,16 +2089,17 @@ function renderCompat(state) {
     r: {
       cls:'r', title:'NOT COMPATIBLE',
       headline:'Your room does not meet the minimum requirements.',
-      body:`<div style="margin-top:10px">
-        <div style="display:flex;gap:8px;padding:8px 0;font-size:13px;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.06)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Ceiling height is too low — 8 ft minimum required, 9 ft recommended</div>
-        <div style="display:flex;gap:8px;padding:8px 0;font-size:13px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Room depth is insufficient — 10 ft minimum in the ball flight direction</div>
+      body:`<div style="margin-top:8px">
+        <div style="display:flex;gap:8px;padding:5px 0;font-size:12px;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.06)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Ceiling too low — min 8 ft, recommended 9 ft</div>
+        <div style="display:flex;gap:8px;padding:5px 0;font-size:12px;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.06)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Room too shallow — min 12 ft, recommended 14 ft</div>
+        <div style="display:flex;gap:8px;padding:5px 0;font-size:12px;color:rgba(255,255,255,.7)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Screen distance too short — min 7 ft</div>
       </div>
-      <div style="margin-top:12px"><span class="lnk">Contact support to discuss your space →</span></div>`,
+      <div style="margin-top:8px"><span class="lnk" style="font-size:12px">Contact support to discuss your space →</span></div>`,
       next: false,
     },
   };
   const c = configs[state];
-  body.innerHTML = `<div class="compat ${c.cls}" style="padding:18px 20px;margin-bottom:16px;gap:16px">
+  body.innerHTML = `<div class="compat ${c.cls}" style="padding:18px 20px;margin-bottom:0;gap:16px">
     <div style="width:44px;height:44px;border-radius:12px;background:${icoWrapColors[state]};border:1px solid ${icoWrapBorders[state]};display:flex;align-items:center;justify-content:center;flex-shrink:0">${icons[state]}</div>
     <div style="flex:1">
       <div style="font-family:var(--head);font-weight:700;font-size:1.15rem;font-style:italic;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">${c.title}</div>
@@ -1767,7 +2107,13 @@ function renderCompat(state) {
       ${c.body||''}${c.extra||''}
     </div>
   </div>`;
-  if (nextBtn) nextBtn.disabled = !c.next;
+  if (nextBtn) {
+    // Inline target (meas-continue-btn): hide entirely for 'r', show for g/a
+    if (nextBtnId === 'meas-continue-btn') {
+      nextBtn.style.display = state === 'r' ? 'none' : 'block';
+    }
+    nextBtn.disabled = !c.next;
+  }
 }
 
 function toggleCbx(el, key) {
@@ -1862,6 +2208,101 @@ function showNotMounted() {
 function selectDev(id) {
   document.getElementById('dv-clm').classList.toggle('sel', id==='clm');
   document.getElementById('dv-mlm').classList.toggle('sel', id==='mlm');
+  S.device.type = id;
+  if (id === 'mlm') {
+    S.device.name = 'MLM2 PRO';
+    S.device.id   = 'MLM-9876543210-456';
+  } else {
+    S.device.name = 'CLM PRO';
+    S.device.id   = 'CLM-1254780399-123';
+  }
+}
+
+function enterSetupHub() {
+  S.setupSkipped = false;
+  if (S.device.type === 'mlm') go('hub-mlm');
+  else go('hub');
+}
+
+function completeMLMSetup() {
+  S.phases.room = S.phases.install = S.phases.device = S.phases.cal = true;
+  go('done');
+}
+
+function continueAsGuest() {
+  S.user.isGuest = true;
+  go('play');
+}
+
+function renderCompatPending() {
+  const body = document.getElementById('meas-compat-result');
+  if (!body) return;
+  body.innerHTML = `<div class="compat" style="padding:16px 20px;margin-bottom:0;gap:14px;background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.07)">
+    <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <div style="flex:1">
+      <div style="font-family:var(--head);font-weight:700;font-size:1rem;font-style:italic;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;color:rgba(255,255,255,.25)">AWAITING MEASUREMENTS</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.3);line-height:1.5">Fill in all fields above to automatically check compatibility.</div>
+    </div>
+  </div>`;
+}
+
+function checkCompatInline() {
+  const toFt = v => S.unitFt ? v : Math.round(v / 0.3048 * 10) / 10;
+  const ch = toFt(parseFloat(document.getElementById('m-ch').value));
+  const rd = toFt(parseFloat(document.getElementById('m-rd').value));
+  const rw = toFt(parseFloat(document.getElementById('m-rw').value));
+  const sd = toFt(parseFloat(document.getElementById('m-sd').value));
+  const cm = document.getElementById('m-cm').value;
+  S.room = { ch, rd, rw, sd, cm };
+  if (ch < 8 || rd < 12 || sd < 7) S.compatState = 'r';
+  else if (ch < 9 || rd < 14) S.compatState = 'a';
+  else S.compatState = 'g';
+  renderCompat(S.compatState, 'meas-compat-result', 'meas-continue-btn');
+}
+
+function activateTrial() {
+  S.membershipActivated = true;
+  const el = document.getElementById('activate-content');
+  if (!el) return;
+  const endDate = new Date(); endDate.setDate(endDate.getDate() + 30);
+  el.innerHTML = `
+    <div class="success-mark mb16">✓</div>
+    <div class="h2 mb8">TRIAL ACTIVATED!</div>
+    <div class="sub mb20">Your 30-day free trial is now active. Enjoy full access to Rapsodo Golf.</div>
+    <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:12px 16px;font-size:13px;color:rgba(255,255,255,.7);margin-bottom:24px">
+      Trial ends <strong style="color:#fff">${endDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</strong>
+    </div>
+    <button class="btn btn-red" onclick="go('play')">START PLAYING →</button>`;
+}
+
+function showPaymentModal() {
+  const ov = document.getElementById('payment-ov');
+  if (!ov) return;
+  document.getElementById('payment-form-state').style.display = 'block';
+  document.getElementById('payment-success-state').style.display = 'none';
+  const ni = document.getElementById('pay-name');
+  if (ni && S.user.name) ni.value = S.user.name;
+  const isTrial = S.device.type === 'mlm';
+  document.getElementById('pay-product-label').textContent = isTrial ? '30-Day Free Trial' : 'Rapsodo Golf Membership';
+  document.getElementById('pay-product-price').innerHTML = isTrial ? '<span style="font-family:var(--head);font-size:1.2rem;font-weight:700;color:rgba(34,197,94,.9)">FREE</span><span style="font-size:.75rem;color:var(--muted)"> for 30 days</span>' : '$19.99<span style="font-size:.75rem;color:var(--muted)">/mo</span>';
+  document.getElementById('pay-submit-btn').textContent = isTrial ? 'START FREE TRIAL →' : 'PAY $19.99 →';
+  document.getElementById('pay-success-msg').textContent = isTrial ? 'Your 30-day free trial is now active. Enjoy full Platinum access.' : 'Your Rapsodo Golf Membership is now active.';
+  document.getElementById('pay-success-title').textContent = isTrial ? 'TRIAL ACTIVATED!' : 'PAYMENT SUCCESSFUL!';
+  ov.style.opacity = '1';
+  ov.style.pointerEvents = 'all';
+}
+
+function closePaymentModal() {
+  const ov = document.getElementById('payment-ov');
+  if (ov) { ov.style.opacity = '0'; ov.style.pointerEvents = 'none'; }
+}
+
+function confirmPayment() {
+  S.membershipActivated = true;
+  document.getElementById('payment-form-state').style.display = 'none';
+  document.getElementById('payment-success-state').style.display = 'block';
 }
 
 function toggleExp(hd) {
@@ -2102,12 +2543,25 @@ function buildDistDiagram(dist) {
 </svg>`;
 }
 
+function positionDistArrows(val) {
+  const slider = document.getElementById('dist-slider');
+  const wrap = document.getElementById('dist-slider-wrap');
+  const thumb = document.getElementById('dist-thumb');
+  if (!slider || !wrap || !thumb) return;
+  const min = parseFloat(slider.min), max = parseFloat(slider.max);
+  const pct = (parseFloat(val) - min) / (max - min);
+  const thumbSize = 16;
+  const thumbCenter = pct * (wrap.offsetWidth - thumbSize) + thumbSize / 2;
+  thumb.style.left = thumbCenter + 'px';
+}
+
 function updateDist(val) {
   const v = parseFloat(val);
   const disp = document.getElementById('dist-val');
   if (disp) disp.textContent = v.toFixed(1) + ' ft';
   const el = document.getElementById('dist-diagram');
   if (el) el.innerHTML = buildDistDiagram(v);
+  positionDistArrows(val);
 }
 
 function spawnConfetti() {
@@ -2143,6 +2597,8 @@ function allPhasesComplete() {
 
 function buildPlayModes() {
   const done = allPhasesComplete();
+  const needsMembership = S.device.type === 'clm' && done && !S.membershipActivated && S.membershipSkipped;
+  const unlocked = done && !needsMembership;
   const modes = [
     { name:'Range', bg:'linear-gradient(160deg,#2d6a4f 0%,#081c0f 100%)' },
     { name:'Target Range', bg:'linear-gradient(160deg,#1e3a5f 0%,#0a1628 100%)' },
@@ -2150,16 +2606,16 @@ function buildPlayModes() {
     { name:'Closest To Pin', bg:'linear-gradient(160deg,#264653 0%,#0a2026 100%)' },
   ];
   return modes.map(m=>`
-    <div style="position:relative;border-radius:10px;overflow:hidden;cursor:${done?'pointer':'default'};background:${m.bg};aspect-ratio:3/4">
+    <div style="position:relative;border-radius:10px;overflow:hidden;cursor:${unlocked?'pointer':'default'};background:${m.bg};aspect-ratio:3/4">
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.72))"></div>
-      ${done?`<div style="position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:6px;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center">
+      ${unlocked?`<div style="position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:6px;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
       </div>`:''}
-      ${!done?`<div style="position:absolute;inset:0;background:rgba(0,0,0,.52);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
-        <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      ${!unlocked?`<div style="position:absolute;inset:0;background:rgba(0,0,0,.52);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px" onclick="${needsMembership?'go(\'activate\')':''}">
+        <div style="width:32px;height:32px;border-radius:50%;background:${needsMembership?'rgba(196,32,40,.2)':'rgba(255,255,255,.1)'};border:1px solid ${needsMembership?'rgba(196,32,40,.4)':'rgba(255,255,255,.25)'};display:flex;align-items:center;justify-content:center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${needsMembership?'#f87171':'rgba(255,255,255,.7)'}" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
-        <div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:600;text-transform:uppercase;letter-spacing:.1em;text-align:center;font-family:var(--body);line-height:1.3">Setup<br>Required</div>
+        <div style="font-size:10px;color:${needsMembership?'#f87171':'rgba(255,255,255,.5)'};font-weight:600;text-transform:uppercase;letter-spacing:.1em;text-align:center;font-family:var(--body);line-height:1.3">${needsMembership?'Activate<br>to Play':'Setup<br>Required'}</div>
       </div>`:''}
       <div style="position:absolute;bottom:0;left:0;right:0;padding:11px 13px">
         <div style="font-family:var(--head);font-size:1.05rem;font-weight:800;font-style:italic;text-transform:uppercase;color:#fff;letter-spacing:.06em">${m.name}</div>
@@ -2174,7 +2630,7 @@ function renderAllScreens() {
 }
 
 // ─── KEYBOARD NAV ──────────────────────────────────────────────────────────
-const FLOW = ['splash','auth','acct-done','p4sel','hub','p2-meas','p2-compat','p2-check','p3-status','p3-check','p3-power','p4inst','p4scan','p4conn','p4bind','p4fw-info','p4fw','p4fw-done','cala','calb','calc','cald','play','done'];
+const FLOW = ['splash','auth','acct-done','p4sel','hub','hub-mlm','p2-meas','p2-check','p3-status','p3-check','p3-power','p4inst','p4scan','p4conn','p4bind','p4fw-info','p4fw','p4fw-done','cala','calb','calc','cald','done','activate','play'];
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
