@@ -284,6 +284,7 @@ select.inp{padding-left:16px;appearance:none;cursor:pointer}
 .led-dot.g{background:var(--green);box-shadow:0 0 10px var(--green)}
 .led-dot.w{background:#fff;box-shadow:0 0 10px #fff}
 .led-dot.off{background:#222}
+.led-dot.r{background:#C42028;box-shadow:0 0 10px #C42028}
 
 /* MODAL OVERLAY */
 #trial-ov{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
@@ -326,6 +327,16 @@ select.inp{padding-left:16px;appearance:none;cursor:pointer}
 .hub-phcard.locked{opacity:.42;cursor:not-allowed}
 .hub-phcard.locked:hover{border-color:var(--border);background:var(--card)}
 .hub-phcard.locked .hub-phcta{opacity:.5}
+.hub-phcard.skipped{border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04)}
+.hub-phcard.skipped .hub-phnum{background:#78716c}
+.hub-phcard.skipped .hub-phcta{color:#a16207}
+.hub-preinstalled{display:none;margin-bottom:14px;border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:12px 16px;background:rgba(245,158,11,.05)}
+.hub-preinstalled-row{display:flex;align-items:center;gap:10px}
+.hub-preinstalled-ico{font-size:16px;flex-shrink:0;line-height:1}
+.hub-preinstalled-text{flex:1;font-size:12px;color:rgba(255,255,255,.6);line-height:1.4}
+.hub-preinstalled-text strong{color:rgba(255,255,255,.85);font-weight:600}
+.hub-preinstalled-btn{font-size:11px;font-weight:700;color:#f59e0b;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0;background:none;border:none;padding:0;font-family:var(--head)}
+.hub-preinstalled-btn:hover{color:#fbbf24}
 /* PLAY SCREEN */
 #sc-play{background:#f0f0f0}
 /* SPACING HELPERS */
@@ -361,6 +372,13 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:20px;height:20px;b
 .meas-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;transition:border-color .3s}
 .meas-stat-val{font-family:var(--head);font-size:1.4rem;font-weight:700;line-height:1}
 .meas-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+/* CEILING MATERIAL BUTTONS */
+.cmats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cmat{background:#1a1a1a;border:1px solid var(--border);border-radius:6px;padding:9px 12px;cursor:pointer;text-align:left;font-family:var(--body);transition:border-color .15s,background .15s}
+.cmat:hover{border-color:rgba(255,255,255,.2)}
+.cmat.sel{border-color:rgba(196,32,40,.5);background:rgba(196,32,40,.07)}
+.cmat-name{font-size:12px;font-weight:600;color:rgba(255,255,255,.85);letter-spacing:.03em}
+.cmat-sub{font-size:10px;color:var(--muted);margin-top:1px}
 /* ROOM DIAGRAM */
 #room-diagram-wrap svg{display:block}
 /* PREMIUM MEASUREMENT FIELDS */
@@ -551,10 +569,15 @@ const S = {
   device: { name: "CLM PRO", id: 'CLM-1254780399-123', fw: '2.0.5', fwNew: '2.1.3', type: 'clm' },
   cal: { az: 0, dist: 9, shots: [], checks: [false,false,false,false] },
   phases: { room: false, install: false, device: false, cal: false },
+  phaseSkipped: { room: false, install: false },
+  fwPending: false,
   setupSkipped: false,
   ivUnitFt: true,
   unitFt: true,
   compatState: 'g', // g, a, r
+  compatIssues: [],
+  diagramMode: 'simple', // 'simple' | 'detailed'
+  diagramFlipped: false,
   fwProg: 0,
 };
 
@@ -814,55 +837,55 @@ auth: ()=>`
             <button class="ubtn" id="u-metric" onclick="setUnit('metric')">Metric</button>
           </div>
         </div>
-        <div class="ig"><div class="ilbl">Ceiling Height</div>
+        <div class="ig">
+          <div class="ilbl">Ceiling Height</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.4">From floor to ceiling at centre of room, above your hitting position.</div>
           <div class="mfield">
             <div class="mfield-body">
               <span class="mfield-op" id="m-ch-op"></span>
-              <input class="mfield-inp" id="m-ch" type="text" inputmode="decimal" placeholder="9.0" oninput="checkMeas()" onblur="commitField('ch')">
+              <input class="mfield-inp" id="m-ch" type="text" inputmode="decimal" placeholder="9.5" oninput="checkMeas()" onblur="commitField('ch')">
             </div>
             <button class="mstep" onclick="stepField('ch',-1)">−</button>
             <button class="mstep" onclick="stepField('ch',+1)">+</button>
             <span class="mfield-unit" id="u-lbl-ch">ft</span>
-          </div></div>
-        <div class="ig"><div class="ilbl">Room Depth <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(ball flight direction)</span></div>
+          </div>
+        </div>
+        <div class="ig">
+          <div class="ilbl">Room Depth <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(ball flight direction)</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.4">Full length from screen wall to the wall behind you.</div>
           <div class="mfield">
             <div class="mfield-body">
               <span class="mfield-op" id="m-rd-op"></span>
-              <input class="mfield-inp" id="m-rd" type="text" inputmode="decimal" placeholder="14.0" oninput="checkMeas()" onblur="commitField('rd')">
+              <input class="mfield-inp" id="m-rd" type="text" inputmode="decimal" placeholder="15.0" oninput="checkMeas()" onblur="commitField('rd')">
             </div>
             <button class="mstep" onclick="stepField('rd',-1)">−</button>
             <button class="mstep" onclick="stepField('rd',+1)">+</button>
             <span class="mfield-unit" id="u-lbl-rd">ft</span>
-          </div></div>
-        <div class="ig"><div class="ilbl">Room Width <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(side to side)</span></div>
+          </div>
+        </div>
+        <div class="ig">
+          <div class="ilbl">Room Width <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(side to side)</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.4">Full width side wall to side wall, perpendicular to your swing.</div>
           <div class="mfield">
             <div class="mfield-body">
               <span class="mfield-op" id="m-rw-op"></span>
-              <input class="mfield-inp" id="m-rw" type="text" inputmode="decimal" placeholder="10.0" oninput="checkMeas()" onblur="commitField('rw')">
+              <input class="mfield-inp" id="m-rw" type="text" inputmode="decimal" placeholder="12.0" oninput="checkMeas()" onblur="commitField('rw')">
             </div>
             <button class="mstep" onclick="stepField('rw',-1)">−</button>
             <button class="mstep" onclick="stepField('rw',+1)">+</button>
             <span class="mfield-unit" id="u-lbl-rw">ft</span>
-          </div></div>
-        <div class="ig"><div class="ilbl">Distance from Screen <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(hitting position to screen)</span></div>
-          <div class="mfield">
-            <div class="mfield-body">
-              <span class="mfield-op" id="m-sd-op"></span>
-              <input class="mfield-inp" id="m-sd" type="text" inputmode="decimal" placeholder="9.0" oninput="checkMeas()" onblur="commitField('sd')">
-            </div>
-            <button class="mstep" onclick="stepField('sd',-1)">−</button>
-            <button class="mstep" onclick="stepField('sd',+1)">+</button>
-            <span class="mfield-unit" id="u-lbl-sd">ft</span>
-          </div></div>
-        <div class="ig"><div class="ilbl">Ceiling Material</div>
-          <div class="selw"><select class="inp ni" id="m-cm" onchange="checkMeas()">
-            <option value="">Select material…</option>
-            <option value="drywall">Drywall</option>
-            <option value="drop">Drop Ceiling</option>
-            <option value="concrete">Concrete / Masonry</option>
-            <option value="wood">Wood / Beam</option>
-            <option value="other">Other</option>
-          </select></div></div>
+          </div>
+        </div>
+        <div class="ig">
+          <div class="ilbl">Ceiling Material</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.4">Determines which mounting hardware you'll need.</div>
+          <div class="cmats" id="cmat-grid">
+            <button class="cmat" data-mat="drywall" onclick="selectCeilMat('drywall')"><div class="cmat-name">Drywall</div><div class="cmat-sub">Standard stud framing</div></button>
+            <button class="cmat" data-mat="concrete" onclick="selectCeilMat('concrete')"><div class="cmat-name">Concrete</div><div class="cmat-sub">Masonry / block</div></button>
+            <button class="cmat" data-mat="wood" onclick="selectCeilMat('wood')"><div class="cmat-name">Wood / Beam</div><div class="cmat-sub">Exposed timber</div></button>
+            <button class="cmat" data-mat="other" onclick="selectCeilMat('other')"><div class="cmat-name">Other</div><div class="cmat-sub">Unsure or unusual ceiling type</div></button>
+          </div>
+        </div>
       </div>
       <!-- Right: 3D Room Diagram + Compat Result -->
       <div>
@@ -870,15 +893,22 @@ auth: ()=>`
           <div style="width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 2s ease-in-out infinite"></div>
           <span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.18em;font-weight:600">Live 3D Preview</span>
         </div>
-        <div id="room-diagram-wrap" style="background:rgba(10,10,10,.8);border:1px solid var(--border);border-radius:10px;overflow:hidden;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center">
+        <div id="room-diagram-wrap" style="position:relative;background:#0a0a0a;border:1px solid var(--border);border-radius:10px;overflow:hidden;aspect-ratio:16/10">
           <div id="room-svg-container" style="width:100%;height:100%"></div>
+          <button onclick="flipRoomDiagram()" title="Flip perspective" style="position:absolute;bottom:10px;right:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s" onmouseenter="this.style.background='rgba(255,255,255,.12)'" onmouseleave="this.style.background='rgba(255,255,255,.06)'">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 4.5h9M7 2l3 2.5L7 7" stroke="rgba(255,255,255,.6)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13 9.5H4M7 12L4 9.5 7 7" stroke="rgba(255,255,255,.6)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
-        <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:5px"><div style="width:18px;height:0;border-top:1.5px dashed rgba(196,32,40,.6)"></div><span style="font-size:10px;color:var(--muted)">Ball flight</span></div>
+        <div id="diagram-legend" style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;transition:opacity .3s">
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:18px;height:0;border-top:1.5px dashed rgba(34,197,94,.7)"></div><span style="font-size:10px;color:var(--muted)">Ball flight</span></div>
           <div style="display:flex;align-items:center;gap:5px"><div style="width:18px;height:0;border-top:1.5px solid #C42028"></div><span style="font-size:10px;color:var(--muted)">Screen / net</span></div>
           <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;background:rgba(196,32,40,.2);border:1px solid rgba(196,32,40,.4);border-radius:2px"></div><span style="font-size:10px;color:var(--muted)">Sensing zone</span></div>
         </div>
-        <div id="meas-compat-result" style="margin-top:16px;height:270px;overflow-y:auto"></div>
+        <button id="check-room-btn" class="btn btn-red mt12" style="display:none;width:100%" onclick="runCompatCheck()">CHECK MY ROOM →</button>
+        <div id="meas-compat-result" style="margin-top:16px;max-height:300px;overflow-y:auto"></div>
       </div>
     </div>
     <div style="max-width:480px;margin:20px auto 0">
@@ -925,7 +955,7 @@ auth: ()=>`
       </div></div>
       <div class="cbx" onclick="toggleCbx(this,'rc2')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">I have identified my mounting location on the ceiling</span></div></div>
       <div class="cbx" onclick="toggleCbx(this,'rc3')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">A power outlet is within reach of the mount point</span></div></div>
-      <div class="cbx" onclick="toggleCbx(this,'rc4')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">My ethernet cable can reach the mount point - or I plan to use a Wi-Fi connection</span></div></div>
+      <div class="cbx" onclick="toggleCbx(this,'rc4')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">My ethernet cable can reach the mount point - (CLM Tour: or I plan to use a Wi-Fi connection)</span></div></div>
       <div class="cbx" onclick="toggleCbx(this,'rc5')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">My impact screen or net enclosure is in place</span></div></div>
     </div>
     <div class="btn-row">
@@ -936,57 +966,32 @@ auth: ()=>`
 </div>`,
 
 'p3-status': ()=>`
-<div class="sc" id="sc-p3-status">
+<div class="sc" id="sc-p3-status" style="overflow-y:auto">
   <div class="cnt">
-    <div class="phase-tag"><em>PHASE 2</em> · INSTALLATION + VERIFICATION</div>
-    <div class="stepdots"><div class="sdot act"></div><div class="sdot"></div><div class="sdot"></div></div>
-    <div class="h3 mb8">INSTALLATION STATUS</div>
-    <div class="sub mb20">Have you already mounted your CLM PRO unit?</div>
-    <div class="optrow">
-      <div class="optcard" onclick="go('p3-check');S.install.mounted=true">
-        <div class="oico" style="font-size:0">
-          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="28" cy="28" r="26" stroke="rgba(34,197,94,.35)" stroke-width="1.5" fill="rgba(34,197,94,.07)"/>
-            <path d="M18 28.5L24.5 35L38 21" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="otitle">Yes, it's mounted</div>
-        <div class="odesc">Unit is secured to the ceiling and ready for verification</div>
-      </div>
-      <div class="optcard" onclick="showNotMounted()">
-        <div class="oico" style="font-size:0">
-          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="28" cy="28" r="26" stroke="rgba(255,255,255,.15)" stroke-width="1.5" fill="rgba(255,255,255,.04)"/>
-            <path d="M37.5 18.5c-1.5-1.5-3.8-1.8-5.6-.8l3.1 3.1-3.5 3.5-3.1-3.1c-1 1.8-.7 4.1.8 5.6 1.4 1.4 3.4 1.8 5.2 1.1l5.8 5.8c.8.8 2 .8 2.8 0 .8-.8.8-2 0-2.8l-5.8-5.8c.7-1.8.3-3.8-1.1-5.2-.1-.1-.3-.3-.6-.4z" stroke="rgba(255,255,255,.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            <path d="M18.5 37.5l5-5" stroke="rgba(255,255,255,.5)" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M22.5 33.5l-4 4" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="otitle">Not yet</div>
-        <div class="odesc">I need to complete the physical installation first</div>
-      </div>
+    <div class="phase-tag mb2"><em>PHASE 2</em> · INSTALLATION + VERIFICATION</div>
+    <div class="stepdots mb8"><div class="sdot act"></div><div class="sdot"></div><div class="sdot"></div></div>
+    <div class="h3 mb6">INSTALL YOUR CLM PRO</div>
+    <div class="sub mb20" style="font-size:14px">Follow the installation guide below, then continue to verify your setup.</div>
+    <div class="infobox mb20">
+      <span class="lbl">Before continuing:</span> Your CLM PRO must be fully mounted and secured to the ceiling. The next step confirms it's level, powered on, and ready to connect.
     </div>
-    <div id="notmounted-msg" style="display:none" class="mt16">
-      <div class="infobox mb14">
-        <span class="lbl">Before continuing:</span> Complete the physical installation using the CLM PRO Installation Guide.
-        The next step requires your unit to be fully mounted and secured.
-      </div>
-      <!-- Video placeholder -->
-      <div style="width:100%;aspect-ratio:16/9;background:#111;border:1px solid var(--border);border-radius:8px;overflow:hidden;position:relative;margin-bottom:14px;display:flex;align-items:center;justify-content:center">
-        <div style="position:absolute;inset:0;background:linear-gradient(160deg,#1a1a1a,#0a0a0a)"></div>
-        <div style="position:relative;z-index:2;text-align:center">
-          <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;cursor:pointer">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          </div>
-          <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.15em">CLM PRO Installation Guide</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:4px">Full walkthrough · 8 min</div>
+    <!-- Video placeholder -->
+    <div style="width:100%;aspect-ratio:16/9;background:#111;border:1px solid var(--border);border-radius:8px;overflow:hidden;position:relative;margin-bottom:16px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;background:linear-gradient(160deg,#1a1a1a,#0a0a0a)"></div>
+      <div style="position:relative;z-index:2;text-align:center">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         </div>
-        <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.6);border-radius:4px;padding:3px 8px;font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.05em">YouTube</div>
+        <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.15em">CLM PRO Installation Guide</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:4px">Full walkthrough · 8 min</div>
       </div>
-      <button class="btn btn-ghost mb12" onclick="window.open('#','_blank')">VIEW FULL INSTALLATION GUIDE →</button>
-      <button class="btn btn-dk" onclick="document.getElementById('notmounted-msg').style.display='none';document.querySelector('#sc-p3-status .optrow').style.display='flex';document.querySelector('#sc-p3-status .tc').style.display='block'">← Back</button>
+      <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.6);border-radius:4px;padding:3px 8px;font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.05em">YouTube</div>
     </div>
-    <div class="tc mt16"><button class="btn btn-dk btn-sm" style="width:auto;padding:0 20px" onclick="go('hub')">← Back to Hub</button></div>
+    <div class="tc mb16"><span class="lnk" style="font-size:12px" onclick="window.open('#','_blank')">View full installation guide →</span></div>
+    <div class="btn-row">
+      <button class="btn btn-dk" onclick="go('hub')">← Back to Hub</button>
+      <button class="btn btn-red" onclick="go('p3-check');S.install.mounted=true">I'VE INSTALLED MY CLM PRO →</button>
+    </div>
   </div>
 </div>`,
 
@@ -1019,7 +1024,6 @@ auth: ()=>`
         </div>
       </div>
     </div>
-    <div class="tc mt8 mb12"><span class="lnk" onclick="openInstallGuide()">View installation instructions →</span></div>
     <div class="btn-row">
       <button class="btn btn-dk" onclick="go('p3-status')">← BACK</button>
       <button class="btn btn-red" id="iv-btn" disabled onclick="go('p3-power')">NEXT →</button>
@@ -1033,11 +1037,11 @@ auth: ()=>`
     <div class="phase-tag"><em>PHASE 2</em> · INSTALLATION + VERIFICATION</div>
     <div class="stepdots mb16"><div class="sdot done"></div><div class="sdot done"></div><div class="sdot act"></div></div>
     <div class="h3 mb6">POWER ON CONFIRMATION</div>
-    <div class="sub mb20" style="font-size:14px">Is your CLM PRO powered on and showing a <strong style="color:#fff;font-weight:600">white LED</strong>?</div>
+    <div class="sub mb20" style="font-size:14px">Is your CLM PRO powered on and showing a <strong style="color:#C42028;font-weight:600">red LED</strong>?</div>
     <!-- Device illustration -->
     <div class="clm-device mb20">
       <span class="clm-brand">Rapsodo | CLM PRO</span>
-      <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot w"></div></div>
+      <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot r"></div></div>
     </div>
     <div id="power-question">
       <div class="pwrbtns mb12">
@@ -1107,6 +1111,38 @@ p4sel: ()=>`
   </div>
 </div>`,
 
+'clm-preinstalled': ()=>`
+<div class="sc" id="sc-clm-preinstalled">
+  <div class="cnt">
+    <div class="phase-tag mb2">CLM PRO SETUP</div>
+    <div class="h3 mb8">ALREADY INSTALLED?</div>
+    <div class="sub mb24" style="font-size:14px">Have you already mounted and connected your CLM PRO unit before?</div>
+    <div class="optrow">
+      <div class="optcard" onclick="skipInstall()">
+        <div class="oico" style="font-size:0">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="28" cy="28" r="26" stroke="rgba(34,197,94,.35)" stroke-width="1.5" fill="rgba(34,197,94,.07)"/>
+            <path d="M18 28.5L24.5 35L38 21" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="otitle">Yes, it's installed</div>
+        <div class="odesc">Skip room & installation steps and go straight to connecting your device</div>
+      </div>
+      <div class="optcard" onclick="go('hub')">
+        <div class="oico" style="font-size:0">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="28" cy="28" r="26" stroke="rgba(255,255,255,.15)" stroke-width="1.5" fill="rgba(255,255,255,.04)"/>
+            <path d="M28 18v10l6 6" stroke="rgba(255,255,255,.7)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="28" cy="28" r="8" stroke="rgba(255,255,255,.4)" stroke-width="1.5" fill="none"/>
+          </svg>
+        </div>
+        <div class="otitle">Not yet</div>
+        <div class="odesc">Start from the beginning — room check, installation, then connect</div>
+      </div>
+    </div>
+  </div>
+</div>`,
+
 p4inst: ()=>`
 <div class="sc" id="sc-p4inst">
   <div class="cnt-lg">
@@ -1128,7 +1164,7 @@ p4inst: ()=>`
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
         <div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Step 2</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.4">Press the power button on the device — wait for white LED</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.4">Press the power button on the device — wait for red LED</div>
       </div>
       <div style="flex:1;text-align:center;padding:0 20px;position:relative">
         <div style="position:absolute;top:22px;right:50%;left:0;height:2px;background:rgba(255,255,255,.08)"></div>
@@ -1152,39 +1188,30 @@ p4inst: ()=>`
 
 p4scan: ()=>`
 <div class="sc" id="sc-p4scan">
-  <div class="cnt" style="text-align:center">
-    <div id="scan-state-scanning">
-      <div class="h3 mb8">SCANNING FOR DEVICES</div>
-      <div class="sub mb28">Searching your network for CLM PRO devices…</div>
-      <div style="position:relative;width:200px;height:200px;margin:0 auto 28px;display:flex;align-items:center;justify-content:center">
-        <div class="sring" style="width:60px;height:60px"></div>
-        <div class="sring" style="width:110px;height:110px;animation-delay:.35s;opacity:.55"></div>
-        <div class="sring" style="width:170px;height:170px;animation-delay:.7s;opacity:.3"></div>
-        <div style="width:48px;height:48px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:2;position:relative">📡</div>
+  <div class="cnt" style="max-width:560px">
+    <div class="h3 mb6">DEVICE DETECTED</div>
+    <div class="sub mb24" style="font-size:14px">Your CLM PRO has been found on the local network. Confirm the details below and continue.</div>
+    <div class="chip mb20" style="background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)">
+      <div style="width:36px;height:36px;border-radius:50%;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="#22C55E"/></svg>
       </div>
-      <div class="fwstat"><div class="spin"></div> Scanning local network…</div>
-    </div>
-    <div id="scan-state-found" style="display:none">
-      <div class="h3 mb8">DEVICE FOUND</div>
-      <div class="sub mb8">Select your device to connect.</div>
-      <div class="sresult" onclick="go('p4conn')">
-        <div class="sdico">📡</div>
-        <div style="flex:1;text-align:left">
-          <div style="font-size:15px;font-weight:600">${S.device.id}</div>
-          <div style="font-size:12px;color:var(--muted)">CLM PRO · Firmware v${S.device.fw}</div>
-        </div>
-        <div class="sbars"><div class="sbar on"></div><div class="sbar on"></div><div class="sbar on"></div><div class="sbar"></div></div>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:600">${S.device.id}</div>
+        <div style="font-size:11px;color:var(--green);margin-top:2px">Detected on local network · Firmware v${S.device.fw}</div>
       </div>
-      <div class="tc mt12"><span class="lnk" onclick="showScanTrouble()">Don't see your device? Troubleshoot →</span></div>
+      <div class="sbars" style="margin-left:8px"><div class="sbar on"></div><div class="sbar on"></div><div class="sbar on"></div><div class="sbar"></div></div>
     </div>
-    <div id="scan-trouble" style="display:none" class="mt16">
+    <div class="btn-row mb16">
+      <button class="btn btn-dk" onclick="showScanTrouble()">NOT MY DEVICE</button>
+      <button class="btn btn-red" onclick="go('p4conn')">CONFIRM →</button>
+    </div>
+    <div id="scan-trouble" style="display:none">
       <div class="card" style="text-align:left">
-        <div class="troub-item"><div class="troub-num">1</div><div>Confirm the device is powered on (white LED)</div></div>
+        <div class="troub-item"><div class="troub-num">1</div><div>Confirm the device is powered on (red LED)</div></div>
         <div class="troub-item"><div class="troub-num">2</div><div>Make sure the device and this PC are on the same network</div></div>
         <div class="troub-item"><div class="troub-num">3</div><div>Try connecting with an Ethernet cable instead of Wi-Fi</div></div>
         <div class="troub-item"><div class="troub-num">4</div><div><span class="lnk">Enter IP address manually (advanced)</span></div></div>
       </div>
-      <button class="btn btn-dk mt12" onclick="restartScan()">RESCAN</button>
     </div>
   </div>
 </div>`,
@@ -1269,7 +1296,7 @@ p4bind: ()=>`
       <span>${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
     </div>
     <div class="btn-row mb12">
-      <button class="btn btn-dk" onclick="go('hub')">NOT NOW</button>
+      <button class="btn btn-dk" onclick="S.fwPending=true;go('hub')">NOT NOW</button>
       <button class="btn btn-red" onclick="go('p4fw')">CONTINUE →</button>
     </div>
     <div class="infobox" style="font-size:12px">
@@ -1351,7 +1378,7 @@ cala: ()=>`
         <span>-15°</span><span>Aim Line</span><span>+15°</span>
       </div>
       <div class="az-track" style="position:relative;height:4px;background:#2a2a2a;border-radius:2px">
-        <div class="az-zone" style="left:40%;width:20%"></div>
+        <div class="az-zone" style="left:33.3%;width:33.3%"></div>
       </div>
       <input type="range" id="az-slider" min="-15" max="15" value="0" step="0.5" oninput="updateAzimuth(this.value)" style="margin-top:-4px;display:block">
     </div>
@@ -1411,9 +1438,8 @@ calc: ()=>`
     <div class="sub mb16" style="font-size:13px">Running automated checks against the live device feed…</div>
     <div class="card mb16" id="env-checks">
       <div class="chkitem" style="animation-delay:.1s" id="ec-1"><div class="chksta pend" id="ec1-s">·</div><div class="chklbl">Lighting Adequacy</div><div class="chkval" id="ec1-v"></div></div>
-      <div class="chkitem" style="animation-delay:.2s" id="ec-2"><div class="chksta pend" id="ec2-s">·</div><div class="chklbl">Background Clutter Detection</div><div class="chkval" id="ec2-v"></div></div>
-      <div class="chkitem" style="animation-delay:.3s" id="ec-3"><div class="chksta pend" id="ec3-s">·</div><div class="chklbl">Pitch &amp; Roll Verification</div><div class="chkval" id="ec3-v"></div></div>
-      <div class="chkitem" style="animation-delay:.4s" id="ec-4"><div class="chksta pend" id="ec4-s">·</div><div class="chklbl">Height Confirmation (${S.install.height || '8.5'} ft)</div><div class="chkval" id="ec4-v"></div></div>
+      <div class="chkitem" style="animation-delay:.2s" id="ec-3"><div class="chksta pend" id="ec3-s">·</div><div class="chklbl">Pitch &amp; Roll Verification</div><div class="chkval" id="ec3-v"></div></div>
+      <div class="chkitem" style="animation-delay:.3s" id="ec-4"><div class="chksta pend" id="ec4-s">·</div><div class="chklbl">Height Confirmation (${S.install.height || '8.5'} ft)</div><div class="chkval" id="ec4-v"></div></div>
     </div>
     <button class="btn btn-red" id="ec-btn" disabled onclick="go('cald')">PROCEED →</button>
   </div>
@@ -1430,7 +1456,7 @@ cald: ()=>`
       <div class="calph act"><div class="calph-fill"></div></div>
     </div>
     <div class="h3 mb8">TEST SHOTS</div>
-    <div class="sub mb16" style="font-size:13px">Hit 2–3 shots to validate the calibration. Data should register within expected ranges.</div>
+    <div class="sub mb16" style="font-size:13px">Hit 3 shots to validate the calibration. Each shot must be detected before you can continue.</div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
       <div style="font-size:13px;color:var(--muted)">Shots recorded:</div>
       <div style="font-family:var(--head);font-size:1.4rem;font-weight:700"><span id="shot-count">0</span><span style="color:var(--muted);font-size:1rem"> / 3</span></div>
@@ -1611,11 +1637,20 @@ done: ()=>`
 const INIT = {
   auth: () => {},
   'p2-meas': () => {
+    S.diagramMode = 'simple';
     updateRoomDiagram();
     const cb = document.getElementById('meas-continue-btn');
     if (cb) cb.style.display = 'none';
+    // Restore ceiling material button state if previously selected
+    const cm = S.room?.cm;
+    if (cm) {
+      document.querySelectorAll('.cmat').forEach(b => b.classList.toggle('sel', b.dataset.mat === cm));
+    }
     renderCompatPending();
-    checkMeas();
+    // Show Check My Room button if all fields already filled
+    const allFilled = !!(document.getElementById('m-ch')?.value && document.getElementById('m-rd')?.value && document.getElementById('m-rw')?.value && cm);
+    const checkBtn = document.getElementById('check-room-btn');
+    if (checkBtn) checkBtn.style.display = allFilled ? 'block' : 'none';
   },
   'p2-compat': () => {
     renderCompat(S.compatState);
@@ -1629,12 +1664,7 @@ const INIT = {
     }, 200);
   },
   'p4fw-done': () => {},
-  p4scan: () => {
-    setTimeout(() => {
-      document.getElementById('scan-state-scanning').style.display='none';
-      document.getElementById('scan-state-found').style.display='block';
-    }, 3000);
-  },
+  p4scan: () => {},
   p4fw: () => {
     S.fwProg = 0;
     const fill = document.getElementById('fw-fill');
@@ -1681,19 +1711,22 @@ const INIT = {
     const keys = ['room','install','device','cal'];
     let count = 0;
     keys.forEach((key,i) => {
-      const done   = S.phases[key];
-      const locked = !done && deps[key].some(k => !S.phases[k]);
+      const done    = S.phases[key];
+      const skipped = !!(done && S.phaseSkipped[key]);
+      const locked  = !done && deps[key].some(k => !S.phases[k]);
+      const fwWait  = key === 'device' && S.fwPending && !done;
       if (done) count++;
       const card = document.getElementById('hph-'+key);
       const num  = document.getElementById('hphn-'+key);
       const cta  = document.getElementById('hphc-'+key);
       const stat = document.getElementById('hphs-'+key);
       if (!card) return;
-      card.classList.toggle('done',   done);
-      card.classList.toggle('locked', locked);
+      card.classList.toggle('done',    done && !skipped);
+      card.classList.toggle('skipped', skipped);
+      card.classList.toggle('locked',  locked && !fwWait);
       if (num)  num.textContent  = done ? '✓' : (i+1);
-      if (stat) stat.textContent = done ? 'Done' : locked ? '🔒' : 'Start';
-      if (cta)  cta.style.color  = done ? 'var(--green)' : locked ? 'var(--muted)' : '';
+      if (stat) stat.textContent = skipped ? 'Skipped' : done ? 'Done' : fwWait ? 'Update Required' : locked ? '🔒' : 'Start';
+      if (cta)  cta.style.color  = skipped ? '' : done ? 'var(--green)' : fwWait ? 'var(--amber)' : locked ? 'var(--muted)' : '';
     });
     // Device chip — only show real info after phase 3 done
     const devDone = S.phases.device;
@@ -1899,7 +1932,7 @@ function closeTrialModal() {
 }
 
 function prefill() {
-  const baseFt = { ch:9.5, rd:14, rw:12, sd:9 };
+  const baseFt = { ch:9.5, rd:15, rw:12 };
   Object.entries(baseFt).forEach(([key, ftVal]) => {
     const inp = document.getElementById('m-'+key);
     if (!inp) return;
@@ -1909,9 +1942,9 @@ function prefill() {
     inp.value = clamped.toFixed(1);
     updateFieldOp(key, clamped, r.min, r.max);
   });
-  document.getElementById('m-cm').value = 'drywall';
   document.getElementById('saved-banner')?.remove();
-  checkMeas();
+  S.diagramMode = 'simple';
+  selectCeilMat('drywall'); // triggers checkMeas which shows the button
   updateRoomDiagram();
   toast('Measurements loaded from your room validator ✓');
 }
@@ -1925,7 +1958,7 @@ function setUnit(u) {
   document.getElementById('u-metric')?.classList.toggle('on', nowMetric);
   // Convert values BEFORE flipping S.unitFt so we know the old unit
   const lbl = nowMetric ? 'm' : 'ft';
-  ['ch','rd','rw','sd'].forEach(k => {
+  ['ch','rd','rw'].forEach(k => {
     const el = document.getElementById('u-lbl-'+k);
     if (el) el.textContent = lbl;
     const inp = document.getElementById('m-'+k);
@@ -1939,7 +1972,7 @@ function setUnit(u) {
   });
   // Flip unit AFTER conversion so getFieldRange uses new unit for clamping
   S.unitFt = !nowMetric;
-  ['ch','rd','rw','sd'].forEach(k => {
+  ['ch','rd','rw'].forEach(k => {
     const inp = document.getElementById('m-'+k);
     if (!inp || inp.value.trim() === '') return;
     const r = getFieldRange(k);
@@ -1954,10 +1987,9 @@ function setUnit(u) {
 
 // ─── MEASUREMENT FIELD CONFIG ──────────────────────────────────────────────
 const MFIELD = {
-  ch: { min:7,  max:16, step:0.5 },
-  rd: { min:12, max:30, step:0.5 },
-  rw: { min:6,  max:30, step:0.5 },
-  sd: { min:7,  max:15, step:0.5 },
+  ch: { min:7.5, max:13,  step:0.5 },
+  rd: { min:10,  max:30,  step:0.5 },
+  rw: { min:8,   max:25,  step:0.5 },
 };
 
 function getFieldRange(key) {
@@ -2006,47 +2038,48 @@ function checkMeas() {
   const chEl = document.getElementById('m-ch');
   const rdEl = document.getElementById('m-rd');
   const rwEl = document.getElementById('m-rw');
-  const sdEl = document.getElementById('m-sd');
-  const cmEl = document.getElementById('m-cm');
-  // Enforce sd ≤ rd
-  if (rdEl?.value && sdEl?.value) {
-    const rdV = parseFloat(rdEl.value), sdV = parseFloat(sdEl.value);
-    if (sdV > rdV) {
-      sdEl.value = rdV.toFixed(1);
-      const r = getFieldRange('sd');
-      updateFieldOp('sd', rdV, r.min, r.max);
-    }
-  }
-  if (chEl?.value && rdEl?.value && rwEl?.value && sdEl?.value && cmEl?.value) {
-    checkCompatInline();
-  } else {
+  const cm = S.room?.cm || '';
+  const allFilled = !!(chEl?.value && rdEl?.value && rwEl?.value && cm);
+  const checkBtn = document.getElementById('check-room-btn');
+  const contBtn  = document.getElementById('meas-continue-btn');
+  // If user edits fields after a check, revert to simple mode
+  if (S.diagramMode === 'detailed') {
+    S.diagramMode = 'simple';
+    updateRoomDiagram();
     renderCompatPending();
-    const cb = document.getElementById('meas-continue-btn');
-    if (cb) cb.style.display = 'none';
+    if (contBtn) contBtn.style.display = 'none';
+  }
+  if (checkBtn) checkBtn.style.display = allFilled ? 'block' : 'none';
+  if (!allFilled) {
+    renderCompatPending();
+    if (contBtn) contBtn.style.display = 'none';
   }
 }
 
 function saveMeasAndNext() {
-  // Convert to feet if currently in metric
-  const toFt = v => S.unitFt ? v : Math.round(v / 0.3048 * 10) / 10;
-  const raw = {
-    ch: parseFloat(document.getElementById('m-ch').value),
-    rd: parseFloat(document.getElementById('m-rd').value),
-    rw: parseFloat(document.getElementById('m-rw').value),
-    sd: parseFloat(document.getElementById('m-sd').value),
-    cm: document.getElementById('m-cm').value,
-  };
-  S.room = { ch: toFt(raw.ch), rd: toFt(raw.rd), rw: toFt(raw.rw), sd: toFt(raw.sd), cm: raw.cm };
-  // Determine compatibility (always in ft)
-  const ch = S.room.ch, rd = S.room.rd, sd = S.room.sd;
-  if (ch < 8 || rd < 12 || sd < 7) S.compatState = 'r';
-  else if (ch < 9 || rd < 14) S.compatState = 'a';
-  else S.compatState = 'g';
+  const toFt = v => S.unitFt ? v : v / 0.3048;
+  const ch = toFt(parseFloat(document.getElementById('m-ch').value));
+  const rd = toFt(parseFloat(document.getElementById('m-rd').value));
+  const rw = toFt(parseFloat(document.getElementById('m-rw').value));
+  const cm = S.room?.cm || '';
+  S.room = { ch, rd, rw, cm };
+  const result = validateRoom(ch, rd, rw, cm);
+  S.compatState = result.status;
+  S.compatIssues = result.issues;
   go('p2-check');
 }
 
 function setCompat(state) {
   S.compatState = state;
+  if (state === 'a') S.compatIssues = [
+    { sev:'warning', msg:'High ceiling — drop mount required', rec:'At 11.0 ft, a VESA drop mount is needed to lower the CLM PRO to its ideal sensing height of 9.8–10.5 ft.' },
+    { sev:'warning', msg:'Room depth is tight — 14.5 ft', rec:'This can work but may feel cramped. 16.4 ft or more is recommended for comfort.' },
+  ];
+  else if (state === 'r') S.compatIssues = [
+    { sev:'error', msg:'Ceiling too low', rec:'CLM PRO needs at least 8.9 ft (2.7 m) of clearance. An MLM2PRO may suit this room better.' },
+    { sev:'error', msg:'Room too shallow — 11.0 ft', rec:'A minimum of 13.8 ft (4.2 m) is required for a safe swing and ball flight.' },
+  ];
+  else S.compatIssues = [];
   renderCompat(state);
 }
 
@@ -2061,61 +2094,66 @@ function renderCompat(state, bodyId='compat-body', nextBtnId='compat-next') {
   };
   const icoWrapColors  = { g:'rgba(34,197,94,.12)', a:'rgba(245,158,11,.1)', r:'rgba(248,113,113,.1)' };
   const icoWrapBorders = { g:'rgba(34,197,94,.25)', a:'rgba(245,158,11,.2)', r:'rgba(248,113,113,.2)' };
-  const unitLbl = S.unitFt ? 'ft' : 'm';
-  const disp = v => S.unitFt ? v : Math.round(v * 0.3048 * 10) / 10;
-  const chRaw = S.room.ch||9.5, rdRaw = S.room.rd||14, sdRaw = S.room.sd||9;
-  const ch = disp(chRaw), rd = disp(rdRaw), sd = disp(sdRaw);
-  const configs = {
-    g: {
-      cls:'g', title:'COMPATIBLE',
-      headline:'Your room meets all CLM PRO requirements.',
-      body:'',
-      extra:`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px">
-        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${ch}<span style="font-size:.9rem"> ${unitLbl}</span></div><div class="meas-stat-lbl">Ceiling Height</div></div>
-        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${rd}<span style="font-size:.9rem"> ${unitLbl}</span></div><div class="meas-stat-lbl">Room Depth</div></div>
-        <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${sd}<span style="font-size:.9rem"> ${unitLbl}</span></div><div class="meas-stat-lbl">Screen Dist.</div></div>
-      </div>`,
-      next: true,
-    },
-    a: {
-      cls:'a', title:'CONDITIONALLY COMPATIBLE',
-      headline:'Your room meets minimum requirements but has some caveats.',
-      body:`<div style="margin-top:10px">
-        <div style="display:flex;gap:8px;padding:8px 0;font-size:13px;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.06)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Ceiling below 9 ft — some high-launch shots may clip near the ceiling</div>
-        <div style="display:flex;gap:8px;padding:8px 0;font-size:13px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Room depth below 14 ft recommended — keep your hitting position tightly centered</div>
-      </div>
-      <div class="cbx mt12" onclick="this.classList.toggle('ck');document.getElementById('${nextBtnId}').disabled=!this.classList.contains('ck')">
-        <div class="cbbox"></div><div class="cbxt" style="font-size:13px">I understand the limitations and wish to proceed</div>
-      </div>`,
-      next: false,
-    },
-    r: {
-      cls:'r', title:'NOT COMPATIBLE',
-      headline:'Your room does not meet the minimum requirements.',
-      body:`<div style="margin-top:8px">
-        <div style="display:flex;gap:8px;padding:5px 0;font-size:12px;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.06)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Ceiling too low — min 8 ft, recommended 9 ft</div>
-        <div style="display:flex;gap:8px;padding:5px 0;font-size:12px;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.06)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Room too shallow — min 12 ft, recommended 14 ft</div>
-        <div style="display:flex;gap:8px;padding:5px 0;font-size:12px;color:rgba(255,255,255,.7)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Screen distance too short — min 7 ft</div>
-      </div>
-      <div style="margin-top:8px"><span class="lnk" style="font-size:12px">Contact support to discuss your space →</span></div>`,
-      next: false,
-    },
+  const titles    = { g:'COMPATIBLE', a:'CONDITIONALLY COMPATIBLE', r:'NOT COMPATIBLE' };
+  const issues    = S.compatIssues || [];
+  const nIssues   = issues.length;
+  const headlines = {
+    g: 'Your room meets all CLM PRO requirements.',
+    a: `${nIssues} thing${nIssues===1?'':'s'} to note before proceeding.`,
+    r: `${issues.filter(i=>i.sev==='error').length} critical requirement${issues.filter(i=>i.sev==='error').length===1?' is':' are'} not met.`,
   };
-  const c = configs[state];
-  body.innerHTML = `<div class="compat ${c.cls}" style="padding:18px 20px;margin-bottom:0;gap:16px">
+  // Issue cards — incompatible state shows errors only; "other" ceiling always first
+  const visibleIssues = state === 'r' ? issues.filter(i => i.sev === 'error') : issues;
+  const sortedIssues = [...visibleIssues].sort((a, b) => (b.msg.includes('unverified') ? 1 : 0) - (a.msg.includes('unverified') ? 1 : 0));
+  const issueCards = sortedIssues.map(issue => {
+    const isOther = issue.msg.includes('unverified');
+    const isErr = issue.sev === 'error';
+    const stripe = isOther ? '#d97706' : isErr ? '#f87171' : '#F59E0B';
+    const border = isOther ? 'rgba(180,83,9,.35)' : isErr ? 'rgba(248,113,113,.2)' : 'rgba(245,158,11,.2)';
+    return `<div style="display:flex;border:1px solid ${border};border-radius:6px;overflow:hidden;margin-top:8px">
+      <div style="width:3px;flex-shrink:0;background:${stripe}"></div>
+      <div style="padding:8px 12px;flex:1">
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:2px">${issue.msg}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.4">${issue.rec}</div>
+      </div>
+    </div>`;
+  }).join('');
+  // Compatible state shows measurement summary
+  let extra = '';
+  if (state === 'g') {
+    const unitLbl = S.unitFt ? 'ft' : 'm';
+    const disp = v => (S.unitFt ? v : v * 0.3048).toFixed(1);
+    const ch = S.room?.ch||9.5, rd = S.room?.rd||15, rw = S.room?.rw||12;
+    extra = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px">
+      <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${disp(ch)}<span style="font-size:.9rem"> ${unitLbl}</span></div><div class="meas-stat-lbl">Ceiling Height</div></div>
+      <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${disp(rd)}<span style="font-size:.9rem"> ${unitLbl}</span></div><div class="meas-stat-lbl">Room Depth</div></div>
+      <div class="meas-stat"><div class="meas-stat-val" style="color:var(--green)">${disp(rw)}<span style="font-size:.9rem"> ${unitLbl}</span></div><div class="meas-stat-lbl">Room Width</div></div>
+    </div>`;
+  }
+  // Conditional: acknowledgement checkbox
+  let confirm = '';
+  if (state === 'a') {
+    confirm = `<div class="cbx mt12" onclick="this.classList.toggle('ck');document.getElementById('${nextBtnId}').disabled=!this.classList.contains('ck')">
+      <div class="cbbox"></div><div class="cbxt" style="font-size:13px">I have validated my ceiling type${S.room?.cm==='other'?' and have confirmed compatibility with support before installing':''} and understand the limitations</div>
+    </div>`;
+  } else if (state === 'r') {
+    confirm = `<div style="margin-top:8px"><span class="lnk" style="font-size:12px">We recommend contacting support to discuss your space →</span></div>`;
+  }
+  body.innerHTML = `<div class="compat ${state}" style="padding:18px 20px;margin-bottom:0;gap:16px">
     <div style="width:44px;height:44px;border-radius:12px;background:${icoWrapColors[state]};border:1px solid ${icoWrapBorders[state]};display:flex;align-items:center;justify-content:center;flex-shrink:0">${icons[state]}</div>
     <div style="flex:1">
-      <div style="font-family:var(--head);font-weight:700;font-size:1.15rem;font-style:italic;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">${c.title}</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.5">${c.headline}</div>
-      ${c.body||''}${c.extra||''}
+      <div style="font-family:var(--head);font-weight:700;font-size:1.15rem;font-style:italic;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">${titles[state]}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.5">${headlines[state]}</div>
+      ${issueCards}${extra}${confirm}
     </div>
   </div>`;
   if (nextBtn) {
-    // Inline target (meas-continue-btn): hide entirely for 'r', show for g/a
     if (nextBtnId === 'meas-continue-btn') {
       nextBtn.style.display = state === 'r' ? 'none' : 'block';
     }
-    nextBtn.disabled = !c.next;
+    nextBtn.disabled = state === 'a'; // enabled by checkbox; r is hidden or always disabled
+    if (state === 'g') nextBtn.disabled = false;
+    if (state === 'r') nextBtn.disabled = true;
   }
 }
 
@@ -2199,13 +2237,6 @@ function toggleIVUnit() {
 
 function openInstallGuide() {
   go('p3-status');
-  setTimeout(() => showNotMounted(), 80);
-}
-
-function showNotMounted() {
-  document.getElementById('notmounted-msg').style.display = 'block';
-  document.querySelector('#sc-p3-status .optrow').style.display = 'none';
-  document.querySelector('#sc-p3-status .tc').style.display = 'none';
 }
 
 function selectDev(id) {
@@ -2224,7 +2255,7 @@ function selectDev(id) {
 function enterSetupHub() {
   S.setupSkipped = false;
   if (S.device.type === 'mlm') go('hub-mlm');
-  else go('hub');
+  else go('clm-preinstalled');
 }
 
 function completeMLMSetup() {
@@ -2251,18 +2282,56 @@ function renderCompatPending() {
   </div>`;
 }
 
-function checkCompatInline() {
-  const toFt = v => S.unitFt ? v : Math.round(v / 0.3048 * 10) / 10;
+function validateRoom(ch, rd, rw, cm) {
+  // All measurements in feet. Returns { status:'g'|'a'|'r', issues:[] }
+  const issues = [];
+  const disp = v => S.unitFt ? v.toFixed(1)+' ft' : (v*0.3048).toFixed(1)+' m';
+  if (ch < 8.86) {
+    issues.push({ sev:'error', msg:'Ceiling too low', rec:`CLM PRO needs at least 8.9 ft (2.7 m) of clearance. At ${disp(ch)}, an MLM2PRO may suit this room better.` });
+  } else if (ch > 10.5) {
+    issues.push({ sev:'warning', msg:'High ceiling — drop mount required', rec:`At ${disp(ch)}, a VESA drop mount is needed to lower the CLM PRO to its ideal sensing height of 9.8–10.5 ft (3.0–3.2 m).` });
+  }
+  if (rd < 13.78) {
+    issues.push({ sev:'error', msg:`Room too shallow — ${disp(rd)}`, rec:`A minimum of 13.8 ft (4.2 m) is required for a safe swing and ball flight.` });
+  } else if (rd < 16.4) {
+    issues.push({ sev:'warning', msg:`Room depth is tight — ${disp(rd)}`, rec:`This can work but may feel cramped. 16.4 ft (5.0 m) or more is recommended for comfort.` });
+  }
+  if (rw < 9.84) {
+    issues.push({ sev:'error', msg:'Room too narrow', rec:`At least 9.8 ft (3.0 m) of side clearance is needed for a full swing. Your room is ${disp(rw)}.` });
+  } else if (rw < 13.78) {
+    issues.push({ sev:'warning', msg:`Room width is tight — ${disp(rw)}`, rec:`13.8 ft (4.2 m) or more is recommended for comfortable clearance on both sides.` });
+  }
+  if (cm === 'concrete') issues.push({ sev:'warning', msg:'Concrete ceiling — masonry anchor kit required', rec:`A masonry drill and M8 sleeve anchor kit are required for mounting. Purchase separately.` });
+  else if (cm === 'other') issues.push({ sev:'warning', msg:'Ceiling type unverified — contact support before purchasing', rec:`We need to confirm your ceiling can safely support the CLM PRO (15 kg) before you proceed. Reach out to support with a photo or description of your ceiling.` });
+  const errors = issues.filter(i => i.sev === 'error').length;
+  return { status: errors > 0 ? 'r' : issues.length > 0 ? 'a' : 'g', issues };
+}
+
+function selectCeilMat(val) {
+  S.room = S.room || {};
+  S.room.cm = val;
+  document.querySelectorAll('.cmat').forEach(b => b.classList.toggle('sel', b.dataset.mat === val));
+  checkMeas();
+}
+
+function runCompatCheck() {
+  const toFt = v => S.unitFt ? v : v / 0.3048;
   const ch = toFt(parseFloat(document.getElementById('m-ch').value));
   const rd = toFt(parseFloat(document.getElementById('m-rd').value));
   const rw = toFt(parseFloat(document.getElementById('m-rw').value));
-  const sd = toFt(parseFloat(document.getElementById('m-sd').value));
-  const cm = document.getElementById('m-cm').value;
-  S.room = { ch, rd, rw, sd, cm };
-  if (ch < 8 || rd < 12 || sd < 7) S.compatState = 'r';
-  else if (ch < 9 || rd < 14) S.compatState = 'a';
-  else S.compatState = 'g';
-  renderCompat(S.compatState, 'meas-compat-result', 'meas-continue-btn');
+  const cm = S.room?.cm || '';
+  S.room = { ...S.room, ch, rd, rw, cm };
+  const result = validateRoom(ch, rd, rw, cm);
+  S.compatState = result.status;
+  S.compatIssues = result.issues;
+  S.diagramMode = 'detailed';
+  updateRoomDiagram();
+  renderCompat(result.status, 'meas-compat-result', 'meas-continue-btn');
+  const checkBtn = document.getElementById('check-room-btn');
+  if (checkBtn) checkBtn.style.display = 'none';
+  // Scroll the result into view
+  const res = document.getElementById('meas-compat-result');
+  if (res) res.scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
 
 function activateTrial() {
@@ -2323,7 +2392,7 @@ function updateAzimuth(val) {
   const btn = document.getElementById('az-btn');
   if (indicator) indicator.style.transform = `translate(-50%, -50%) rotate(${val * 3}deg)`;
   if (azDisp) azDisp.textContent = Math.abs(val).toFixed(1) + '°';
-  const inRange = Math.abs(val) <= 2.5;
+  const inRange = Math.abs(val) <= 5;
   if (azItem) { azItem.classList.toggle('good', inRange); azItem.classList.toggle('bad', !inRange); }
   if (btn) btn.disabled = !inRange;
 }
@@ -2336,7 +2405,6 @@ function updateDist(val) {
 function runEnvChecks() {
   const checks = [
     { id:1, label:'Lighting Adequacy', pass:true, val:'Good' },
-    { id:2, label:'Background Detection', pass:true, val:'Clear' },
     { id:3, label:'Pitch & Roll', pass:true, val:'2.1° / 0.8°' },
     { id:4, label:'Height', pass:true, val:(S.install.height||'8.5')+' ft ✓' },
   ];
@@ -2359,15 +2427,9 @@ function runEnvChecks() {
 }
 
 function simulateShot() {
-  const shots = [
-    { cs:95, bs:138, la:12.4, cd:168 },
-    { cs:98, bs:143, la:11.8, cd:175 },
-    { cs:93, bs:136, la:13.1, cd:163 },
-  ];
   const idx = S.cal.shots.length;
   if (idx >= 3) return;
-  const shot = shots[idx];
-  S.cal.shots.push(shot);
+  S.cal.shots.push({});
   const cnt = document.getElementById('shot-count');
   if (cnt) cnt.textContent = S.cal.shots.length;
   const container = document.getElementById('shots-container');
@@ -2375,132 +2437,269 @@ function simulateShot() {
     container.insertAdjacentHTML('beforeend', `
       <div class="shotcard">
         <div style="font-family:var(--head);font-weight:700;font-size:1rem;color:var(--muted);min-width:32px">S${S.cal.shots.length}</div>
-        <div class="shotgrid">
-          <div class="shotstat"><div class="shotval">${shot.cs}</div><div class="shotlbl">Club MPH</div></div>
-          <div class="shotstat"><div class="shotval">${shot.bs}</div><div class="shotlbl">Ball MPH</div></div>
-          <div class="shotstat"><div class="shotval">${shot.la}°</div><div class="shotlbl">Launch</div></div>
-          <div class="shotstat"><div class="shotval">${shot.cd}</div><div class="shotlbl">Carry (yds)</div></div>
-        </div>
+        <div style="flex:1;font-size:13px;color:var(--green);font-weight:600">Shot detected</div>
         <div class="shotpass">✓</div>
       </div>`);
   }
-  if (S.cal.shots.length >= 2) {
+  if (S.cal.shots.length >= 3) {
     const cb = document.getElementById('complete-btn');
     if (cb) cb.style.display = 'flex';
-  }
-  if (S.cal.shots.length >= 3) {
     const simBtn = document.getElementById('sim-btn');
     if (simBtn) simBtn.disabled = true;
   }
 }
 
 function showScanTrouble() {
-  document.getElementById('scan-trouble').style.display = 'block';
-}
-
-function restartScan() {
-  document.getElementById('scan-trouble').style.display = 'none';
-  document.getElementById('scan-state-found').style.display = 'none';
-  document.getElementById('scan-state-scanning').style.display = 'block';
-  setTimeout(()=>{
-    document.getElementById('scan-state-scanning').style.display='none';
-    document.getElementById('scan-state-found').style.display='block';
-  }, 3000);
+  const el = document.getElementById('scan-trouble');
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
 }
 
 // ─── ROOM DIAGRAM (isometric 3D) ──────────────────────────────────────────
-function buildRoomSVG(W, H, D, SD, unitSys) {
-  const isMetric = unitSys === 'metric';
-  // fmt() shows labels in the user's chosen unit; geometry is always in feet
+function buildRoomSVG(W, H, D, SD, unitSys, simplified=true) {
+  const isFlipped = S.diagramFlipped || false;
+  const isMetric  = unitSys === 'metric';
   const fmt = v => isMetric ? `${(v*0.3048).toFixed(1)} m` : `${v.toFixed(1)} ft`;
-  W = Math.max(W||10, 4); H = Math.max(H||9, 4); D = Math.max(D||14, 4);
-  SD = SD != null ? Math.max(1, Math.min(SD, D - 0.5)) : Math.min(D*0.65, D-1);
-  const SW=480,SH=280, PL=44,PR=32,PT=30,PB=36;
-  const DW=SW-PL-PR, DH=SH-PT-PB;
-  const COS=Math.cos(30*Math.PI/180), SIN=Math.sin(30*Math.PI/180);
-  const scale = Math.min(DW/(Math.max(W,10)+Math.max(D,12)*COS), DH/(Math.max(H,8)+Math.max(D,12)*SIN))*0.84;
-  const rW=W*scale,rH=H*scale,rD=D*scale;
-  const ox=PL+(DW-(rW+rD*COS))/2;
-  const oy=PT+(DH-(rH+rD*SIN))/2+rH;
-  const p=(x,y,z)=>({x:ox+x*scale+z*COS*scale, y:oy-y*scale+z*SIN*scale});
-  const pts=(...cs)=>cs.map(([x,y,z])=>{const q=p(x,y,z);return`${q.x},${q.y}`}).join(' ');
-  // Screen area scales based on room walls and ceiling height (room validator approach)
+
+  W  = Math.max(W||12, 4); H = Math.max(H||9, 4); D = Math.max(D||15, 4);
+  SD = SD != null ? Math.max(1, Math.min(SD, D-0.5)) : D*0.55;
+
+  const SVG_W=600, SVG_H=420, PL=52, PR=52, PT=44, PB=48;
+  const DW=SVG_W-PL-PR, DH=SVG_H-PT-PB;
+  const COS=Math.cos(Math.PI/6), SIN=Math.sin(Math.PI/6);
+
+  // Scale to fit the viewport
+  const refWD = Math.max(W,10)+Math.max(D,10);
+  const scale = Math.min(DW/(refWD*COS), DH/(Math.max(H,8)+refWD*SIN)) * 0.88;
+
+  // Origin: leftmost point differs between normal and flipped perspectives
+  const totalW = (W+D)*COS*scale;
+  const totalH = H*scale + (W+D)*SIN*scale;
+  const oxNormal  = PL+(DW-totalW)/2 + D*COS*scale;
+  const oxFlipped = PL+(DW-totalW)/2 + W*COS*scale;
+  const oy = PT+(DH-totalH)/2 + H*scale;
+
+  // True isometric projection with flip support
+  // Normal:  X→down-right, Z→down-left  | Flipped: Z→down-right, X→down-left
+  const p = (x,y,z) => {
+    const ox = isFlipped ? oxFlipped : oxNormal;
+    const h  = isFlipped ? (z-x) : (x-z);
+    return { x: ox + h*COS*scale, y: oy - y*scale + (x+z)*SIN*scale };
+  };
+  const pts = (...cs) => cs.map(([x,y,z])=>{ const q=p(x,y,z); return `${q.x},${q.y}`; }).join(' ');
+  const qv  = (...vs) => vs.map(v=>`${v.x},${v.y}`).join(' ');
+
+  // Room corners
+  const BLF=[0,0,0], BRF=[W,0,0], BLC=[0,H,0], BRC=[W,H,0];
+  const FLF=[0,0,D], FRF=[W,0,D], FLC=[0,H,D], FRC=[W,H,D];
+
+  // Screen (16:9, centered on back wall)
   const maxScrW=Math.min(W*0.82,W-0.35), maxScrH=Math.min(H*0.82,H-0.25);
   let scrW=maxScrW, scrH=scrW/(16/9);
-  if(scrH>maxScrH){scrH=maxScrH;scrW=Math.min(scrH*(16/9),maxScrW);}
-  const sX0=(W-scrW)/2, sX1=sX0+scrW;
-  const clmZ=SD;
-  const cd=0.22, ch=0.14;
-  // CLM box corners
-  const clm={
-    BLt:p(W/2-cd,H,clmZ-cd),BRt:p(W/2+cd,H,clmZ-cd),
-    BLb:p(W/2-cd,H-ch,clmZ-cd),BRb:p(W/2+cd,H-ch,clmZ-cd),
-    FLb:p(W/2-cd,H-ch,clmZ+cd),FRb:p(W/2+cd,H-ch,clmZ+cd),
-    FLt:p(W/2-cd,H,clmZ+cd),FRt:p(W/2+cd,H,clmZ+cd)
+  if(scrH>maxScrH){scrH=maxScrH; scrW=Math.min(scrH*(16/9),maxScrW);}
+  const scrX0=(W-scrW)/2, scrX1=scrX0+scrW;
+
+  // CLM — drop mount logic from validator
+  const needsDrop = H > 10.5;
+  const clmMountH = needsDrop ? 9.84 : H;
+  const hitZ = SD;
+  const clmZ = Math.max(0, SD - 1/0.3048);  // 1 m closer to screen than hitting position
+
+  // CLM device box (physical proportions: 1.1m wide, 0.15m deep, 0.10m tall)
+  const cw=1.1/0.3048/2, cdv=0.15/0.3048/2, clmH=0.10/0.3048;
+  const clm = {
+    BLt:p(W/2-cw,clmMountH,    clmZ-cdv), BRt:p(W/2+cw,clmMountH,    clmZ-cdv),
+    BLb:p(W/2-cw,clmMountH-clmH,clmZ-cdv), BRb:p(W/2+cw,clmMountH-clmH,clmZ-cdv),
+    FLb:p(W/2-cw,clmMountH-clmH,clmZ+cdv), FRb:p(W/2+cw,clmMountH-clmH,clmZ+cdv),
+    FLt:p(W/2-cw,clmMountH,    clmZ+cdv), FRt:p(W/2+cw,clmMountH,    clmZ+cdv),
   };
-  const q=(...vs)=>vs.map(v=>`${v.x},${v.y}`).join(' ');
-  // Ball arc
-  const a0=p(W/2,0.3,clmZ), a1=p(W/2,H*0.35,SD*0.5), a2=p(W/2,scrH*0.7,SD*0.1), a3=p(W/2,scrH*0.4,0.06);
-  // Detection zone
+
+  // Detection zone corners (centred on hitting position)
   const dz=1.8;
-  const dz_pts=[[W/2-dz,0,clmZ-dz],[W/2+dz,0,clmZ-dz],[W/2+dz,0,clmZ+dz],[W/2-dz,0,clmZ+dz]];
-  // Dim annotations
-  const pFLF=p(0,0,D),pFRF=p(W,0,D),pBLF=p(0,0,0),pBLC=p(0,H,0);
-  const wmy=(pFLF.y+pFRF.y)/2, wmx=(pFLF.x+pFRF.x)/2;
-  return `<svg viewBox="0 0 ${SW} ${SH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+  const dzBL=p(W/2-dz,0,hitZ-dz), dzBR=p(W/2+dz,0,hitZ-dz);
+  const dzFR=p(W/2+dz,0,hitZ+dz), dzFL=p(W/2-dz,0,hitZ+dz);
+
+  // Ball arc
+  const arcS =p(W/2, 0.3,            hitZ);
+  const arcC1=p(W/2, clmMountH*0.38, SD*0.5);
+  const arcC2=p(W/2, scrH*0.75,      SD*0.08);
+  const arcE =p(W/2, scrH*0.42,      0.06);
+
+  // Hitting mat corners
+  const mw=2.5, md=2.0;
+  const matPts=[[W/2-mw,0,hitZ-md],[W/2+mw,0,hitZ-md],[W/2+mw,0,hitZ+md],[W/2-mw,0,hitZ+md]]
+    .map(([x,y,z])=>{ const q=p(x,y,z); return `${q.x},${q.y}`; }).join(' ');
+
+  // Key projected corner points for dimension lines
+  const pBRF=p(W,0,0), pBRC=p(W,H,0), pFLF=p(0,0,D), pFRF=p(W,0,D);
+
+  // LED strip (lerp helper)
+  const lerp=(a,b,t)=>({x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t});
+  const s1a=lerp(lerp(clm.BLb,clm.BRb,0.455),lerp(clm.FLb,clm.FRb,0.455),0.5);
+  const s1b=lerp(lerp(clm.BLb,clm.BRb,0.545),lerp(clm.FLb,clm.FRb,0.545),0.5);
+
+  // Arrow head
+  const arrHead=(cx,cy,dx,dy,s=5)=>{
+    const len=Math.sqrt(dx*dx+dy*dy)||1, ux=dx/len, uy=dy/len, nx=-uy, ny=ux;
+    return `M${cx},${cy} L${cx-ux*s+nx*(s/2)},${cy-uy*s+ny*(s/2)} L${cx-ux*s-nx*(s/2)},${cy-uy*s-ny*(s/2)}Z`;
+  };
+
+  // Status tint (applied over back wall after check)
+  const tints={g:'rgba(34,197,94,.08)',a:'rgba(245,158,11,.08)',r:'rgba(196,32,40,.1)'};
+  const tint = S.diagramMode==='detailed' ? (tints[S.compatState]||'') : '';
+
+  // Screen wall label (angled along screen face)
+  const midL=p(scrX0,0.5,0), midR=p(scrX1,0.5,0);
+  const [tL,tR]=midL.x<midR.x?[midL,midR]:[midR,midL];
+  const scrAngle=Math.atan2(tR.y-tL.y,tR.x-tL.x)*180/Math.PI;
+  const scrLX=(tL.x+tR.x)/2, scrLY=(tL.y+tR.y)/2;
+
+  // Drop mount points
+  const ceilPt=p(W/2,H,clmZ), clmTop=p(W/2,clmMountH,clmZ);
+
+  // CLM label leader (side flips with perspective)
+  const devPt=p(W/2,clmMountH,clmZ);
+  const xOff=isFlipped?60:-60;
+  const lx1=devPt.x+(isFlipped?4:-4), ly1=devPt.y-8;
+  const lx2=devPt.x+xOff,             ly2=devPt.y-56;
+
+  // ── Dimension: Width (below front edge) ──────────────────────────────────
+  const wOff=22;
+  const wax=pFLF.x, way=pFLF.y+wOff, wbx=pFRF.x, wby=pFRF.y+wOff;
+  const wmx=(wax+wbx)/2, wmy=(way+wby)/2, wdx=wbx-wax, wdy=wby-way;
+
+  // ── Dimension: Height (right edge of back wall) ───────────────────────────
+  const hSide=isFlipped?-1:1, hOff=14;
+  const hax=pBRF.x+hSide*hOff, hay=pBRF.y, hbx=pBRC.x+hSide*hOff, hby=pBRC.y;
+  const hmx=(hax+hbx)/2, hmy=(hay+hby)/2, hdx=hbx-hax, hdy=hby-hay, htx=hmx+hSide*12;
+
+  // ── Dimension: Depth (along BRF→FRF edge) ────────────────────────────────
+  const ddx=pFRF.x-pBRF.x, ddy=pFRF.y-pBRF.y, dlen=Math.sqrt(ddx*ddx+ddy*ddy)||1;
+  const dSide=isFlipped?-1:1, dnx=dSide*ddy/dlen, dny=dSide*(-ddx/dlen), dOff=18;
+  const dax=pBRF.x+dnx*dOff, day=pBRF.y+dny*dOff, dbx=pFRF.x+dnx*dOff, dby=pFRF.y+dny*dOff;
+  const dlx=(dax+dbx)/2+dnx*32, dly=(day+dby)/2+dny*32;
+
+  return `<svg viewBox="0 0 ${SVG_W} ${SVG_H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
   <defs>
-    <linearGradient id="rd-sc" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a3a1a" stop-opacity=".85"/><stop offset="100%" stop-color="#081208" stop-opacity=".75"/></linearGradient>
-    <linearGradient id="rd-fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#222"/><stop offset="100%" stop-color="#181818"/></linearGradient>
+    <linearGradient id="rd-sc" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a3a1a" stop-opacity=".85"/>
+      <stop offset="100%" stop-color="#081208" stop-opacity=".75"/>
+    </linearGradient>
+    <linearGradient id="rd-fl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e1e1e"/><stop offset="100%" stop-color="#141414"/>
+    </linearGradient>
+    <linearGradient id="rd-cone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C42028" stop-opacity=".18"/>
+      <stop offset="100%" stop-color="#C42028" stop-opacity=".03"/>
+    </linearGradient>
   </defs>
-  <!-- Room faces -->
-  <polygon points="${pts([0,H,0],[W,H,0],[W,H,D],[0,H,D])}" fill="rgba(38,38,38,.9)" stroke="#333" stroke-width="1"/>
-  <polygon points="${pts([0,0,0],[W,0,0],[W,H,0],[0,H,0])}" fill="rgba(26,26,26,.95)" stroke="#333" stroke-width="1"/>
-  <polygon points="${pts([0,0,0],[0,H,0],[0,H,D],[0,0,D])}" fill="rgba(30,30,30,.9)" stroke="#333" stroke-width="1"/>
-  <polygon points="${pts([0,0,0],[W,0,0],[W,0,D],[0,0,D])}" fill="url(#rd-fl)" stroke="#2a2a2a" stroke-width="1"/>
-  <!-- Screen -->
-  <polygon points="${pts([sX0,0,0],[sX1,0,0],[sX1,scrH,0],[sX0,scrH,0])}" fill="url(#rd-sc)" stroke="#C42028" stroke-width="1.5"/>
+
+  <!-- 1. Back wall -->
+  <polygon points="${pts(BLF,BRF,BRC,BLC)}" fill="#141414" stroke="#2e2e2e" stroke-width="1"/>
+  ${tint ? `<polygon points="${pts(BLF,BRF,BRC,BLC)}" fill="${tint}"/>` : ''}
+
+  <!-- 2. Left wall -->
+  <polygon points="${pts(BLF,BLC,FLC,FLF)}" fill="#1a1a1a" stroke="#2e2e2e" stroke-width="1"/>
+
+  <!-- 3. Floor -->
+  <polygon points="${pts(BLF,BRF,FRF,FLF)}" fill="url(#rd-fl)" stroke="#252525" stroke-width="1"/>
+
+  ${!simplified ? `<!-- Hitting mat -->
+  <polygon points="${matPts}" fill="#2d6a2d" opacity=".35" stroke="#22863a" stroke-width=".75" stroke-opacity=".5"/>
   <!-- Detection zone -->
-  <polygon points="${dz_pts.map(([x,y,z])=>{const q=p(x,y,z);return`${q.x},${q.y}`}).join(' ')}" fill="rgba(196,32,40,.06)" stroke="rgba(196,32,40,.25)" stroke-width=".75" stroke-dasharray="3,3"/>
-  <!-- Screen distance line -->
-  <line x1="${p(W/2,0,0).x}" y1="${p(W/2,0,0).y}" x2="${p(W/2,0,SD).x}" y2="${p(W/2,0,SD).y}" stroke="rgba(196,32,40,.4)" stroke-width="1" stroke-dasharray="4,4"/>
+  <polygon points="${qv(dzBL,dzBR,dzFR,dzFL)}" fill="#C42028" opacity=".07" stroke="#C42028" stroke-width=".75" stroke-dasharray="3,3" stroke-opacity=".28"/>
   <!-- Hitting position -->
-  <ellipse cx="${p(W/2,0,clmZ).x}" cy="${p(W/2,0,clmZ).y}" rx="${dz*scale*0.32}" ry="${dz*scale*0.12}" fill="rgba(196,32,40,.18)"/>
-  <circle cx="${p(W/2,0,clmZ).x}" cy="${p(W/2,0,clmZ).y}" r="3" fill="#C42028" opacity=".6"/>
-  <!-- CLM device -->
-  <polygon points="${q(clm.BLb,clm.BRb,clm.FRb,clm.FLb)}" fill="#303030" stroke="#404040" stroke-width=".75"/>
-  <polygon points="${q(clm.BLt,clm.BRt,clm.BRb,clm.BLb)}" fill="#3a3a3a" stroke="#404040" stroke-width=".75"/>
-  <polygon points="${q(clm.BRt,clm.FRt,clm.FRb,clm.BRb)}" fill="#353535" stroke="#404040" stroke-width=".75"/>
-  <polygon points="${q(clm.FLt,clm.FRt,clm.FRb,clm.FLb)}" fill="#404040" stroke="#404040" stroke-width=".75"/>
-  <line x1="${clm.FLb.x+(clm.FRb.x-clm.FLb.x)*.15}" y1="${clm.FLb.y+(clm.FRb.y-clm.FLb.y)*.15-2}" x2="${clm.FRb.x-(clm.FRb.x-clm.FLb.x)*.15}" y2="${clm.FRb.y-(clm.FRb.y-clm.FLb.y)*.15-2}" stroke="#C42028" stroke-width="2.5" stroke-linecap="round" opacity=".9"/>
+  <ellipse cx="${p(W/2,0,hitZ).x}" cy="${p(W/2,0,hitZ).y}" rx="${dz*scale*0.35}" ry="${dz*scale*0.14}" fill="#C42028" opacity=".2"/>
+  <circle cx="${p(W/2,0,hitZ).x}" cy="${p(W/2,0,hitZ).y}" r="3.5" fill="#C42028" opacity=".55"/>` : ''}
+
+  <!-- 4. Screen (16:9, dashed red border) -->
+  <polygon points="${pts([scrX0,0,0],[scrX1,0,0],[scrX1,scrH,0],[scrX0,scrH,0])}" fill="url(#rd-sc)" stroke="#C42028" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <!-- Screen wall label -->
+  <text x="${scrLX}" y="${scrLY}" fill="rgba(255,255,255,.4)" font-size="8" font-family="sans-serif" text-anchor="middle" font-style="italic" transform="rotate(${scrAngle},${scrLX},${scrLY})">Screen wall</text>
+
+  ${!simplified ? `<!-- Detection cone lines to all 4 zone corners -->
+  <line x1="${p(W/2,clmMountH,clmZ).x}" y1="${p(W/2,clmMountH,clmZ).y+8}" x2="${dzBL.x}" y2="${dzBL.y}" stroke="#C42028" stroke-width=".75" stroke-dasharray="4,4" opacity=".25"/>
+  <line x1="${p(W/2,clmMountH,clmZ).x}" y1="${p(W/2,clmMountH,clmZ).y+8}" x2="${dzBR.x}" y2="${dzBR.y}" stroke="#C42028" stroke-width=".75" stroke-dasharray="4,4" opacity=".25"/>
+  <line x1="${p(W/2,clmMountH,clmZ).x}" y1="${p(W/2,clmMountH,clmZ).y+8}" x2="${dzFR.x}" y2="${dzFR.y}" stroke="#C42028" stroke-width=".75" stroke-dasharray="4,4" opacity=".25"/>
+  <line x1="${p(W/2,clmMountH,clmZ).x}" y1="${p(W/2,clmMountH,clmZ).y+8}" x2="${dzFL.x}" y2="${dzFL.y}" stroke="#C42028" stroke-width=".75" stroke-dasharray="4,4" opacity=".25"/>
+  <polygon points="${qv(p(W/2,clmMountH,clmZ),dzFR,dzFL)}" fill="url(#rd-cone)"/>
+  <!-- CLM device faces -->
+  <polygon points="${qv(clm.BLb,clm.BRb,clm.FRb,clm.FLb)}" fill="#1a1a1a" stroke="#2e2e2e" stroke-width=".75"/>
+  <polygon points="${qv(clm.BLt,clm.BRt,clm.BRb,clm.BLb)}" fill="#222" stroke="#2e2e2e" stroke-width=".75"/>
+  <polygon points="${qv(clm.BRt,clm.FRt,clm.FRb,clm.BRb)}" fill="#2a2a2a" stroke="#2e2e2e" stroke-width=".75"/>
+  <polygon points="${qv(clm.FLt,clm.FRt,clm.FRb,clm.FLb)}" fill="#252525" stroke="#2e2e2e" stroke-width=".75"/>
+  <polygon points="${qv(clm.BLt,clm.BRt,clm.FRt,clm.FLt)}" fill="#2e2e2e" stroke="#2e2e2e" stroke-width=".75"/>
+  <!-- LED strip on bottom face -->
+  <line x1="${s1a.x}" y1="${s1a.y}" x2="${s1b.x}" y2="${s1b.y}" stroke="#C42028" stroke-width="2.5" stroke-linecap="round" opacity=".9"/>
   <!-- Ball arc -->
-  <path d="M ${a0.x} ${a0.y} C ${a1.x} ${a1.y} ${a2.x} ${a2.y} ${a3.x} ${a3.y}" stroke="rgba(34,197,94,.55)" stroke-width="1.5" stroke-dasharray="5,3" fill="none"/>
-  <circle cx="${a3.x}" cy="${a3.y}" r="3.5" fill="rgba(34,197,94,.7)"/>
+  <path d="M ${arcS.x} ${arcS.y} C ${arcC1.x} ${arcC1.y} ${arcC2.x} ${arcC2.y} ${arcE.x} ${arcE.y}" stroke="#22863a" stroke-width="1.75" stroke-dasharray="5,3" fill="none" opacity=".65"/>
+  <!-- Ball with dimples -->
+  <circle cx="${arcE.x}" cy="${arcE.y}" r="5" fill="rgba(255,255,255,.9)" stroke="#aaa" stroke-width=".75"/>
+  <circle cx="${arcE.x-1.5}" cy="${arcE.y-1.5}" r=".9" fill="#ddd" opacity=".8"/>
+  <circle cx="${arcE.x+1.8}" cy="${arcE.y-1.2}" r=".9" fill="#ddd" opacity=".8"/>
+  <circle cx="${arcE.x+0.3}" cy="${arcE.y+1.8}" r=".9" fill="#ddd" opacity=".8"/>
+  <circle cx="${arcE.x-2.0}" cy="${arcE.y+1.0}" r=".9" fill="#ddd" opacity=".8"/>
+  ${needsDrop ? `<!-- Drop mount pole -->
+  <line x1="${ceilPt.x}" y1="${ceilPt.y}" x2="${clmTop.x}" y2="${clmTop.y}" stroke="#666" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+  <circle cx="${ceilPt.x}" cy="${ceilPt.y}" r="3.5" fill="#888" opacity=".85"/>` : ''}
+  <!-- CLM PRO label with leader line -->
+  <line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="#444" stroke-width=".75"/>
+  <text x="${isFlipped?lx2+3:lx2-3}" y="${ly2+3}" fill="rgba(255,255,255,.45)" font-size="8.5" font-family="sans-serif" font-weight="700" text-anchor="${isFlipped?'start':'end'}">CLM PRO</text>` : ''}
+
+  <!-- 5. Ceiling — drawn last, translucent overlay so it sits above everything -->
+  <polygon points="${pts(BLC,BRC,FRC,FLC)}" fill="rgba(255,255,255,.03)" stroke="#2e2e2e" stroke-width="1"/>
+
   <!-- Dimension: Width -->
-  <line x1="${pFLF.x}" y1="${pFLF.y+12}" x2="${pFRF.x}" y2="${pFRF.y+12}" stroke="#444" stroke-width=".75"/>
-  <text x="${wmx}" y="${(pFLF.y+pFRF.y)/2+24}" fill="rgba(255,255,255,.4)" font-size="9" text-anchor="middle" font-family="sans-serif" font-weight="600">${fmt(W)} wide</text>
+  <g opacity=".7">
+    <line x1="${wax}" y1="${way}" x2="${wbx}" y2="${wby}" stroke="#4a4a4a" stroke-width="1"/>
+    <line x1="${pFLF.x}" y1="${pFLF.y}" x2="${wax}" y2="${way}" stroke="#333" stroke-width=".75" stroke-dasharray="2,2"/>
+    <line x1="${pFRF.x}" y1="${pFRF.y}" x2="${wbx}" y2="${wby}" stroke="#333" stroke-width=".75" stroke-dasharray="2,2"/>
+    <path d="${arrHead(wax,way,-wdx,-wdy)}" fill="#4a4a4a"/>
+    <path d="${arrHead(wbx,wby,wdx,wdy)}"   fill="#4a4a4a"/>
+    <text x="${wmx+(isFlipped?18:-18)}" y="${wmy+18}" fill="rgba(255,255,255,.4)" font-size="10" font-family="sans-serif" font-weight="700" text-anchor="middle">${simplified?`W  ${fmt(W)}`:`${fmt(W)} wide`}</text>
+  </g>
+
   <!-- Dimension: Height -->
-  <line x1="${pBLF.x-12}" y1="${pBLF.y}" x2="${pBLC.x-12}" y2="${pBLC.y}" stroke="#444" stroke-width=".75"/>
-  <text x="${pBLF.x-22}" y="${(pBLF.y+pBLC.y)/2+4}" fill="rgba(255,255,255,.4)" font-size="9" text-anchor="middle" font-family="sans-serif" font-weight="600" transform="rotate(-90,${pBLF.x-22},${(pBLF.y+pBLC.y)/2+4})">${fmt(H)}</text>
-  <!-- SD label -->
-  <text x="${(p(W/2,0,0).x+p(W/2,0,SD).x)/2+8}" y="${(p(W/2,0,0).y+p(W/2,0,SD).y)/2}" fill="rgba(196,32,40,.55)" font-size="8.5" font-family="sans-serif" font-weight="700">${fmt(SD)}</text>
-  <!-- Label -->
-  <text x="${SW/2}" y="13" fill="rgba(255,255,255,.2)" font-size="8.5" text-anchor="middle" font-family="sans-serif" letter-spacing="2">LIVE 3D PREVIEW</text>
+  <g opacity=".7">
+    <line x1="${hax}" y1="${hay}" x2="${hbx}" y2="${hby}" stroke="#4a4a4a" stroke-width="1"/>
+    <line x1="${pBRF.x}" y1="${pBRF.y}" x2="${hax}" y2="${hay}" stroke="#333" stroke-width=".75" stroke-dasharray="2,2"/>
+    <line x1="${pBRC.x}" y1="${pBRC.y}" x2="${hbx}" y2="${hby}" stroke="#333" stroke-width=".75" stroke-dasharray="2,2"/>
+    <path d="${arrHead(hax,hay,-hdx,-hdy)}" fill="#4a4a4a"/>
+    <path d="${arrHead(hbx,hby,hdx,hdy)}"   fill="#4a4a4a"/>
+    <text x="${htx}" y="${hmy}" fill="rgba(255,255,255,.4)" font-size="10" font-family="sans-serif" font-weight="700" text-anchor="middle" transform="rotate(${-90*hSide},${htx},${hmy})">${simplified?`H  ${fmt(H)}`:`${fmt(H)} high`}</text>
+  </g>
+
+  <!-- Dimension: Depth -->
+  <g opacity=".7">
+    <line x1="${dax}" y1="${day}" x2="${dbx}" y2="${dby}" stroke="#4a4a4a" stroke-width="1"/>
+    <line x1="${pBRF.x}" y1="${pBRF.y}" x2="${dax}" y2="${day}" stroke="#333" stroke-width=".75" stroke-dasharray="2,2"/>
+    <line x1="${pFRF.x}" y1="${pFRF.y}" x2="${dbx}" y2="${dby}" stroke="#333" stroke-width=".75" stroke-dasharray="2,2"/>
+    <path d="${arrHead(dax,day,dax-dbx,day-dby)}" fill="#4a4a4a"/>
+    <path d="${arrHead(dbx,dby,dbx-dax,dby-day)}" fill="#4a4a4a"/>
+    <text x="${dlx}" y="${dly}" fill="rgba(255,255,255,.4)" font-size="10" font-family="sans-serif" font-weight="700" text-anchor="middle">${simplified?`D  ${fmt(D)}`:`${fmt(D)} deep`}</text>
+  </g>
 </svg>`;
+}
+
+function flipRoomDiagram() {
+  S.diagramFlipped = !S.diagramFlipped;
+  updateRoomDiagram();
 }
 
 function updateRoomDiagram() {
   const el = document.getElementById('room-svg-container');
   if (!el) return;
-  const toFt = v => S.unitFt ? v : Math.round(v / 0.3048 * 10) / 10;
+  const toFt = v => S.unitFt ? v : v / 0.3048;
   const rawW = parseFloat(document.getElementById('m-rw')?.value);
   const rawH = parseFloat(document.getElementById('m-ch')?.value);
   const rawD = parseFloat(document.getElementById('m-rd')?.value);
-  const rawSD = parseFloat(document.getElementById('m-sd')?.value);
   const W = isNaN(rawW) ? null : toFt(rawW);
   const H = isNaN(rawH) ? null : toFt(rawH);
   const D = isNaN(rawD) ? null : toFt(rawD);
-  const SD = isNaN(rawSD) ? null : toFt(rawSD);
-  el.innerHTML = buildRoomSVG(W, H, D, SD, S.unitFt ? 'imperial' : 'metric');
+  const SD = D ? D * 0.55 : null;
+  const simplified = S.diagramMode !== 'detailed';
+  el.innerHTML = buildRoomSVG(W, H, D, SD, S.unitFt ? 'imperial' : 'metric', simplified);
+  const legend = document.getElementById('diagram-legend');
+  if (legend) legend.style.opacity = simplified ? '0.4' : '1';
 }
 
 // ─── SCREEN DISTANCE DIAGRAM ──────────────────────────────────────────────
@@ -2582,6 +2781,15 @@ function spawnConfetti() {
 // ─── PHASE COMPLETION ──────────────────────────────────────────────────────
 function completePhase(key) {
   S.phases[key] = true;
+  if (key === 'device') S.fwPending = false;
+  go('hub');
+}
+
+function skipInstall() {
+  S.phases.room    = true;
+  S.phases.install = true;
+  S.phaseSkipped.room    = true;
+  S.phaseSkipped.install = true;
   go('hub');
 }
 
@@ -2589,6 +2797,18 @@ function enterPhase(key) {
   const deps    = { room:[], install:['room'], device:['room'], cal:['install','device'] };
   const targets = { room:'p2-meas', install:'p3-status', device:'p4inst', cal:'cala' };
   const names   = { room:'Room Confirmation', install:'Installation + Verification', device:'Device Connection', cal:'Calibration' };
+  // If this phase was skipped, clear the skip flag and re-enter it
+  if (S.phaseSkipped[key]) {
+    S.phases[key]       = false;
+    S.phaseSkipped[key] = false;
+    go(targets[key]);
+    return;
+  }
+  // If device firmware update was deferred, resume at the firmware screen
+  if (key === 'device' && S.fwPending) {
+    go('p4fw-info');
+    return;
+  }
   const missing = deps[key].filter(k => !S.phases[k]);
   if (missing.length) { toast('Complete ' + missing.map(k=>names[k]).join(' & ') + ' first'); return; }
   go(targets[key]);
@@ -2633,7 +2853,7 @@ function renderAllScreens() {
 }
 
 // ─── KEYBOARD NAV ──────────────────────────────────────────────────────────
-const FLOW = ['splash','auth','acct-done','p4sel','hub','hub-mlm','p2-meas','p2-check','p3-status','p3-check','p3-power','p4inst','p4scan','p4conn','p4bind','p4fw-info','p4fw','p4fw-done','cala','calb','calc','cald','done','activate','play'];
+const FLOW = ['splash','auth','acct-done','p4sel','clm-preinstalled','hub','hub-mlm','p2-meas','p2-check','p3-status','p3-check','p3-power','p4inst','p4scan','p4conn','p4bind','p4fw-info','p4fw','p4fw-done','cala','calb','calc','cald','done','activate','play'];
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
