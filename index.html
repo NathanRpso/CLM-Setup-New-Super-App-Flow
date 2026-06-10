@@ -404,8 +404,8 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:20px;height:20px;b
 /* CONNECTION GLOW */
 @keyframes connection-glow{0%,100%{box-shadow:0 0 8px rgba(34,197,94,.4)}50%{box-shadow:0 0 30px rgba(34,197,94,.7),0 0 60px rgba(34,197,94,.25)}}
 /* STRIKETHROUGH ON CHECKED ITEMS - readiness + installation checklists only */
-#sc-p2-check .cbx.ck .cbxt-lbl,
-#sc-p3-check .cbx.ck .cbxt-lbl{text-decoration:line-through;color:rgba(255,255,255,.4);transition:all .2s}
+#sc-room-readiness .cbx.ck .cbxt-lbl,
+#sc-install-verify .cbx.ck .cbxt-lbl{text-decoration:line-through;color:rgba(255,255,255,.4);transition:all .2s}
 /* SUB BULLETS - no strikethrough ever */
 .sub-bullets{display:block;margin-top:5px;padding-left:2px}
 .sub-bullet{display:block;font-size:12px;color:var(--muted);line-height:1.6}
@@ -644,7 +644,20 @@ const LOGO = `<img src="rapsodo-golf-logo.png" alt="Rapsodo Golf" style="height:
 const LOGO_LG = `<img src="rapsodo-golf-logo.png" alt="Rapsodo Golf" style="height:104px;width:auto;display:block">`;
 
 // ─── NAVIGATION ────────────────────────────────────────────────────────────
+// Old screen ids → new, so previously-shared links (e.g. #p4sel, #calwand) still resolve.
+const SCREEN_ALIASES = {
+  'acct-done':'account-created','p2-meas':'room-plan','p2-meas-legacy':'room-measurements-legacy',
+  'p2-compat':'room-compatibility','p2-check':'room-readiness','p3-status':'install-start',
+  'p3-check':'install-verify','p3-power':'install-power-on','p4sel':'connect-select',
+  'clm-preinstalled':'connect-preinstalled','p4inst':'connect-power-on','p4scan':'connect-detected',
+  'p4conn':'connect-success','p4bind':'connect-bind','p4fw-info':'firmware-available',
+  'p4fw':'firmware-installing','p4fw-done':'firmware-done','cal-prep':'cal-before-you-begin',
+  'calb':'cal-1-distance','calwand':'cal-2-wand','cala':'cal-3-centerline','calc':'cal-4-environment',
+  'cald':'cal-5-test-shots','done':'setup-complete',
+};
+
 function go(id, opts={}) {
+  if (SCREEN_ALIASES[id]) id = SCREEN_ALIASES[id];
   if (S.screen === 'play') {
     document.getElementById('grass').style.display  = 'block';
     document.getElementById('rmark').style.display  = 'block';
@@ -657,8 +670,113 @@ function go(id, opts={}) {
   S.screen = id;
   updateP4Bar(id);
   if (INIT[id]) INIT[id]();
+  syncDeepLink(id);
   requestAnimationFrame(fitActive);
 }
+
+// ─── DEEP LINKING (share/jump straight to any screen) ───────────────────────
+// Keep the URL hash in sync with the current screen so any screen is shareable
+// (e.g. index.html#cal-2-wand), and reflect it in the dev jump picker.
+function syncDeepLink(id) {
+  if (window.history && history.replaceState) history.replaceState(null, '', '#' + id);
+  const dj = document.getElementById('dev-jump');
+  if (dj && dj.value !== id) dj.value = id;
+}
+
+function screenFromHash() {
+  const raw = decodeURIComponent((location.hash || '').replace(/^#/, '')).trim();
+  const id = SCREEN_ALIASES[raw] || raw;
+  return SCREENS[id] ? id : null;
+}
+
+// Navigate to the screen named in the URL hash (on load, and on hashchange /
+// back-forward). Screens render from default state — no gating prerequisites.
+function applyHashRoute() {
+  const id = screenFromHash();
+  if (id && id !== S.screen) go(id);
+}
+
+// Friendly, flow-ordered names for the dev picker (value = screen id).
+const SCREEN_NAV = [
+  ['Account', [
+    ['splash', 'Splash / Welcome'],
+    ['auth', 'Login / Sign Up'],
+    ['account-created', 'Account Created'],
+  ]],
+  ['Phase 2 · Room', [
+    ['room-plan', 'Plan Your Room'],
+    ['room-measurements-legacy', 'Room Measurements (legacy)'],
+    ['room-compatibility', 'Compatibility Result'],
+    ['room-readiness', 'Installation Readiness Checklist'],
+  ]],
+  ['Phase 3 · Install', [
+    ['install-start', 'Install Your CLM PRO'],
+    ['install-verify', 'Installation + Verification'],
+    ['install-power-on', 'Power-On Confirmation'],
+  ]],
+  ['Hub', [
+    ['hub', 'Device Setup Hub'],
+  ]],
+  ['Phase 4 · Connect', [
+    ['connect-select', 'Select Your Device'],
+    ['connect-preinstalled', 'Already Installed?'],
+    ['connect-power-on', 'Power On & Connect'],
+    ['connect-detected', 'Device Detected'],
+    ['connect-success', 'Connection Successful'],
+    ['connect-bind', 'Name / Bind Device'],
+  ]],
+  ['Phase 4 · Firmware', [
+    ['firmware-available', 'Firmware Update Available'],
+    ['firmware-installing', 'Installing Firmware'],
+    ['firmware-done', 'Firmware Updated'],
+  ]],
+  ['Phase 4 · Calibration', [
+    ['cal-before-you-begin', 'Before You Begin'],
+    ['cal-1-distance', '1 · Screen Distance'],
+    ['cal-2-wand', '2 · Wand Mapping'],
+    ['cal-3-centerline', '3 · Centerline Alignment'],
+    ['cal-4-environment', '4 · Environment Check'],
+    ['cal-5-test-shots', '5 · Test Shots'],
+  ]],
+  ['Finish', [
+    ['setup-complete', 'Setup Complete'],
+    ['activate', 'Activate Membership'],
+    ['play', 'Play Home (App)'],
+  ]],
+  ['MLM2 PRO', [
+    ['hub-mlm', 'MLM2 PRO Setup'],
+  ]],
+];
+
+// Dev-only screen picker. Hidden unless the URL carries ?dev — keeps shared
+// links clean while letting engineering jump anywhere via index.html?dev
+function buildDevNav() {
+  if (!/[?&]dev\b/i.test(location.search)) return;
+  const wrap = document.createElement('div');
+  wrap.id = 'dev-nav';
+  wrap.style.cssText = 'position:fixed;top:8px;right:8px;z-index:9999';
+  const sel = document.createElement('select');
+  sel.id = 'dev-jump';
+  sel.style.cssText = 'font:600 11px var(--body);background:#111;color:#eee;border:1px solid #333;border-radius:6px;padding:5px 8px;cursor:pointer;opacity:.6;max-width:220px';
+  sel.onmouseover = () => sel.style.opacity = '1';
+  sel.onmouseout  = () => sel.style.opacity = '.6';
+  // Any screen not listed in SCREEN_NAV still shows up under "Other".
+  const named = new Set(SCREEN_NAV.flatMap(([, items]) => items.map(([id]) => id)));
+  const groups = SCREEN_NAV.slice();
+  const leftover = Object.keys(SCREENS).filter(id => !named.has(id));
+  if (leftover.length) groups.push(['Other', leftover.map(id => [id, id])]);
+  sel.innerHTML = '<option value="">⚙ Jump to a screen…</option>' +
+    groups.map(([group, items]) =>
+      `<optgroup label="${group}">` +
+      items.map(([id, label]) => `<option value="${id}">${label}</option>`).join('') +
+      `</optgroup>`).join('');
+  sel.onchange = () => { if (sel.value) go(sel.value); };
+  wrap.appendChild(sel);
+  document.body.appendChild(wrap);
+  if (S.screen) sel.value = S.screen;
+}
+
+window.addEventListener('hashchange', applyHashRoute);
 
 // Scale the active screen's content down so it always fits the viewport — never scroll.
 // Components, type and spacing scale together; transform-origin stays centred.
@@ -778,7 +896,7 @@ hub: ()=>`
       <div class="success-mark" style="width:60px;height:60px;font-size:26px;margin:0 auto 14px">✓</div>
       <div class="h3 mb6" style="font-size:1.4rem">ALL PHASES COMPLETE!</div>
       <div class="sub mb16" style="font-size:13px">Your CLM PRO is fully set up and ready to play.</div>
-      <button class="btn btn-red mb10" onclick="go('done')">VIEW SETUP SUMMARY →</button>
+      <button class="btn btn-red mb10" onclick="go('setup-complete')">VIEW SETUP SUMMARY →</button>
     </div>
     <div id="hub-skip-link" class="tc mt12"><span class="lnk" onclick="go('play')">Leave setup for now →</span></div>
   </div>
@@ -826,18 +944,18 @@ auth: ()=>`
   </div>
 </div>`,
 
-'acct-done': ()=>`
-<div class="sc" id="sc-acct-done">
+'account-created': ()=>`
+<div class="sc" id="sc-account-created">
   <div class="cnt" style="text-align:center">
     <div class="success-mark">✓</div>
     <div class="h2 mb8">ACCOUNT CREATED<br>SUCCESSFULLY!</div>
     <div class="sub mb20">Welcome to Rapsodo. Your account is ready.</div>
-    <button class="btn btn-red" onclick="go('p4sel')">SELECT YOUR DEVICE →</button>
+    <button class="btn btn-red" onclick="go('connect-select')">SELECT YOUR DEVICE →</button>
   </div>
 </div>`,
 
-'p2-meas': ()=>`
-<div class="sc" id="sc-p2-meas" style="overflow-y:auto">
+'room-plan': ()=>`
+<div class="sc" id="sc-room-plan" style="overflow-y:auto">
   <div class="cnt-lg">
     <div class="phase-tag mb2"><em>PHASE 1</em> · ROOM CONFIRMATION</div>
     <div class="stepdots mb8"><div class="sdot act"></div><div class="sdot"></div></div>
@@ -861,13 +979,13 @@ auth: ()=>`
 
     <div class="btn-row" style="max-width:560px;margin:0 auto">
       <button class="btn btn-dk" onclick="go('hub')">← BACK</button>
-      <button class="btn btn-red" id="meas-continue-btn" disabled onclick="go('p2-check')">CONTINUE →</button>
+      <button class="btn btn-red" id="meas-continue-btn" disabled onclick="go('room-readiness')">CONTINUE →</button>
     </div>
   </div>
 </div>`,
 
-'p2-meas-legacy': ()=>`
-<div class="sc" id="sc-p2-meas-legacy" style="overflow-y:auto">
+'room-measurements-legacy': ()=>`
+<div class="sc" id="sc-room-measurements-legacy" style="overflow-y:auto">
   <div style="width:100%;max-width:980px;padding:0 24px;position:relative;z-index:10">
     <div class="phase-tag mb2"><em>PHASE 1</em> · ROOM CONFIRMATION</div>
     <div class="stepdots mb8"><div class="sdot act"></div><div class="sdot"></div></div>
@@ -973,13 +1091,13 @@ auth: ()=>`
       </div>
     </div>
     <div style="max-width:480px;margin:20px auto 0">
-      <button class="btn btn-red" id="meas-continue-btn-legacy" style="display:none" onclick="go('p2-check')">CONTINUE →</button>
+      <button class="btn btn-red" id="meas-continue-btn-legacy" style="display:none" onclick="go('room-readiness')">CONTINUE →</button>
     </div>
   </div>
 </div>`,
 
-'p2-compat': ()=>`
-<div class="sc" id="sc-p2-compat">
+'room-compatibility': ()=>`
+<div class="sc" id="sc-room-compatibility">
   <div class="cnt" style="max-width:560px">
     <div class="phase-tag"><em>PHASE 1</em> · ROOM CONFIRMATION</div>
     <div class="stepdots"><div class="sdot done"></div><div class="sdot act"></div><div class="sdot"></div></div>
@@ -993,14 +1111,14 @@ auth: ()=>`
       <button onclick="setCompat('r')" style="height:26px;padding:0 10px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(196,32,40,.1);border:1px solid rgba(196,32,40,.3);color:#f87171;border-radius:4px;cursor:pointer">Incompatible</button>
     </div>
     <div class="btn-row">
-      <button class="btn btn-dk" onclick="go('p2-meas')">← BACK</button>
-      <button class="btn btn-red" id="compat-next" onclick="go('p2-check')">NEXT →</button>
+      <button class="btn btn-dk" onclick="go('room-plan')">← BACK</button>
+      <button class="btn btn-red" id="compat-next" onclick="go('room-readiness')">NEXT →</button>
     </div>
   </div>
 </div>`,
 
-'p2-check': ()=>`
-<div class="sc" id="sc-p2-check">
+'room-readiness': ()=>`
+<div class="sc" id="sc-room-readiness">
   <div class="cnt">
     <div class="phase-tag"><em>PHASE 1</em> · ROOM CONFIRMATION</div>
     <div class="stepdots"><div class="sdot done"></div><div class="sdot act"></div></div>
@@ -1016,18 +1134,18 @@ auth: ()=>`
       </div></div>
       <div class="cbx" onclick="toggleCbx(this,'rc2')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">I have identified my mounting location on the ceiling</span></div></div>
       <div class="cbx" onclick="toggleCbx(this,'rc3')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">A power outlet is within reach of the mount point</span></div></div>
-      <div class="cbx" onclick="toggleCbx(this,'rc4')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">My ethernet cable can reach the mount point - (CLM Tour: or I plan to use a Wi-Fi connection)</span></div></div>
+      <div class="cbx" onclick="toggleCbx(this,'rc4')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">My ethernet cable can reach the mount point</span></div></div>
       <div class="cbx" onclick="toggleCbx(this,'rc5')"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">My impact screen or net enclosure is in place</span></div></div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-dk" onclick="go('p2-meas')">← BACK</button>
+      <button class="btn btn-dk" onclick="go('room-plan')">← BACK</button>
       <button class="btn btn-red" id="rc-btn" disabled onclick="completePhase('room')">NEXT →</button>
     </div>
   </div>
 </div>`,
 
-'p3-status': ()=>`
-<div class="sc" id="sc-p3-status" style="overflow-y:auto">
+'install-start': ()=>`
+<div class="sc" id="sc-install-start" style="overflow-y:auto">
   <div class="cnt">
     <div class="phase-tag mb2"><em>PHASE 2</em> · INSTALLATION + VERIFICATION</div>
     <div class="stepdots mb8"><div class="sdot act"></div><div class="sdot"></div><div class="sdot"></div></div>
@@ -1048,13 +1166,13 @@ auth: ()=>`
     <div class="tc mb16"><span class="lnk" style="font-size:12px" onclick="window.open('#','_blank')">View full installation guide →</span></div>
     <div class="btn-row">
       <button class="btn btn-dk" onclick="go('hub')">← Back to Hub</button>
-      <button class="btn btn-red" onclick="go('p3-check');S.install.mounted=true">I'VE INSTALLED MY CLM PRO →</button>
+      <button class="btn btn-red" onclick="go('install-verify');S.install.mounted=true">I'VE INSTALLED MY CLM PRO →</button>
     </div>
   </div>
 </div>`,
 
-'p3-check': ()=>`
-<div class="sc" id="sc-p3-check">
+'install-verify': ()=>`
+<div class="sc" id="sc-install-verify">
   <div class="cnt">
     <div class="phase-tag"><em>PHASE 2</em> · INSTALLATION + VERIFICATION</div>
     <div class="stepdots"><div class="sdot done"></div><div class="sdot act"></div><div class="sdot"></div></div>
@@ -1083,14 +1201,14 @@ auth: ()=>`
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-dk" onclick="go('p3-status')">← BACK</button>
-      <button class="btn btn-red" id="iv-btn" disabled onclick="go('p3-power')">NEXT →</button>
+      <button class="btn btn-dk" onclick="go('install-start')">← BACK</button>
+      <button class="btn btn-red" id="iv-btn" disabled onclick="go('install-power-on')">NEXT →</button>
     </div>
   </div>
 </div>`,
 
-'p3-power': ()=>`
-<div class="sc" id="sc-p3-power">
+'install-power-on': ()=>`
+<div class="sc" id="sc-install-power-on">
   <div class="cnt" style="max-width:560px">
     <div class="phase-tag"><em>PHASE 2</em> · INSTALLATION + VERIFICATION</div>
     <div class="stepdots mb16"><div class="sdot done"></div><div class="sdot done"></div><div class="sdot act"></div></div>
@@ -1112,7 +1230,7 @@ auth: ()=>`
           NO / NOT SURE
         </button>
       </div>
-      <div class="tc mt12"><button class="btn btn-dk btn-sm" style="width:auto;padding:0 20px" onclick="go('p3-check')">← Back to checklist</button></div>
+      <div class="tc mt12"><button class="btn btn-dk btn-sm" style="width:auto;padding:0 20px" onclick="go('install-verify')">← Back to checklist</button></div>
     </div>
     <div id="trouble" style="display:none">
       <div class="card mb12">
@@ -1127,8 +1245,8 @@ auth: ()=>`
   </div>
 </div>`,
 
-p4sel: ()=>`
-<div class="sc" id="sc-p4sel">
+'connect-select': ()=>`
+<div class="sc" id="sc-connect-select">
   <div class="cnt-lg">
     <div class="h2 mb6">SELECT YOUR DEVICE</div>
     <div class="sub mb24" style="font-size:14px">Please select the device you would like to connect.</div>
@@ -1169,8 +1287,8 @@ p4sel: ()=>`
   </div>
 </div>`,
 
-'clm-preinstalled': ()=>`
-<div class="sc" id="sc-clm-preinstalled">
+'connect-preinstalled': ()=>`
+<div class="sc" id="sc-connect-preinstalled">
   <div class="cnt">
     <div class="phase-tag mb2">CLM PRO SETUP</div>
     <div class="h3 mb8">ALREADY INSTALLED?</div>
@@ -1201,8 +1319,8 @@ p4sel: ()=>`
   </div>
 </div>`,
 
-p4inst: ()=>`
-<div class="sc" id="sc-p4inst">
+'connect-power-on': ()=>`
+<div class="sc" id="sc-connect-power-on">
   <div class="cnt-lg">
     <div class="h2 mb6">POWER ON AND CONNECT<br>THE DEVICE</div>
     <div class="sub mb20" style="font-size:14px">Follow these steps before scanning for your device.</div>
@@ -1239,13 +1357,13 @@ p4inst: ()=>`
     </div>
     <div class="btn-row" style="max-width:640px;margin:0 auto">
       <button class="btn btn-dk" onclick="go('hub')">← BACK</button>
-      <button class="btn btn-red" onclick="go('p4scan')">NEXT →</button>
+      <button class="btn btn-red" onclick="go('connect-detected')">NEXT →</button>
     </div>
   </div>
 </div>`,
 
-p4scan: ()=>`
-<div class="sc" id="sc-p4scan">
+'connect-detected': ()=>`
+<div class="sc" id="sc-connect-detected">
   <div class="cnt" style="max-width:560px">
     <div class="h3 mb6">DEVICE DETECTED</div>
     <div class="sub mb24" style="font-size:14px">Your CLM PRO has been found on the local network. Confirm the details below and continue.</div>
@@ -1261,7 +1379,7 @@ p4scan: ()=>`
     </div>
     <div class="btn-row mb16">
       <button class="btn btn-dk" onclick="showScanTrouble()">NOT MY DEVICE</button>
-      <button class="btn btn-red" onclick="go('p4conn')">CONFIRM →</button>
+      <button class="btn btn-red" onclick="go('connect-success')">CONFIRM →</button>
     </div>
     <div id="scan-trouble" style="display:none">
       <div class="card" style="text-align:left">
@@ -1274,8 +1392,8 @@ p4scan: ()=>`
   </div>
 </div>`,
 
-p4conn: ()=>`
-<div class="sc" id="sc-p4conn">
+'connect-success': ()=>`
+<div class="sc" id="sc-connect-success">
   <div class="cnt" style="max-width:560px">
     <div class="h2 mb6">CONNECTION SUCCESSFUL</div>
     <div class="sub mb20" style="font-size:14px">Your device is now connected and ready to use. Proceed to add more details.</div>
@@ -1293,14 +1411,14 @@ p4conn: ()=>`
       <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot g"></div></div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-dk" onclick="go('p4scan')">← BACK</button>
-      <button class="btn btn-red" onclick="go('p4bind')">NEXT →</button>
+      <button class="btn btn-dk" onclick="go('connect-detected')">← BACK</button>
+      <button class="btn btn-red" onclick="go('connect-bind')">NEXT →</button>
     </div>
   </div>
 </div>`,
 
-p4bind: ()=>`
-<div class="sc" id="sc-p4bind">
+'connect-bind': ()=>`
+<div class="sc" id="sc-connect-bind">
   <div class="cnt" style="max-width:480px">
     <div class="h3 mb6">DEVICE SETUP</div>
     <div class="sub mb20" style="font-size:13px">Give your device a name and confirm the details.</div>
@@ -1327,12 +1445,12 @@ p4bind: ()=>`
       <span class="clm-brand">Rapsodo | CLM PRO</span>
       <div class="clm-led-wrap"><span class="clm-led-lbl">LED</span><div class="led-dot g"></div></div>
     </div>
-    <button class="btn btn-red" onclick="go('p4fw-info')">NEXT →</button>
+    <button class="btn btn-red" onclick="go('firmware-available')">NEXT →</button>
   </div>
 </div>`,
 
-'p4fw-info': ()=>`
-<div class="sc" id="sc-p4fw-info" style="overflow-y:auto">
+'firmware-available': ()=>`
+<div class="sc" id="sc-firmware-available" style="overflow-y:auto">
   <div class="cnt" style="max-width:640px">
     <div class="h3 mb6">LATEST FIRMWARE UPDATE</div>
     <div class="sub mb14" style="font-size:14px">Updating to the latest version for improved performance and new features.</div>
@@ -1355,7 +1473,7 @@ p4bind: ()=>`
     </div>
     <div class="btn-row mb12">
       <button class="btn btn-dk" onclick="S.fwPending=true;go('hub')">NOT NOW</button>
-      <button class="btn btn-red" onclick="go('p4fw')">CONTINUE →</button>
+      <button class="btn btn-red" onclick="go('firmware-installing')">CONTINUE →</button>
     </div>
     <div class="infobox" style="font-size:12px">
       <span class="lbl">Before You Update:</span> Update takes approximately 2–3 minutes &bull; Device will reboot automatically during the process &bull; Make sure the device stays powered on &bull; Keep the Ethernet connection stable
@@ -1363,8 +1481,8 @@ p4bind: ()=>`
   </div>
 </div>`,
 
-p4fw: ()=>`
-<div class="sc" id="sc-p4fw">
+'firmware-installing': ()=>`
+<div class="sc" id="sc-firmware-installing">
   <div class="cnt" style="max-width:640px">
     <div class="h2 mb8">INSTALLING FIRMWARE<br>UPDATE</div>
     <div class="sub mb16" style="font-size:14px">Please do not disconnect power or Ethernet during the update.</div>
@@ -1386,8 +1504,8 @@ p4fw: ()=>`
   </div>
 </div>`,
 
-'p4fw-done': ()=>`
-<div class="sc" id="sc-p4fw-done">
+'firmware-done': ()=>`
+<div class="sc" id="sc-firmware-done">
   <div class="cnt" style="max-width:560px;text-align:center">
     <div class="success-mark mb16">✓</div>
     <div class="h2 mb8">FIRMWARE UPDATED<br>SUCCESSFULLY</div>
@@ -1396,8 +1514,8 @@ p4fw: ()=>`
   </div>
 </div>`,
 
-'cal-prep': ()=>`
-<div class="sc" id="sc-cal-prep">
+'cal-before-you-begin': ()=>`
+<div class="sc" id="sc-cal-before-you-begin">
   <div class="cnt">
     <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="h3 mb4">BEFORE YOU BEGIN</div>
@@ -1407,13 +1525,13 @@ p4fw: ()=>`
       <div class="cbx" onclick="toggleCbx(this,'cp2');checkCalPrep()"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">Ambient lighting is controlled: blinds closed, no direct sunlight hitting the sensors</span></div></div>
       <div class="cbx" onclick="toggleCbx(this,'cp3');checkCalPrep()"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">Everyone is out of the zone, with no people standing in the detection area</span></div></div>
     </div>
-    <button class="btn btn-red mt20" id="cal-prep-btn" disabled onclick="go('calb')">BEGIN CALIBRATION →</button>
+    <button class="btn btn-red mt20" id="cal-prep-btn" disabled onclick="go('cal-1-distance')">BEGIN CALIBRATION →</button>
     <div class="tc mt10"><span class="lnk" onclick="go('hub')">← Back to Hub</span></div>
   </div>
 </div>`,
 
-cala: ()=>`
-<div class="sc" id="sc-cala">
+'cal-3-centerline': ()=>`
+<div class="sc" id="sc-cal-3-centerline">
   <div class="cnt">
     <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
@@ -1462,13 +1580,13 @@ cala: ()=>`
       <div class="rdi"><div class="rdval" id="rd-roll">0.8°</div><div class="rdlbl">Roll</div></div>
       <div class="rdi bad" id="rd-az-item"><div class="rdval" id="rd-az">8.5°</div><div class="rdlbl">Aim Line</div></div>
     </div>
-    <button class="btn btn-red mt16" id="az-btn" disabled onclick="go('calc')">CONFIRM ALIGNMENT →</button>
+    <button class="btn btn-red mt16" id="az-btn" disabled onclick="go('cal-4-environment')">CONFIRM ALIGNMENT →</button>
     <div class="tc mt10"><span class="lnk" onclick="go('hub')">← Back to Hub</span></div>
   </div>
 </div>`,
 
-calb: ()=>`
-<div class="sc" id="sc-calb">
+'cal-1-distance': ()=>`
+<div class="sc" id="sc-cal-1-distance">
   <div class="cnt" style="max-width:560px">
     <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
@@ -1494,14 +1612,14 @@ calb: ()=>`
     </div>
     <div class="dist-range"><span>6 ft (min)</span><span>15 ft (max)</span></div>
     <div class="btn-row mt20">
-      <button class="btn btn-dk" onclick="go('cal-prep')">← BACK</button>
-      <button class="btn btn-red" onclick="S.cal.dist=parseFloat(document.getElementById('dist-slider').value);go('calwand')">NEXT →</button>
+      <button class="btn btn-dk" onclick="go('cal-before-you-begin')">← BACK</button>
+      <button class="btn btn-red" onclick="S.cal.dist=parseFloat(document.getElementById('dist-slider').value);go('cal-2-wand')">NEXT →</button>
     </div>
   </div>
 </div>`,
 
-calwand: ()=>`
-<div class="sc" id="sc-calwand">
+'cal-2-wand': ()=>`
+<div class="sc" id="sc-cal-2-wand">
   <div class="cnt" style="max-width:560px">
     <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
@@ -1533,7 +1651,7 @@ calwand: ()=>`
         <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:rgba(255,255,255,.7)"><span style="color:var(--green)">✓</span> Cover the whole area, front to back and side to side</div>
       </div>
       <button class="btn btn-red" onclick="startWandPass()">START WAND PASS →</button>
-      <div class="tc mt10"><span class="lnk" onclick="go('calb')">← Back</span></div>
+      <div class="tc mt10"><span class="lnk" onclick="go('cal-1-distance')">← Back</span></div>
     </div>
 
     <!-- B · Live capture -->
@@ -1583,8 +1701,8 @@ calwand: ()=>`
   </div>
 </div>`,
 
-calc: ()=>`
-<div class="sc" id="sc-calc">
+'cal-4-environment': ()=>`
+<div class="sc" id="sc-cal-4-environment">
   <div class="cnt">
     <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
@@ -1601,12 +1719,12 @@ calc: ()=>`
       <div class="chkitem" style="animation-delay:.2s" id="ec-3"><div class="chksta pend" id="ec3-s">·</div><div class="chklbl">Pitch &amp; Roll Verification</div><div class="chkval" id="ec3-v"></div></div>
       <div class="chkitem" style="animation-delay:.3s" id="ec-4"><div class="chksta pend" id="ec4-s">·</div><div class="chklbl">Height Confirmation (${S.install.height || '8.5'} ft)</div><div class="chkval" id="ec4-v"></div></div>
     </div>
-    <button class="btn btn-red" id="ec-btn" disabled onclick="go('cald')">PROCEED →</button>
+    <button class="btn btn-red" id="ec-btn" disabled onclick="go('cal-5-test-shots')">PROCEED →</button>
   </div>
 </div>`,
 
-cald: ()=>`
-<div class="sc" id="sc-cald">
+'cal-5-test-shots': ()=>`
+<div class="sc" id="sc-cal-5-test-shots">
   <div class="cnt">
     <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
@@ -1624,8 +1742,8 @@ cald: ()=>`
     </div>
     <div id="shots-container"></div>
     <button class="btn btn-red mb8" id="sim-btn" onclick="simulateShot()">🏌 SIMULATE SHOT</button>
-    <button class="btn btn-dk" id="complete-btn" style="display:none" onclick="S.phases.cal=true;go('done')">COMPLETE CALIBRATION ✓</button>
-    <div class="tc mt8"><span class="lnk" id="retry-cal" style="display:none" onclick="go('calwand')">Not registering? Re-run wand calibration</span></div>
+    <button class="btn btn-dk" id="complete-btn" style="display:none" onclick="S.phases.cal=true;go('setup-complete')">COMPLETE CALIBRATION ✓</button>
+    <div class="tc mt8"><span class="lnk" id="retry-cal" style="display:none" onclick="go('cal-2-wand')">Not registering? Re-run wand calibration</span></div>
   </div>
 </div>`,
 
@@ -1704,7 +1822,7 @@ play: ()=>`
           <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:1px">Device setup incomplete</div>
           <div style="font-size:12px;color:#78350f">Complete device setup to unlock all play modes.</div>
         </div>
-        <button onclick="S.setupSkipped?go('p4sel'):go('hub')" style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--head);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0">SETUP →</button>
+        <button onclick="S.setupSkipped?go('connect-select'):go('hub')" style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--head);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0">SETUP →</button>
       </div>
       <div id="play-modes" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px"></div>
       <div style="display:flex;align-items:center;gap:4px;opacity:.3">
@@ -1762,7 +1880,7 @@ play: ()=>`
       <button class="btn btn-red" onclick="completeMLMSetup()">SIMULATE SETUP COMPLETE →</button>
     </div>
 
-    <div class="tc"><button class="btn btn-dk btn-sm" style="width:auto;padding:0 24px" onclick="go('p4sel')">← Change Device</button></div>
+    <div class="tc"><button class="btn btn-dk btn-sm" style="width:auto;padding:0 24px" onclick="go('connect-select')">← Change Device</button></div>
   </div>
 </div>`,
 
@@ -1773,8 +1891,8 @@ activate: ()=>`
   </div>
 </div>`,
 
-done: ()=>`
-<div class="sc" id="sc-done" style="overflow-y:auto">
+'setup-complete': ()=>`
+<div class="sc" id="sc-setup-complete" style="overflow-y:auto">
   <div class="cnt" id="done-content">
     <div class="success-mark">✓</div>
     <div class="h2 mb8">SETUP COMPLETE!</div>
@@ -1797,7 +1915,7 @@ done: ()=>`
 // ─── SCREEN INIT CALLBACKS ─────────────────────────────────────────────────
 const INIT = {
   auth: () => {},
-  'p2-meas': () => {
+'room-plan': ()=> {
     // Embedded Room Planner step — reset the acknowledgement gate each entry.
     const ack = document.getElementById('room-ack');
     if (ack) ack.classList.remove('ck');
@@ -1806,10 +1924,10 @@ const INIT = {
     const fb = document.getElementById('planner-fallback');
     if (fb) fb.style.display = 'none';
   },
-  'p2-compat': () => {
+'room-compatibility': ()=> {
     renderCompat(S.compatState);
   },
-  p4bind: () => {
+'connect-bind': ()=> {
     const bh = document.getElementById('bind-height');
     if (bh) bh.textContent = (S.install.height || '8.5') + ' ft';
     setTimeout(() => {
@@ -1817,9 +1935,9 @@ const INIT = {
       if (inp) { inp.focus(); inp.select(); }
     }, 200);
   },
-  'p4fw-done': () => {},
-  p4scan: () => {},
-  p4fw: () => {
+'firmware-done': ()=> {},
+'connect-detected': ()=> {},
+'firmware-installing': ()=> {
     S.fwProg = 0;
     const fill = document.getElementById('fw-fill');
     const stat = document.getElementById('fw-stat');
@@ -1831,15 +1949,15 @@ const INIT = {
         clearInterval(timer);
         stat.innerHTML = '✓ Firmware updated to v' + S.device.fwNew;
         stat.style.color = 'var(--green)';
-        setTimeout(() => go('p4fw-done'), 1500);
+        setTimeout(() => go('firmware-done'), 1500);
       }
     }, 100);
   },
-  cala: () => {
+'cal-3-centerline': ()=> {
     const slider = document.getElementById('az-slider');
     if (slider) { slider.value = 8.5; updateAzimuth(8.5); }
   },
-  calb: () => {
+'cal-1-distance': ()=> {
     const el = document.getElementById('dist-diagram');
     if (el) el.innerHTML = buildDistDiagram(S.cal.dist || 9);
     const sl = document.getElementById('dist-slider');
@@ -1848,7 +1966,7 @@ const INIT = {
     if (dv) dv.textContent = (S.cal.dist || 9).toFixed(1) + ' ft';
     setTimeout(() => positionDistArrows(S.cal.dist || 9), 50);
   },
-  calwand: () => {
+'cal-2-wand': ()=> {
     S.cal.wandSolving = false;
     const intro = document.getElementById('cw-intro');
     const cap   = document.getElementById('cw-capture');
@@ -1864,12 +1982,12 @@ const INIT = {
     if (sim) sim.disabled = false;
     buildWandGrid();
   },
-  calc: () => {
+'cal-4-environment': ()=> {
     const ec4lbl = document.querySelector('#ec-4 .chklbl');
     if (ec4lbl) ec4lbl.textContent = `Height Confirmation (${S.install.height || '8.5'} ft)`;
     runEnvChecks();
   },
-  cald: () => {
+'cal-5-test-shots': ()=> {
     S.cal.shots = [];
     document.getElementById('shot-count').textContent = '0';
     document.getElementById('shots-container').innerHTML = '';
@@ -1967,11 +2085,11 @@ const INIT = {
       }, 5000);
     }
   },
-  done: () => {
+'setup-complete': ()=> {
     const sd = document.getElementById('sum-device');
     const sh = document.getElementById('sum-height');
     const sdist = document.getElementById('sum-dist');
-    const sub = document.querySelector('#sc-done .sub');
+    const sub = document.querySelector('#sc-setup-complete .sub');
     if (sd) sd.textContent = S.device.name;
     if (sub) sub.textContent = S.device.type === 'mlm'
       ? 'Your MLM2 PRO is set up and ready to play.'
@@ -2075,14 +2193,14 @@ function checkSignup() {
 function doLogin() {
   S.user.email = document.getElementById('li-email')?.value || '';
   S.user.isGuest = false;
-  go('p4sel');
+  go('connect-select');
 }
 
 function doSignup() {
   S.user.name = document.getElementById('su-name')?.value || '';
   S.user.email = document.getElementById('su-email')?.value || '';
   S.user.isNew = true;
-  go('acct-done');
+  go('account-created');
 }
 
 function showTrialModal() {
@@ -2099,7 +2217,7 @@ function openLoginWithTrial() {
 
 function closeTrialModal() {
   document.getElementById('trial-ov').classList.remove('open');
-  go('p4sel');
+  go('connect-select');
 }
 
 function prefill() {
@@ -2237,7 +2355,7 @@ function saveMeasAndNext() {
   const result = validateRoom(ch, rd, rw, cm);
   S.compatState = result.status;
   S.compatIssues = result.issues;
-  go('p2-check');
+  go('room-readiness');
 }
 
 function setCompat(state) {
@@ -2345,7 +2463,7 @@ function toggleCbx(el, key) {
   // Generic: check readiness and IV buttons
   const rcBtn = document.getElementById('rc-btn');
   if (rcBtn) {
-    const items = document.querySelectorAll('#sc-p2-check .cbx');
+    const items = document.querySelectorAll('#sc-room-readiness .cbx');
     rcBtn.disabled = ![...items].every(i=>i.classList.contains('ck'));
   }
   checkIV();
@@ -2363,7 +2481,7 @@ function autoCheckHeight(inp) {
 function checkIV() {
   const btn = document.getElementById('iv-btn');
   if (!btn) return;
-  const items = document.querySelectorAll('#sc-p3-check .cbx');
+  const items = document.querySelectorAll('#sc-install-verify .cbx');
   const h = document.getElementById('iv-height')?.value;
   btn.disabled = !([...items].every(i=>i.classList.contains('ck')) && h);
 }
@@ -2420,7 +2538,7 @@ function toggleIVUnit() {
 }
 
 function openInstallGuide() {
-  go('p3-status');
+  go('install-start');
 }
 
 function selectDev(id) {
@@ -2439,12 +2557,12 @@ function selectDev(id) {
 function enterSetupHub() {
   S.setupSkipped = false;
   if (S.device.type === 'mlm') go('hub-mlm');
-  else go('clm-preinstalled');
+  else go('connect-preinstalled');
 }
 
 function completeMLMSetup() {
   S.phases.room = S.phases.install = S.phases.device = S.phases.cal = true;
-  go('done');
+  go('setup-complete');
 }
 
 function continueAsGuest() {
@@ -2821,7 +2939,7 @@ function wandSolve() {
       if (sp) sp.style.display = 'none';
       if (ok) ok.style.display = 'block';
       requestAnimationFrame(fitActive);
-      setTimeout(() => { if (S.screen === 'calwand') go('cala'); }, 1500);
+      setTimeout(() => { if (S.screen === 'cal-2-wand') go('cal-3-centerline'); }, 1500);
     }, 2600);
   }, 450);
 }
@@ -3183,7 +3301,7 @@ function enterPhase(key) {
   }
   // If device firmware update was deferred, resume at the firmware screen
   if (key === 'device' && S.fwPending) {
-    go('p4fw-info');
+    go('firmware-available');
     return;
   }
   const missing = deps[key].filter(k => !S.phases[k]);
@@ -3230,7 +3348,7 @@ function renderAllScreens() {
 }
 
 // ─── KEYBOARD NAV ──────────────────────────────────────────────────────────
-const FLOW = ['splash','auth','acct-done','p4sel','clm-preinstalled','hub','hub-mlm','p2-meas','p2-check','p3-status','p3-check','p3-power','p4inst','p4scan','p4conn','p4bind','p4fw-info','p4fw','p4fw-done','cal-prep','cala','calb','calc','cald','done','activate','play'];
+const FLOW = ['splash','auth','account-created','connect-select','connect-preinstalled','hub','hub-mlm','room-plan','room-readiness','install-start','install-verify','install-power-on','connect-power-on','connect-detected','connect-success','connect-bind','firmware-available','firmware-installing','firmware-done','cal-before-you-begin','cal-1-distance','cal-2-wand','cal-3-centerline','cal-4-environment','cal-5-test-shots','setup-complete','activate','play'];
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
@@ -3246,6 +3364,8 @@ document.addEventListener('keydown', e => {
 generateGrass();
 renderAllScreens();
 document.getElementById('p4bar').style.display = 'none';
+buildDevNav();      // ?dev → show the screen picker
+applyHashRoute();   // #<screen> → deep-link straight to that screen on load
 </script>
 </body>
 </html>
