@@ -1,0 +1,12 @@
+# Static prototype — no build step. Publish the files into public/ for GitLab Pages.
+pages:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - mkdir -p public
+    - cp index.html planner-placeholder.html *.png *.jpg public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
