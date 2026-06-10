@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Rapsodo Golf — CLM PRO Setup</title>
+<title>Rapsodo Golf - CLM PRO Setup</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,700;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -16,6 +16,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
   --border:#2a2a2a;--text:#fff;--muted:#787878;--ph:#454545;
   --green:#22C55E;--amber:#F59E0B;--r:6px;
   --head:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;
+  /* Consistent frame gutter — the minimum distance content keeps from every viewport
+     edge, identical on all four sides and every screen, scaled across the full PC
+     viewport range (4vmin → tracks the smaller dimension). fitActive() scales content
+     to fit inside this frame so the spacing reads uniform everywhere. */
+  --frame:clamp(24px,4vmin,64px);
 }
 #app{width:100vw;height:100vh;position:relative;overflow:hidden;background:#000;font-family:var(--body);color:var(--text)}
 
@@ -30,8 +35,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* SCREENS */
-.sc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:translateY(12px);transition:opacity .35s ease,transform .35s ease;pointer-events:none;z-index:10}
+.sc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:var(--frame);opacity:0;transform:translateY(12px);transition:opacity .35s ease,transform .35s ease;pointer-events:none;z-index:10}
 .sc.on{opacity:1;transform:translateY(0);pointer-events:all}
+/* Scale-to-fit: fitActive() (JS) shrinks the content to fit the viewport so screens
+   never scroll — text, components and spacing scale together. transform-origin stays
+   centred so justify-content:center keeps it visually centred at any scale. */
+.sc>.cnt,.sc>.cnt-lg{transition:transform .2s ease}
+/* The launch-monitor view is full-bleed — no gutter, never scaled. */
+#sc-play{padding:0}
 
 /* PHASE 4 TOP PROGRESS */
 #p4bar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;pointer-events:none;background:rgba(0,0,0,.85);backdrop-filter:blur(4px)}
@@ -102,12 +113,12 @@ select.inp{padding-left:16px;appearance:none;cursor:pointer}
 .ubtn.on{background:var(--red);color:#fff}
 
 /* CHECKBOX */
-.cbx{display:flex;align-items:flex-start;gap:12px;padding:10px 0;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);user-select:none}
+.cbx{display:flex;align-items:flex-start;gap:11px;padding:7px 0;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);user-select:none}
 .cbx:last-child{border-bottom:none}
-.cbbox{width:22px;height:22px;min-width:22px;border:2px solid #3a3a3a;border-radius:4px;background:transparent;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.cbbox{width:20px;height:20px;min-width:20px;border:2px solid #3a3a3a;border-radius:4px;background:transparent;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
 .cbx.ck .cbbox{background:var(--red);border-color:var(--red)}
 .cbx.ck .cbbox::after{content:'✓';color:#fff;font-size:13px;font-weight:700}
-.cbxt{font-size:14px;color:rgba(255,255,255,.8);line-height:1.5}
+.cbxt{font-size:13px;color:rgba(255,255,255,.8);line-height:1.45}
 
 /* TABS */
 .tabs{display:flex;gap:28px;justify-content:center;margin-bottom:28px}
@@ -115,7 +126,7 @@ select.inp{padding-left:16px;appearance:none;cursor:pointer}
 .tab.on{color:#fff;border-bottom-color:var(--red)}
 
 /* CARDS */
-.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;transition:border-color .2s}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:border-color .2s}
 .card.sel{border-color:var(--red)}
 
 /* DEVICE CARDS */
@@ -261,6 +272,35 @@ select.inp{padding-left:16px;appearance:none;cursor:pointer}
 .calph.act .calph-fill{width:50%;animation:pulse-bar 1.5s ease-in-out infinite}
 @keyframes pulse-bar{0%,100%{opacity:.7}50%{opacity:1}}
 
+/* WAND CALIBRATION */
+.wanddemo{position:relative;height:120px;background:#111612;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.wanddemo .floor{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,rgba(196,32,40,.06),transparent 70%)}
+.wanddemo .rod{position:absolute;top:50%;left:8%;width:10px;height:70px;transform:translate(-50%,-50%);animation:wandsweep 3.4s ease-in-out infinite}
+.wanddemo .rod .stick{position:absolute;left:50%;top:0;bottom:0;width:6px;transform:translateX(-50%);border-radius:3px;background:linear-gradient(#e6e6e6,#9a9a9a)}
+.wanddemo .rod .wdotmark{position:absolute;left:50%;width:9px;height:9px;border-radius:50%;background:#fff;transform:translateX(-50%);box-shadow:0 0 6px rgba(255,255,255,.7)}
+@keyframes wandsweep{0%{left:10%}50%{left:90%}100%{left:10%}}
+.wgrid{position:absolute;inset:0;display:grid;gap:2px;padding:2px;touch-action:none;cursor:crosshair;z-index:3}
+.wcell{border:1px solid rgba(255,255,255,.08);border-radius:3px;background:rgba(255,255,255,.02);transition:background .2s,border-color .2s,box-shadow .2s}
+.wcell.filling{background:rgba(196,32,40,.28);border-color:rgba(196,32,40,.6);box-shadow:inset 0 0 12px rgba(196,32,40,.4)}
+.wcell.done{background:rgba(34,197,94,.32);border-color:rgba(34,197,94,.7);box-shadow:inset 0 0 12px rgba(34,197,94,.3)}
+.wdots{position:absolute;inset:0;pointer-events:none;z-index:4}
+.wdot{position:absolute;width:7px;height:7px;border-radius:50%;background:#ff5a4d;box-shadow:0 0 8px rgba(255,90,77,.9);transform:translate(-50%,-50%);animation:wdotf .6s ease forwards}
+@keyframes wdotf{0%{opacity:1;transform:translate(-50%,-50%) scale(1.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(.6)}}
+.wcoach{background:rgba(196,32,40,.1);border:1px solid rgba(196,32,40,.3);border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;color:#f2a3a3;text-align:center;margin-top:10px;transition:all .25s}
+.wcoach.ok{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:#86efac}
+/* WAND 3D SCENE */
+.wscene{position:relative;width:100%;height:clamp(230px,28vh,440px);background:radial-gradient(ellipse at 50% 22%,#16211b,#090c09 78%);border:1px solid var(--border);border-radius:10px;overflow:hidden;touch-action:none}
+.wscene svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.wcell-svg{cursor:crosshair;transition:fill .25s ease,stroke .25s ease}
+.wpanel{position:absolute;top:9px;right:9px;width:150px;background:rgba(8,18,28,.74);border:1px solid rgba(120,180,230,.45);border-radius:8px;padding:9px 10px 7px;backdrop-filter:blur(3px)}
+.wpanel h5{font-family:var(--head);font-size:.68rem;letter-spacing:.09em;color:#7fb6e6;text-transform:uppercase;margin:0 0 7px;text-align:center}
+.wpanel ul{margin:0;padding:0}
+.wpanel li{font-size:9px;line-height:1.4;color:rgba(255,255,255,.62);margin-bottom:5px;list-style:none;padding-left:9px;position:relative}
+.wpanel li::before{content:'';position:absolute;left:0;top:5px;width:3px;height:3px;border-radius:50%;background:#7fb6e6}
+.wtoggle{position:absolute;bottom:9px;right:9px;display:flex;flex-direction:column;gap:5px}
+.wtoggle button{font-family:var(--head);font-size:8.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:6px 11px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.4);color:rgba(255,255,255,.6);cursor:pointer}
+.wtoggle button.on{background:var(--red);color:#fff;border-color:var(--red)}
+
 /* POWER BTNS */
 .pwrbtns{display:flex;gap:12px;width:100%}
 .pwrbtn{flex:1;height:60px;font-family:var(--head);font-size:1.1rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;border:2px solid var(--border);border-radius:8px;background:var(--card);color:#fff;cursor:pointer;transition:all .2s}
@@ -330,6 +370,9 @@ select.inp{padding-left:16px;appearance:none;cursor:pointer}
 .hub-phcard.skipped{border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04)}
 .hub-phcard.skipped .hub-phnum{background:#78716c}
 .hub-phcard.skipped .hub-phcta{color:#a16207}
+/* Hub is the densest screen (4 phase cards); trim its spacing on short viewports
+   (e.g. 1366×768 laptops) so it fits without scroll. */
+@media(max-height:820px){.hub-phcard{padding:13px 18px}.hub-grid{gap:8px}}
 .hub-preinstalled{display:none;margin-bottom:14px;border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:12px 16px;background:rgba(245,158,11,.05)}
 .hub-preinstalled-row{display:flex;align-items:center;gap:10px}
 .hub-preinstalled-ico{font-size:16px;flex-shrink:0;line-height:1}
@@ -404,8 +447,8 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:20px;height:20px;b
 .sub{font-size:clamp(12px,0.9vw,17px)!important}
 
 /* Fluid containers */
-.cnt{max-width:clamp(400px,32vw,680px);padding:0 clamp(16px,2vw,36px)}
-.cnt-lg{max-width:clamp(680px,52vw,1100px);padding:0 clamp(16px,2.5vw,40px)}
+.cnt{max-width:clamp(400px,32vw,680px);padding:0}
+.cnt-lg{max-width:clamp(680px,52vw,1100px);padding:0}
 
 /* Fluid interactive elements */
 .btn,.inp,.ubtn{height:clamp(40px,3.5vh,62px);font-size:clamp(11px,0.85vw,14px)}
@@ -485,14 +528,7 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:20px;height:20px;b
 
   <!-- R Mark -->
   <div id="rmark">
-    <svg width="38" height="48" viewBox="0 0 38 48" fill="none">
-      <rect x="0" y="0" width="5" height="48" fill="white" rx="1"/>
-      <rect x="5" y="0" width="22" height="7" fill="white" rx="1"/>
-      <rect x="5" y="19" width="22" height="7" fill="white" rx="1"/>
-      <rect x="21" y="7" width="6" height="12" fill="white"/>
-      <line x1="21" y1="26" x2="32" y2="48" stroke="white" stroke-width="6" stroke-linecap="round"/>
-      <text x="28" y="46" font-size="8" fill="white" font-family="sans-serif" opacity=".7">®</text>
-    </svg>
+    <img src="rapsodo-r-mark.jpg" alt="Rapsodo" style="width:48px;height:48px;display:block">
   </div>
 
   <!-- Trial Modal Overlay -->
@@ -603,37 +639,9 @@ function generateGrass() {
 }
 
 // ─── LOGO HTML ─────────────────────────────────────────────────────────────
-const LOGO = `<div class="logo">
-  <div style="display:flex;flex-direction:column;gap:3px;margin-right:2px;justify-content:center">
-    <div style="display:flex;gap:2px;align-items:flex-end">
-      <div style="width:3px;height:22px;background:#fff;border-radius:1px"></div>
-      <div style="display:flex;flex-direction:column;gap:3px">
-        <div style="width:8px;height:2px;background:#fff;border-radius:1px"></div>
-        <div style="width:6px;height:2px;background:#fff;border-radius:1px;margin-left:2px"></div>
-        <div style="width:8px;height:2px;background:#fff;border-radius:1px"></div>
-        <div style="width:6px;height:2px;background:#fff;border-radius:1px;margin-left:2px"></div>
-      </div>
-    </div>
-  </div>
-  <span style="font-family:var(--head);font-weight:700;font-size:26px;color:#fff;line-height:1">Rapsodo</span>
-  <span style="font-family:var(--head);font-weight:400;font-size:22px;color:#fff;letter-spacing:.3em;margin-left:4px">GOLF</span>
-</div>`;
+const LOGO = `<img src="rapsodo-golf-logo.png" alt="Rapsodo Golf" style="height:72px;width:auto;display:block">`;
 
-const LOGO_LG = `<div class="logo" style="transform:scale(1.3);transform-origin:center">
-  <div style="display:flex;flex-direction:column;gap:3px;margin-right:2px;justify-content:center">
-    <div style="display:flex;gap:2px;align-items:flex-end">
-      <div style="width:3px;height:22px;background:#fff;border-radius:1px"></div>
-      <div style="display:flex;flex-direction:column;gap:3px">
-        <div style="width:8px;height:2px;background:#fff;border-radius:1px"></div>
-        <div style="width:6px;height:2px;background:#fff;border-radius:1px;margin-left:2px"></div>
-        <div style="width:8px;height:2px;background:#fff;border-radius:1px"></div>
-        <div style="width:6px;height:2px;background:#fff;border-radius:1px;margin-left:2px"></div>
-      </div>
-    </div>
-  </div>
-  <span style="font-family:var(--head);font-weight:700;font-size:26px;color:#fff;line-height:1">Rapsodo</span>
-  <span style="font-family:var(--head);font-weight:400;font-size:22px;color:#fff;letter-spacing:.3em;margin-left:4px">GOLF</span>
-</div>`;
+const LOGO_LG = `<img src="rapsodo-golf-logo.png" alt="Rapsodo Golf" style="height:104px;width:auto;display:block">`;
 
 // ─── NAVIGATION ────────────────────────────────────────────────────────────
 function go(id, opts={}) {
@@ -649,7 +657,30 @@ function go(id, opts={}) {
   S.screen = id;
   updateP4Bar(id);
   if (INIT[id]) INIT[id]();
+  requestAnimationFrame(fitActive);
 }
+
+// Scale the active screen's content down so it always fits the viewport — never scroll.
+// Components, type and spacing scale together; transform-origin stays centred.
+function fitActive() {
+  const sc = document.querySelector('.sc.on');
+  if (!sc || sc.id === 'sc-play' || sc.id === 'sc-splash') return;
+  const content = sc.querySelector(':scope > .cnt, :scope > .cnt-lg');
+  if (!content) return;
+  content.style.transform = 'none';
+  // Available area = the screen minus its frame padding (the --frame gutter).
+  const cs = getComputedStyle(sc);
+  const availH = sc.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const availW = sc.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  // Scale DOWN only, never up — components keep their natural (viewport-driven) size so
+  // the same element is the same size on every screen. Sparse screens simply sit with
+  // more whitespace; a dense screen shrinks just enough to fit, so nothing ever scrolls.
+  const s = Math.min(1, availH / content.offsetHeight, availW / content.offsetWidth);
+  content.style.transform = s < 1 ? 'scale(' + s.toFixed(4) + ')' : '';
+}
+let _fitT;
+window.addEventListener('resize', () => { clearTimeout(_fitT); _fitT = setTimeout(fitActive, 80); });
+window.addEventListener('load', () => requestAnimationFrame(fitActive));
 
 function updateP4Bar(id) {
   document.getElementById('p4bar').style.display = 'none';
@@ -696,7 +727,7 @@ hub: ()=>`
         </div>
       </div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="hub-dev-name">—</div>
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="hub-dev-name">Not set</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px" id="hub-dev-id">Please complete your device setup</div>
       </div>
     </div>
@@ -755,8 +786,8 @@ hub: ()=>`
 
 auth: ()=>`
 <div class="sc" id="sc-auth">
-  <div style="position:absolute;top:22px;left:50%;transform:translateX(-50%);z-index:20">${LOGO}</div>
   <div class="cnt">
+    <div style="display:flex;justify-content:center;margin-bottom:22px">${LOGO}</div>
     <div class="tabs">
       <div class="tab on" id="tab-login" onclick="switchTab('login')">LOGIN</div>
       <div class="tab" id="tab-signup" onclick="switchTab('signup')">SIGN UP</div>
@@ -806,7 +837,37 @@ auth: ()=>`
 </div>`,
 
 'p2-meas': ()=>`
-<div class="sc" id="sc-p2-meas" style="overflow-y:auto;padding:24px 0 40px">
+<div class="sc" id="sc-p2-meas" style="overflow-y:auto">
+  <div class="cnt-lg">
+    <div class="phase-tag mb2"><em>PHASE 1</em> · ROOM CONFIRMATION</div>
+    <div class="stepdots mb8"><div class="sdot act"></div><div class="sdot"></div></div>
+    <div class="h3 mb6">PLAN YOUR ROOM</div>
+    <div class="sub mb20" style="font-size:14px">Use the Room Planner below to enter your space and confirm your CLM PRO will fit. When you're done, acknowledge and continue.</div>
+
+    <!-- Embedded Room Planner — webview stand-in. Swap src for the deployed planner's embed URL when hosted. -->
+    <div id="planner-frame-wrap" style="position:relative;height:min(50vh,520px);aspect-ratio:16/10;max-width:100%;margin:0 auto 18px;background:#0a0a0a;border:1px solid var(--border);border-radius:10px;overflow:hidden">
+      <iframe id="planner-frame" src="planner-placeholder.html?embed=clm" title="Rapsodo Room Planner" allow="fullscreen" onerror="document.getElementById('planner-fallback').style.display='flex'" style="width:100%;height:100%;border:0;display:block"></iframe>
+      <!-- Fallback if the frame is blocked (X-Frame-Options / offline) or fails to load -->
+      <div id="planner-fallback" style="display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;background:#0a0a0a">
+        <div class="sub" style="margin:0">The Room Planner couldn't load in this view.</div>
+        <a href="planner-placeholder.html?embed=clm" target="_blank" rel="noopener" class="btn btn-dk" style="text-decoration:none;width:auto;padding:0 22px">OPEN ROOM PLANNER ↗</a>
+      </div>
+    </div>
+
+    <!-- Acknowledgement gate (no hard gate — advisory planner, re-validated at install) -->
+    <div class="card mb16" style="max-width:560px;margin-left:auto;margin-right:auto">
+      <div class="cbx" id="room-ack" onclick="ackRoom(this)"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">I've reviewed my room dimensions in the planner and understand the recommended minimums</span></div></div>
+    </div>
+
+    <div class="btn-row" style="max-width:560px;margin:0 auto">
+      <button class="btn btn-dk" onclick="go('hub')">← BACK</button>
+      <button class="btn btn-red" id="meas-continue-btn" disabled onclick="go('p2-check')">CONTINUE →</button>
+    </div>
+  </div>
+</div>`,
+
+'p2-meas-legacy': ()=>`
+<div class="sc" id="sc-p2-meas-legacy" style="overflow-y:auto">
   <div style="width:100%;max-width:980px;padding:0 24px;position:relative;z-index:10">
     <div class="phase-tag mb2"><em>PHASE 1</em> · ROOM CONFIRMATION</div>
     <div class="stepdots mb8"><div class="sdot act"></div><div class="sdot"></div></div>
@@ -912,7 +973,7 @@ auth: ()=>`
       </div>
     </div>
     <div style="max-width:480px;margin:20px auto 0">
-      <button class="btn btn-red" id="meas-continue-btn" style="display:none" onclick="go('p2-check')">CONTINUE →</button>
+      <button class="btn btn-red" id="meas-continue-btn-legacy" style="display:none" onclick="go('p2-check')">CONTINUE →</button>
     </div>
   </div>
 </div>`,
@@ -972,9 +1033,6 @@ auth: ()=>`
     <div class="stepdots mb8"><div class="sdot act"></div><div class="sdot"></div><div class="sdot"></div></div>
     <div class="h3 mb6">INSTALL YOUR CLM PRO</div>
     <div class="sub mb20" style="font-size:14px">Follow the installation guide below, then continue to verify your setup.</div>
-    <div class="infobox mb20">
-      <span class="lbl">Before continuing:</span> Your CLM PRO must be fully mounted and secured to the ceiling. The next step confirms it's level, powered on, and ready to connect.
-    </div>
     <!-- Video placeholder -->
     <div style="width:100%;aspect-ratio:16/9;background:#111;border:1px solid var(--border);border-radius:8px;overflow:hidden;position:relative;margin-bottom:16px;display:flex;align-items:center;justify-content:center">
       <div style="position:absolute;inset:0;background:linear-gradient(160deg,#1a1a1a,#0a0a0a)"></div>
@@ -1059,9 +1117,9 @@ auth: ()=>`
     <div id="trouble" style="display:none">
       <div class="card mb12">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px;color:var(--muted)">Troubleshooting Steps</div>
-        <div class="troub-item"><div class="troub-num">1</div><div>Check the power cable at both the unit and the power adapter — ensure fully seated</div></div>
+        <div class="troub-item"><div class="troub-num">1</div><div>Check the power cable at both the unit and the power adapter, and make sure it's fully seated</div></div>
         <div class="troub-item"><div class="troub-num">2</div><div>Try a different power outlet</div></div>
-        <div class="troub-item"><div class="troub-num">3</div><div>If the LED is <span style="color:var(--red);font-weight:600">red</span> — note the error code displayed and contact support</div></div>
+        <div class="troub-item"><div class="troub-num">3</div><div>If the LED is <span style="color:var(--red);font-weight:600">red</span>, note the error code displayed and contact support</div></div>
       </div>
       <div class="tc mb12"><span class="lnk">Still having trouble? Contact Support →</span></div>
       <button class="btn btn-dk btn-sm" onclick="document.getElementById('trouble').style.display='none';document.getElementById('power-question').style.display='block'">← Back</button>
@@ -1137,7 +1195,7 @@ p4sel: ()=>`
           </svg>
         </div>
         <div class="otitle">Not yet</div>
-        <div class="odesc">Start from the beginning — room check, installation, then connect</div>
+        <div class="odesc">Start from the beginning: room check, installation, then connect</div>
       </div>
     </div>
   </div>
@@ -1164,7 +1222,7 @@ p4inst: ()=>`
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
         <div style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Step 2</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.4">Press the power button on the device — wait for red LED</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.4">Press the power button on the device, then wait for the red LED</div>
       </div>
       <div style="flex:1;text-align:center;padding:0 20px;position:relative">
         <div style="position:absolute;top:22px;right:50%;left:0;height:2px;background:rgba(255,255,255,.08)"></div>
@@ -1274,11 +1332,11 @@ p4bind: ()=>`
 </div>`,
 
 'p4fw-info': ()=>`
-<div class="sc" id="sc-p4fw-info" style="overflow-y:auto;padding:24px 0 40px">
+<div class="sc" id="sc-p4fw-info" style="overflow-y:auto">
   <div class="cnt" style="max-width:640px">
-    <div class="h2 mb8">LATEST FIRMWARE<br>UPDATE</div>
-    <div class="sub mb20" style="font-size:14px">Updating to the latest version for improved performance and new features.</div>
-    <div class="infobox mb20" style="background:rgba(59,130,246,.07);border-color:rgba(59,130,246,.25);color:rgba(255,255,255,.75)">
+    <div class="h3 mb6">LATEST FIRMWARE UPDATE</div>
+    <div class="sub mb14" style="font-size:14px">Updating to the latest version for improved performance and new features.</div>
+    <div class="infobox mb14" style="background:rgba(59,130,246,.07);border-color:rgba(59,130,246,.25);color:rgba(255,255,255,.75)">
       <span style="color:#60a5fa;font-weight:700">What is New:</span> Improved shot detection &bull; Enhanced Ball Spin Calculations &bull; Better Network Stability &bull; Bug Fixes and Performance Improvements
     </div>
     <div class="chip mb6" style="background:rgba(255,255,255,.04);border-color:var(--border)">
@@ -1291,7 +1349,7 @@ p4bind: ()=>`
       </div>
       <div style="background:#1e1e1e;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em">FW: V ${S.device.fw}</div>
     </div>
-    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:4px 0 20px">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:4px 0 14px">
       <span style="color:var(--amber);font-weight:600">Update Available → v${S.device.fwNew}</span>
       <span>${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
     </div>
@@ -1338,17 +1396,34 @@ p4fw: ()=>`
   </div>
 </div>`,
 
+'cal-prep': ()=>`
+<div class="sc" id="sc-cal-prep">
+  <div class="cnt">
+    <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
+    <div class="h3 mb4">BEFORE YOU BEGIN</div>
+    <div class="sub mb20" style="font-size:13px">Complete all three checks before calibration starts.</div>
+    <div id="cal-prep-list">
+      <div class="cbx" onclick="toggleCbx(this,'cp1');checkCalPrep()"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">Detection zone is clear, with no objects or equipment on the floor beneath the CLM PRO</span></div></div>
+      <div class="cbx" onclick="toggleCbx(this,'cp2');checkCalPrep()"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">Ambient lighting is controlled: blinds closed, no direct sunlight hitting the sensors</span></div></div>
+      <div class="cbx" onclick="toggleCbx(this,'cp3');checkCalPrep()"><div class="cbbox"></div><div class="cbxt"><span class="cbxt-lbl">Everyone is out of the zone, with no people standing in the detection area</span></div></div>
+    </div>
+    <button class="btn btn-red mt20" id="cal-prep-btn" disabled onclick="go('calb')">BEGIN CALIBRATION →</button>
+    <div class="tc mt10"><span class="lnk" onclick="go('hub')">← Back to Hub</span></div>
+  </div>
+</div>`,
+
 cala: ()=>`
 <div class="sc" id="sc-cala">
   <div class="cnt">
     <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
+      <div class="calph done"><div class="calph-fill"></div></div>
+      <div class="calph done"><div class="calph-fill"></div></div>
       <div class="calph act"><div class="calph-fill"></div></div>
       <div class="calph"><div class="calph-fill"></div></div>
       <div class="calph"><div class="calph-fill"></div></div>
-      <div class="calph"><div class="calph-fill"></div></div>
     </div>
-    <div class="h3 mb8">CENTERLINE ALIGNMENT</div>
+    <div class="h3 mb8">HITTING LINE / CENTERLINE ALIGNMENT</div>
     <div class="sub mb12" style="font-size:12px">Position an alignment rod at your hitting position center, then adjust the aim line until aligned.</div>
     <div class="cam">
       <!-- Birds-eye mat scene -->
@@ -1387,7 +1462,7 @@ cala: ()=>`
       <div class="rdi"><div class="rdval" id="rd-roll">0.8°</div><div class="rdlbl">Roll</div></div>
       <div class="rdi bad" id="rd-az-item"><div class="rdval" id="rd-az">8.5°</div><div class="rdlbl">Aim Line</div></div>
     </div>
-    <button class="btn btn-red mt16" id="az-btn" disabled onclick="go('calb')">CONFIRM ALIGNMENT →</button>
+    <button class="btn btn-red mt16" id="az-btn" disabled onclick="go('calc')">CONFIRM ALIGNMENT →</button>
     <div class="tc mt10"><span class="lnk" onclick="go('hub')">← Back to Hub</span></div>
   </div>
 </div>`,
@@ -1397,12 +1472,13 @@ calb: ()=>`
   <div class="cnt" style="max-width:560px">
     <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
-      <div class="calph done"><div class="calph-fill"></div></div>
       <div class="calph act"><div class="calph-fill"></div></div>
       <div class="calph"><div class="calph-fill"></div></div>
       <div class="calph"><div class="calph-fill"></div></div>
+      <div class="calph"><div class="calph-fill"></div></div>
+      <div class="calph"><div class="calph-fill"></div></div>
     </div>
-    <div class="h3 mb6">SCREEN DISTANCE</div>
+    <div class="h3 mb6">CONFIRM DISTANCE TO SCREEN</div>
     <div class="sub mb16" style="font-size:13px">Verify the distance from your hitting position to the impact screen or net.</div>
     <div id="dist-diagram" style="background:rgba(10,10,10,.8);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px"></div>
     <div class="dist-val" id="dist-val">9.0 ft</div>
@@ -1418,8 +1494,91 @@ calb: ()=>`
     </div>
     <div class="dist-range"><span>6 ft (min)</span><span>15 ft (max)</span></div>
     <div class="btn-row mt20">
-      <button class="btn btn-dk" onclick="go('cala')">← BACK</button>
-      <button class="btn btn-red" onclick="S.cal.dist=parseFloat(document.getElementById('dist-slider').value);go('calc')">NEXT →</button>
+      <button class="btn btn-dk" onclick="go('cal-prep')">← BACK</button>
+      <button class="btn btn-red" onclick="S.cal.dist=parseFloat(document.getElementById('dist-slider').value);go('calwand')">NEXT →</button>
+    </div>
+  </div>
+</div>`,
+
+calwand: ()=>`
+<div class="sc" id="sc-calwand">
+  <div class="cnt" style="max-width:560px">
+    <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
+    <div class="calphases">
+      <div class="calph done"><div class="calph-fill"></div></div>
+      <div class="calph act"><div class="calph-fill"></div></div>
+      <div class="calph"><div class="calph-fill"></div></div>
+      <div class="calph"><div class="calph-fill"></div></div>
+      <div class="calph"><div class="calph-fill"></div></div>
+    </div>
+
+    <!-- A · Instruction -->
+    <div id="cw-intro">
+      <div class="h3 mb6">WAND CALIBRATION</div>
+      <div class="sub mb12" style="font-size:13px">Move the calibration wand slowly through your hitting area to map the space, like sweeping a metal detector.</div>
+      <div class="wanddemo">
+        <div class="floor"></div>
+        <div class="rod">
+          <div class="stick"></div>
+          <div class="wdotmark" style="top:4px"></div>
+          <div class="wdotmark" style="top:19px"></div>
+          <div class="wdotmark" style="top:34px"></div>
+          <div class="wdotmark" style="top:49px"></div>
+          <div class="wdotmark" style="top:61px"></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:rgba(255,255,255,.7)"><span style="color:var(--green)">✓</span> Keep the five dots facing up toward the CLM PRO</div>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:rgba(255,255,255,.7)"><span style="color:var(--green)">✓</span> Move slowly and steadily</div>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:rgba(255,255,255,.7)"><span style="color:var(--green)">✓</span> Cover the whole area, front to back and side to side</div>
+      </div>
+      <button class="btn btn-red" onclick="startWandPass()">START WAND PASS →</button>
+      <div class="tc mt10"><span class="lnk" onclick="go('calb')">← Back</span></div>
+    </div>
+
+    <!-- B · Live capture -->
+    <div id="cw-capture" style="display:none">
+      <div class="h3 mb6">WAND CALIBRATION</div>
+      <div class="sub mb10" style="font-size:13px">Move the wand through the space until every square turns bright green.</div>
+      <div class="wscene" onpointerup="wandUp()" onpointerleave="wandUp()">
+        <div id="cw-svg-host" style="position:absolute;inset:0"></div>
+        <div class="wpanel">
+          <h5>Map Room Area</h5>
+          <ul>
+            <li>White dots facing toward the device</li>
+            <li>Handle at waist level, ~45° to the ground</li>
+            <li>Don't stand between the wand &amp; device</li>
+            <li>Cover until every square is bright green</li>
+          </ul>
+        </div>
+        <div class="wtoggle">
+          <button id="cw-view-persp" class="on" onclick="setWandView(false)">Perspective</button>
+          <button id="cw-view-top" onclick="setWandView(true)">Top down</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+        <div><span class="dist-val" id="cw-pct" style="font-size:2.4rem">0%</span></div>
+        <div style="text-align:right">
+          <div style="font-family:var(--head);font-size:1.3rem;font-weight:700" id="cw-count">0 / 48</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Squares mapped</div>
+        </div>
+      </div>
+      <div class="wcoach" id="cw-coach">Move the wand slowly through the hitting area</div>
+      <button class="btn btn-dk mt12" id="cw-sim-btn" onclick="simulateWandPass()">⤺ SIMULATE WAND PASS</button>
+    </div>
+
+    <!-- C · Solving / done -->
+    <div id="cw-solve" style="display:none;text-align:center;padding:24px 0">
+      <div id="cw-solve-spin">
+        <div class="spin" style="margin:0 auto 18px"></div>
+        <div class="h3 mb6">BUILDING ROOM MODEL…</div>
+        <div class="sub" style="font-size:13px">Please wait while the CLM PRO processes the calibration and restarts.</div>
+      </div>
+      <div id="cw-solve-done" style="display:none">
+        <div class="success-mark mb16">✓</div>
+        <div class="h3 mb6">CAPTURE VOLUME MAPPED</div>
+        <div class="sub" style="font-size:13px">Continuing to centerline alignment…</div>
+      </div>
     </div>
   </div>
 </div>`,
@@ -1429,6 +1588,7 @@ calc: ()=>`
   <div class="cnt">
     <div class="phase-tag"><em>PHASE 4</em> · CALIBRATION</div>
     <div class="calphases">
+      <div class="calph done"><div class="calph-fill"></div></div>
       <div class="calph done"><div class="calph-fill"></div></div>
       <div class="calph done"><div class="calph-fill"></div></div>
       <div class="calph act"><div class="calph-fill"></div></div>
@@ -1453,6 +1613,7 @@ cald: ()=>`
       <div class="calph done"><div class="calph-fill"></div></div>
       <div class="calph done"><div class="calph-fill"></div></div>
       <div class="calph done"><div class="calph-fill"></div></div>
+      <div class="calph done"><div class="calph-fill"></div></div>
       <div class="calph act"><div class="calph-fill"></div></div>
     </div>
     <div class="h3 mb8">TEST SHOTS</div>
@@ -1464,7 +1625,7 @@ cald: ()=>`
     <div id="shots-container"></div>
     <button class="btn btn-red mb8" id="sim-btn" onclick="simulateShot()">🏌 SIMULATE SHOT</button>
     <button class="btn btn-dk" id="complete-btn" style="display:none" onclick="S.phases.cal=true;go('done')">COMPLETE CALIBRATION ✓</button>
-    <div class="tc mt8"><span class="lnk" id="retry-cal" style="display:none" onclick="go('cala')">Not registering? Retry from Phase A</span></div>
+    <div class="tc mt8"><span class="lnk" id="retry-cal" style="display:none" onclick="go('calwand')">Not registering? Re-run wand calibration</span></div>
   </div>
 </div>`,
 
@@ -1597,7 +1758,7 @@ play: ()=>`
 
     <!-- TBC notice + simulate -->
     <div style="border:1px dashed #2a2a2a;border-radius:10px;padding:20px;text-align:center;margin-bottom:20px">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.2em;color:rgba(255,255,255,.25);text-transform:uppercase;margin-bottom:14px">TBC — Steps to be confirmed</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.2em;color:rgba(255,255,255,.25);text-transform:uppercase;margin-bottom:14px">TBC: Steps to be confirmed</div>
       <button class="btn btn-red" onclick="completeMLMSetup()">SIMULATE SETUP COMPLETE →</button>
     </div>
 
@@ -1606,14 +1767,14 @@ play: ()=>`
 </div>`,
 
 activate: ()=>`
-<div class="sc" id="sc-activate" style="overflow-y:auto;padding:24px 0 40px">
+<div class="sc" id="sc-activate" style="overflow-y:auto">
   <div class="cnt" style="max-width:500px;text-align:center">
     <div id="activate-content"></div>
   </div>
 </div>`,
 
 done: ()=>`
-<div class="sc" id="sc-done" style="overflow-y:auto;padding:24px 0 40px">
+<div class="sc" id="sc-done" style="overflow-y:auto">
   <div class="cnt" id="done-content">
     <div class="success-mark">✓</div>
     <div class="h2 mb8">SETUP COMPLETE!</div>
@@ -1637,20 +1798,13 @@ done: ()=>`
 const INIT = {
   auth: () => {},
   'p2-meas': () => {
-    S.diagramMode = 'simple';
-    updateRoomDiagram();
+    // Embedded Room Planner step — reset the acknowledgement gate each entry.
+    const ack = document.getElementById('room-ack');
+    if (ack) ack.classList.remove('ck');
     const cb = document.getElementById('meas-continue-btn');
-    if (cb) cb.style.display = 'none';
-    // Restore ceiling material button state if previously selected
-    const cm = S.room?.cm;
-    if (cm) {
-      document.querySelectorAll('.cmat').forEach(b => b.classList.toggle('sel', b.dataset.mat === cm));
-    }
-    renderCompatPending();
-    // Show Check My Room button if all fields already filled
-    const allFilled = !!(document.getElementById('m-ch')?.value && document.getElementById('m-rd')?.value && document.getElementById('m-rw')?.value && cm);
-    const checkBtn = document.getElementById('check-room-btn');
-    if (checkBtn) checkBtn.style.display = allFilled ? 'block' : 'none';
+    if (cb) cb.disabled = true;
+    const fb = document.getElementById('planner-fallback');
+    if (fb) fb.style.display = 'none';
   },
   'p2-compat': () => {
     renderCompat(S.compatState);
@@ -1694,6 +1848,22 @@ const INIT = {
     if (dv) dv.textContent = (S.cal.dist || 9).toFixed(1) + ' ft';
     setTimeout(() => positionDistArrows(S.cal.dist || 9), 50);
   },
+  calwand: () => {
+    S.cal.wandSolving = false;
+    const intro = document.getElementById('cw-intro');
+    const cap   = document.getElementById('cw-capture');
+    const solve = document.getElementById('cw-solve');
+    if (intro) intro.style.display = 'block';
+    if (cap)   cap.style.display   = 'none';
+    if (solve) solve.style.display = 'none';
+    const sp = document.getElementById('cw-solve-spin');
+    const ok = document.getElementById('cw-solve-done');
+    if (sp) sp.style.display = 'block';
+    if (ok) ok.style.display = 'none';
+    const sim = document.getElementById('cw-sim-btn');
+    if (sim) sim.disabled = false;
+    buildWandGrid();
+  },
   calc: () => {
     const ec4lbl = document.querySelector('#ec-4 .chklbl');
     if (ec4lbl) ec4lbl.textContent = `Height Confirmation (${S.install.height || '8.5'} ft)`;
@@ -1734,7 +1904,7 @@ const INIT = {
     const idEl    = document.getElementById('hub-dev-id');
     const ledEl   = document.getElementById('hub-dev-led');
     const brandEl = document.getElementById('hub-dev-brand');
-    if (nameEl)  nameEl.textContent  = devDone ? S.device.name : '—';
+    if (nameEl)  nameEl.textContent  = devDone ? S.device.name : 'Not set';
     if (idEl)    idEl.textContent    = devDone ? S.device.id   : 'Please complete your device setup';
     if (ledEl)   ledEl.className     = 'led-dot ' + (devDone ? 'g' : 'off');
     if (brandEl) brandEl.textContent = devDone ? S.device.name : 'Rapsodo | CLM PRO';
@@ -1878,6 +2048,7 @@ function switchTab(tab) {
   document.getElementById('tab-signup').classList.toggle('on', tab==='signup');
   document.getElementById('form-login').style.display = tab==='login' ? 'block' : 'none';
   document.getElementById('form-signup').style.display = tab==='signup' ? 'block' : 'none';
+  requestAnimationFrame(fitActive);
 }
 
 function togglePw(id, btn) {
@@ -2072,12 +2243,12 @@ function saveMeasAndNext() {
 function setCompat(state) {
   S.compatState = state;
   if (state === 'a') S.compatIssues = [
-    { sev:'warning', msg:'High ceiling — drop mount required', rec:'At 11.0 ft, a VESA drop mount is needed to lower the CLM PRO to its ideal sensing height of 9.8–10.5 ft.' },
-    { sev:'warning', msg:'Room depth is tight — 14.5 ft', rec:'This can work but may feel cramped. 16.4 ft or more is recommended for comfort.' },
+    { sev:'warning', msg:'High ceiling, drop mount required', rec:'At 11.0 ft, a VESA drop mount is needed to lower the CLM PRO to its ideal sensing height of 9.8–10.5 ft.' },
+    { sev:'warning', msg:'Room depth is tight:14.5 ft', rec:'This can work but may feel cramped. 16.4 ft or more is recommended for comfort.' },
   ];
   else if (state === 'r') S.compatIssues = [
     { sev:'error', msg:'Ceiling too low', rec:'CLM PRO needs at least 8.9 ft (2.7 m) of clearance. An MLM2PRO may suit this room better.' },
-    { sev:'error', msg:'Room too shallow — 11.0 ft', rec:'A minimum of 13.8 ft (4.2 m) is required for a safe swing and ball flight.' },
+    { sev:'error', msg:'Room too shallow:11.0 ft', rec:'A minimum of 13.8 ft (4.2 m) is required for a safe swing and ball flight.' },
   ];
   else S.compatIssues = [];
   renderCompat(state);
@@ -2157,6 +2328,12 @@ function renderCompat(state, bodyId='compat-body', nextBtnId='compat-next') {
   }
 }
 
+function ackRoom(el) {
+  el.classList.toggle('ck');
+  const btn = document.getElementById('meas-continue-btn');
+  if (btn) btn.disabled = !el.classList.contains('ck');
+}
+
 function toggleCbx(el, key) {
   el.classList.toggle('ck');
   // Check all in parent
@@ -2189,6 +2366,13 @@ function checkIV() {
   const items = document.querySelectorAll('#sc-p3-check .cbx');
   const h = document.getElementById('iv-height')?.value;
   btn.disabled = !([...items].every(i=>i.classList.contains('ck')) && h);
+}
+
+function checkCalPrep() {
+  const btn = document.getElementById('cal-prep-btn');
+  if (!btn) return;
+  const items = document.querySelectorAll('#cal-prep-list .cbx');
+  btn.disabled = ![...items].every(i => i.classList.contains('ck'));
 }
 
 function ivHeightRange() {
@@ -2289,20 +2473,20 @@ function validateRoom(ch, rd, rw, cm) {
   if (ch < 8.86) {
     issues.push({ sev:'error', msg:'Ceiling too low', rec:`CLM PRO needs at least 8.9 ft (2.7 m) of clearance. At ${disp(ch)}, an MLM2PRO may suit this room better.` });
   } else if (ch > 10.5) {
-    issues.push({ sev:'warning', msg:'High ceiling — drop mount required', rec:`At ${disp(ch)}, a VESA drop mount is needed to lower the CLM PRO to its ideal sensing height of 9.8–10.5 ft (3.0–3.2 m).` });
+    issues.push({ sev:'warning', msg:'High ceiling, drop mount required', rec:`At ${disp(ch)}, a VESA drop mount is needed to lower the CLM PRO to its ideal sensing height of 9.8–10.5 ft (3.0–3.2 m).` });
   }
   if (rd < 13.78) {
-    issues.push({ sev:'error', msg:`Room too shallow — ${disp(rd)}`, rec:`A minimum of 13.8 ft (4.2 m) is required for a safe swing and ball flight.` });
+    issues.push({ sev:'error', msg:`Room too shallow:${disp(rd)}`, rec:`A minimum of 13.8 ft (4.2 m) is required for a safe swing and ball flight.` });
   } else if (rd < 16.4) {
-    issues.push({ sev:'warning', msg:`Room depth is tight — ${disp(rd)}`, rec:`This can work but may feel cramped. 16.4 ft (5.0 m) or more is recommended for comfort.` });
+    issues.push({ sev:'warning', msg:`Room depth is tight:${disp(rd)}`, rec:`This can work but may feel cramped. 16.4 ft (5.0 m) or more is recommended for comfort.` });
   }
   if (rw < 9.84) {
     issues.push({ sev:'error', msg:'Room too narrow', rec:`At least 9.8 ft (3.0 m) of side clearance is needed for a full swing. Your room is ${disp(rw)}.` });
   } else if (rw < 13.78) {
-    issues.push({ sev:'warning', msg:`Room width is tight — ${disp(rw)}`, rec:`13.8 ft (4.2 m) or more is recommended for comfortable clearance on both sides.` });
+    issues.push({ sev:'warning', msg:`Room width is tight:${disp(rw)}`, rec:`13.8 ft (4.2 m) or more is recommended for comfortable clearance on both sides.` });
   }
-  if (cm === 'concrete') issues.push({ sev:'warning', msg:'Concrete ceiling — masonry anchor kit required', rec:`A masonry drill and M8 sleeve anchor kit are required for mounting. Purchase separately.` });
-  else if (cm === 'other') issues.push({ sev:'warning', msg:'Ceiling type unverified — contact support before purchasing', rec:`We need to confirm your ceiling can safely support the CLM PRO (15 kg) before you proceed. Reach out to support with a photo or description of your ceiling.` });
+  if (cm === 'concrete') issues.push({ sev:'warning', msg:'Concrete ceiling, masonry anchor kit required', rec:`A masonry drill and M8 sleeve anchor kit are required for mounting. Purchase separately.` });
+  else if (cm === 'other') issues.push({ sev:'warning', msg:'Ceiling type unverified, contact support before purchasing', rec:`We need to confirm your ceiling can safely support the CLM PRO (15 kg) before you proceed. Reach out to support with a photo or description of your ceiling.` });
   const errors = issues.filter(i => i.sev === 'error').length;
   return { status: errors > 0 ? 'r' : issues.length > 0 ? 'a' : 'g', issues };
 }
@@ -2447,6 +2631,199 @@ function simulateShot() {
     const simBtn = document.getElementById('sim-btn');
     if (simBtn) simBtn.disabled = true;
   }
+}
+
+// ─── WAND CALIBRATION (3D scene, mirrors Foresight overhead cal) ────────────
+const WAND_COLS = 8, WAND_ROWS = 6, WAND_TOTAL = WAND_COLS * WAND_ROWS;
+let wandPainting = false;
+
+function startWandPass() {
+  document.getElementById('cw-intro').style.display = 'none';
+  document.getElementById('cw-capture').style.display = 'block';
+  buildWandScene(false);
+  requestAnimationFrame(fitActive);
+}
+
+// Init coverage state and render the perspective scene. (Name kept for INIT.)
+function buildWandGrid() {
+  S.cal.wandCells = new Array(WAND_TOTAL).fill(0); // 0 empty · 1 partial · 2 done
+  S.cal.wandPos = null;
+  S.cal.wandTop = false;
+  buildWandScene(false);
+  updateWandProgress();
+}
+
+// Map a grid coordinate (gc 0..COLS, gr 0..ROWS; gr=0 is the back/screen edge)
+// to a screen point — a trapezoid floor for perspective, a flat grid for top-down.
+function wandFloorPt(gc, gr, top) {
+  if (top) {
+    const gw = 300, gh = 200, x0 = 260 - gw / 2, y0 = 58;
+    return { x: x0 + (gc / WAND_COLS) * gw, y: y0 + (gr / WAND_ROWS) * gh };
+  }
+  const xc = 260, yBack = 124, yFront = 306, backHalf = 92, frontHalf = 224;
+  const t = gr / WAND_ROWS;
+  const y = yBack + (yFront - yBack) * t;
+  const half = backHalf + (frontHalf - backHalf) * t;
+  const x = xc + (gc / WAND_COLS - 0.5) * 2 * half;
+  return { x, y };
+}
+
+function wandCellFill(st)   { return st >= 2 ? 'rgba(60,200,90,.74)' : st === 1 ? 'rgba(245,205,60,.6)' : 'rgba(255,255,255,.05)'; }
+function wandCellStroke(st) { return st >= 2 ? 'rgba(95,235,125,.95)' : st === 1 ? 'rgba(245,205,60,.85)' : 'rgba(255,255,255,.16)'; }
+
+function buildWandScene(top) {
+  const host = document.getElementById('cw-svg-host');
+  if (!host) return;
+  const cells = S.cal.wandCells || new Array(WAND_TOTAL).fill(0);
+
+  // Back: impact screen + overhead device bar (perspective only)
+  let back = '';
+  if (!top) {
+    const bl = wandFloorPt(0, 0, false), br = wandFloorPt(WAND_COLS, 0, false);
+    const wallH = 116, inset = 14;
+    back += `<polygon points="${bl.x + inset},${bl.y} ${br.x - inset},${br.y} ${br.x - inset},${br.y - wallH} ${bl.x + inset},${bl.y - wallH}" fill="rgba(205,216,232,.13)" stroke="rgba(255,255,255,.28)" stroke-width="1"/>`;
+    back += `<text x="${(bl.x + br.x) / 2}" y="${bl.y - wallH / 2}" fill="rgba(255,255,255,.5)" font-size="13" font-style="italic" text-anchor="middle">Impact Screen</text>`;
+    const bx = (bl.x + br.x) / 2, by = bl.y - wallH + 22;
+    back += `<g><rect x="${bx - 48}" y="${by - 5}" width="96" height="10" rx="5" fill="#d2d6db" stroke="#9aa0a8"/><circle cx="${bx + 34}" cy="${by}" r="2.6" fill="#7CFC00"/></g>`;
+  }
+
+  // Floor coverage cells
+  let cellSvg = '';
+  for (let ri = 0; ri < WAND_ROWS; ri++) {
+    for (let ci = 0; ci < WAND_COLS; ci++) {
+      const i = ri * WAND_COLS + ci, st = cells[i] || 0;
+      const a = wandFloorPt(ci, ri, top), b = wandFloorPt(ci + 1, ri, top);
+      const c = wandFloorPt(ci + 1, ri + 1, top), d = wandFloorPt(ci, ri + 1, top);
+      cellSvg += `<polygon id="wc-${i}" class="wcell-svg" points="${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y} ${d.x},${d.y}" fill="${wandCellFill(st)}" stroke="${wandCellStroke(st)}" stroke-width="1" onpointerdown="wandCellDown(${i})" onpointerenter="wandCellEnter(${i})"/>`;
+    }
+  }
+
+  // Front: hitting-direction arrow (over the floor) + wand group
+  let front = '';
+  const f = wandFloorPt(WAND_COLS / 2, WAND_ROWS * 0.82, top);
+  const bk = wandFloorPt(WAND_COLS / 2, WAND_ROWS * 0.42, top);
+  front += `<line x1="${f.x}" y1="${f.y}" x2="${bk.x}" y2="${bk.y}" stroke="rgba(255,255,255,.42)" stroke-width="2"/>`;
+  front += `<polygon points="${bk.x - 6},${bk.y + 7} ${bk.x + 6},${bk.y + 7} ${bk.x},${bk.y - 4}" fill="rgba(255,255,255,.55)"/>`;
+  const lblA = top ? 0 : -24;
+  front += `<text x="${f.x + 9}" y="${(f.y + bk.y) / 2}" fill="rgba(255,255,255,.42)" font-size="10.5" font-style="italic" transform="rotate(${lblA} ${f.x + 9} ${(f.y + bk.y) / 2})">Hitting Direction</text>`;
+  front += `<g id="cw-wand"></g>`;
+
+  host.innerHTML = `<svg viewBox="0 0 520 330" preserveAspectRatio="xMidYMid meet">${back}${cellSvg}${front}</svg>`;
+  positionWand(top);
+}
+
+// Draw the wand (blue rod + 5 white dots) standing on the current cell.
+function positionWand(top) {
+  const g = document.getElementById('cw-wand');
+  if (!g) return;
+  const idx = (S.cal.wandPos != null) ? S.cal.wandPos
+            : (WAND_ROWS - 1) * WAND_COLS + Math.floor(WAND_COLS / 2);
+  const ci = idx % WAND_COLS, ri = Math.floor(idx / WAND_COLS);
+  const p = wandFloorPt(ci + 0.5, ri + 0.5, top);
+  const len = top ? 30 : 56, ang = (top ? -90 : -66) * Math.PI / 180;
+  const tx = p.x + Math.cos(ang) * len, ty = p.y + Math.sin(ang) * len;
+  let dots = '';
+  for (let k = 1; k <= 5; k++) {
+    const fr = k / 6, dx = p.x + (tx - p.x) * fr, dy = p.y + (ty - p.y) * fr;
+    dots += `<circle cx="${dx}" cy="${dy}" r="2.6" fill="#fff"/>`;
+  }
+  g.innerHTML = `<line x1="${p.x}" y1="${p.y}" x2="${tx}" y2="${ty}" stroke="#5aa9e6" stroke-width="4" stroke-linecap="round"/>${dots}<circle cx="${p.x}" cy="${p.y}" r="3.4" fill="#3b82c4"/>`;
+}
+
+function setWandView(top) {
+  S.cal.wandTop = top;
+  const pb = document.getElementById('cw-view-persp'), tb = document.getElementById('cw-view-top');
+  if (pb) pb.classList.toggle('on', !top);
+  if (tb) tb.classList.toggle('on', top);
+  buildWandScene(top);
+}
+
+// Each pass over a cell bumps it one level (empty → partial → done), so a
+// thorough double-sweep is needed to fully cover the room.
+function paintCell(i) {
+  const cells = S.cal.wandCells;
+  if (!cells || i < 0 || i >= WAND_TOTAL || cells[i] >= 2) return;
+  cells[i] = Math.min(2, cells[i] + 1);
+  S.cal.wandPos = i;
+  const el = document.getElementById('wc-' + i);
+  if (el) { el.setAttribute('fill', wandCellFill(cells[i])); el.setAttribute('stroke', wandCellStroke(cells[i])); }
+  positionWand(!!S.cal.wandTop);
+  updateWandProgress();
+}
+
+function wandCellDown(i) { wandPainting = true; paintCell(i); }
+function wandCellEnter(i) { if (wandPainting) paintCell(i); }
+function wandUp()        { wandPainting = false; }
+
+function wandCoachMsg(cells) {
+  let sx = 0, sy = 0, n = 0;
+  for (let i = 0; i < cells.length; i++) {
+    if (cells[i] < 2) { sx += i % WAND_COLS; sy += Math.floor(i / WAND_COLS); n++; }
+  }
+  if (!n) return 'Coverage complete';
+  const cx = sx / n / (WAND_COLS - 1) - 0.5;
+  const cy = sy / n / (WAND_ROWS - 1) - 0.5;
+  if (Math.abs(cx) >= Math.abs(cy)) return cx < 0 ? 'Cover the left side of the zone' : 'Cover the right side of the zone';
+  return cy < 0 ? 'Cover the back of the zone' : 'Cover the front of the zone';
+}
+
+function updateWandProgress() {
+  const cells = S.cal.wandCells || [];
+  const done = cells.filter(v => v >= 2).length;
+  const partial = cells.filter(v => v === 1).length;
+  // Overall coverage climbs as cells go partial (½) then done (full), hitting
+  // 100% only when every square is green.
+  const pct = Math.round((done + partial * 0.5) / WAND_TOTAL * 100);
+  const pctEl = document.getElementById('cw-pct');   if (pctEl) pctEl.textContent = pct + '%';
+  const cntEl = document.getElementById('cw-count'); if (cntEl) cntEl.textContent = done + ' / ' + WAND_TOTAL;
+  const coach = document.getElementById('cw-coach');
+  if (coach) {
+    const complete = done >= WAND_TOTAL;
+    coach.classList.toggle('ok', complete);
+    coach.textContent = (done + partial) === 0 ? 'Move the wand slowly through the hitting area'
+                      : complete               ? 'Coverage complete'
+                                               : wandCoachMsg(cells);
+  }
+  if (done >= WAND_TOTAL) wandSolve();
+}
+
+// Auto-sweep the room in a serpentine path, then back again — the wand follows
+// each cell, so a full coverage takes two passes (partial → done).
+function simulateWandPass() {
+  const btn = document.getElementById('cw-sim-btn');
+  if (btn) btn.disabled = true;
+  const order = [];
+  for (let r = 0; r < WAND_ROWS; r++) {
+    const cols = [...Array(WAND_COLS).keys()];
+    if (r % 2) cols.reverse();
+    cols.forEach(c => order.push(r * WAND_COLS + c));
+  }
+  const seq = order.concat([...order].reverse());
+  let k = 0;
+  const t = setInterval(() => {
+    if (k >= seq.length || !S.cal.wandCells) { clearInterval(t); return; }
+    paintCell(seq[k++]);
+  }, 75);
+}
+
+function wandSolve() {
+  if (S.cal.wandSolving) return;
+  S.cal.wandSolving = true;
+  setTimeout(() => {
+    const cap = document.getElementById('cw-capture');
+    const solve = document.getElementById('cw-solve');
+    if (cap) cap.style.display = 'none';
+    if (solve) solve.style.display = 'block';
+    requestAnimationFrame(fitActive);
+    setTimeout(() => {
+      const sp = document.getElementById('cw-solve-spin');
+      const ok = document.getElementById('cw-solve-done');
+      if (sp) sp.style.display = 'none';
+      if (ok) ok.style.display = 'block';
+      requestAnimationFrame(fitActive);
+      setTimeout(() => { if (S.screen === 'calwand') go('cala'); }, 1500);
+    }, 2600);
+  }, 450);
 }
 
 function showScanTrouble() {
@@ -2795,7 +3172,7 @@ function skipInstall() {
 
 function enterPhase(key) {
   const deps    = { room:[], install:['room'], device:['room'], cal:['install','device'] };
-  const targets = { room:'p2-meas', install:'p3-status', device:'p4inst', cal:'cala' };
+  const targets = { room:'p2-meas', install:'p3-status', device:'p4inst', cal:'cal-prep' };
   const names   = { room:'Room Confirmation', install:'Installation + Verification', device:'Device Connection', cal:'Calibration' };
   // If this phase was skipped, clear the skip flag and re-enter it
   if (S.phaseSkipped[key]) {
@@ -2853,7 +3230,7 @@ function renderAllScreens() {
 }
 
 // ─── KEYBOARD NAV ──────────────────────────────────────────────────────────
-const FLOW = ['splash','auth','acct-done','p4sel','clm-preinstalled','hub','hub-mlm','p2-meas','p2-check','p3-status','p3-check','p3-power','p4inst','p4scan','p4conn','p4bind','p4fw-info','p4fw','p4fw-done','cala','calb','calc','cald','done','activate','play'];
+const FLOW = ['splash','auth','acct-done','p4sel','clm-preinstalled','hub','hub-mlm','p2-meas','p2-check','p3-status','p3-check','p3-power','p4inst','p4scan','p4conn','p4bind','p4fw-info','p4fw','p4fw-done','cal-prep','cala','calb','calc','cald','done','activate','play'];
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
